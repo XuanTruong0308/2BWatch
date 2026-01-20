@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout/admin-layout :: layout(
+        pageTitle='Chi Tiết Đơn Hàng #' + ${order.orderId},
+        activeMenu='orders',
+        content=~{::content},
+        customStyles=~{},
+        customScripts=~{}
+      )}">
+<body>
+    <div th:fragment="content">
+        <div class="row">
+            <!-- Left Column - Order Info -->
+            <div class="col-md-8">
+                <!-- Order Details -->
+                <div class="table-container mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5>Chi Tiết Sản Phẩm</h5>
+                        <span class="badge fs-6" 
+                              th:classappend="${order.orderStatus == 'PENDING' ? 'bg-warning text-dark' : 
+                                               order.orderStatus == 'CONFIRMED' ? 'bg-info' :
+                                               order.orderStatus == 'SHIPPING' ? 'bg-primary' :
+                                               order.orderStatus == 'DELIVERED' ? 'bg-success' : 'bg-danger'}"
+                              th:text="${order.orderStatus}">PENDING</span>
+                    </div>
+                    
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Sản phẩm</th>
+                                <th class="text-center">SL</th>
+                                <th class="text-end">Đơn giá</th>
+                                <th class="text-end">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="detail : ${orderDetails}">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img th:if="${detail.watch.mainImage != null}" 
+                                             th:src="@{'/uploads/watches/' + ${detail.watch.mainImage.imageUrl}}"
+                                             style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px; margin-right: 10px;">
+                                        <div>
+                                            <strong th:text="${detail.watch.watchName}">Product Name</strong><br>
+                                            <small class="text-muted" th:text="${detail.watch.brand.brandName}">Brand</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-center" th:text="${detail.quantity}">1</td>
+                                <td class="text-end" th:text="${#numbers.formatDecimal(detail.unitPrice, 0, 'COMMA', 0, 'POINT')} + '₫'">1,000,000₫</td>
+                                <td class="text-end">
+                                    <strong th:text="${#numbers.formatDecimal(detail.unitPrice * detail.quantity, 0, 'COMMA', 0, 'POINT')} + '₫'">1,000,000₫</strong>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="text-end"><strong>Tổng cộng:</strong></td>
+                                <td class="text-end">
+                                    <h5 class="mb-0 text-primary" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + '₫'">1,000,000₫</h5>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                
+                <!-- Shipping Info -->
+                <div class="table-container">
+                    <h5 class="mb-4">Thông Tin Giao Hàng</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Người nhận:</strong> <span th:text="${order.receiverName}">Nguyễn Văn A</span></p>
+                            <p><strong>Số điện thoại:</strong> <span th:text="${order.shippingPhone}">0123456789</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Địa chỉ:</strong> <span th:text="${order.shippingAddress}">123 ABC Street</span></p>
+                            <p><strong>Ghi chú:</strong> <span th:text="${order.note ?: 'Không có'}">Không có</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column - Actions & Info -->
+            <div class="col-md-4">
+                <!-- Customer Info -->
+                <div class="table-container mb-4">
+                    <h5 class="mb-3">Thông Tin Khách Hàng</h5>
+                    <p><strong>Họ tên:</strong> <span th:text="${order.user.fullName}">Nguyễn Văn A</span></p>
+                    <p><strong>Email:</strong> <span th:text="${order.user.email}">email@example.com</span></p>
+                    <p><strong>SĐT:</strong> <span th:text="${order.user.phoneNumber}">0123456789</span></p>
+                    <a th:href="@{/admin/users/{id}(id=${order.user.userId})}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-user"></i> Xem Profile
+                    </a>
+                </div>
+                
+                <!-- Order Info -->
+                <div class="table-container mb-4">
+                    <h5 class="mb-3">Thông Tin Đơn Hàng</h5>
+                    <p><strong>Mã ĐH:</strong> <span th:text="'ORD' + ${#strings.padLeft(order.orderId, 6, '0')}">ORD000001</span></p>
+                    <p><strong>Ngày đặt:</strong> <span th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}">14/01/2026 10:30</span></p>
+                    <p><strong>Thanh toán:</strong> <span th:text="${order.paymentMethod.methodName}">COD</span></p>
+                </div>
+                
+                <!-- Update Status -->
+                <div class="table-container mb-4" th:if="${!validStatuses.empty}">
+                    <h5 class="mb-3">Cập Nhật Trạng Thái</h5>
+                    <form th:action="@{/admin/orders/update-status}" method="post">
+                        <input type="hidden" name="orderId" th:value="${order.orderId}">
+                        <select name="newStatus" class="form-select mb-3" required>
+                            <option value="">-- Chọn trạng thái --</option>
+                            <option th:each="status : ${validStatuses}" th:value="${status}" th:text="${status}">STATUS</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-check"></i> Cập Nhật
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Cancel Order -->
+                <div class="table-container" th:if="${order.orderStatus != 'CANCELLED' && order.orderStatus != 'DELIVERED'}">
+                    <h5 class="mb-3">Hủy Đơn Hàng</h5>
+                    <form th:action="@{/admin/orders/cancel/{id}(id=${order.orderId})}" method="post" 
+                          onsubmit="return confirm('Xác nhận hủy đơn hàng này?')">
+                        <textarea name="reason" class="form-control mb-3" rows="2" placeholder="Lý do hủy..."></textarea>
+                        <button type="submit" class="btn btn-danger w-100">
+                            <i class="fas fa-times"></i> Hủy Đơn Hàng
+                        </button>
+                    </form>
+                </div>
+                
+                <a th:href="@{/admin/orders}" class="btn btn-secondary w-100 mt-3">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

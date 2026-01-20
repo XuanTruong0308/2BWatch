@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      th:fragment="layout (title, content)" 
+      lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:replace="${title}">2BSHOP</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header th:replace="~{fragments/header :: header}"></header>
+    
+    <!-- Main Content -->
+    <main th:replace="${content}">
+        <p>Page content goes here</p>
+    </main>
+    
+    <!-- Footer -->
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+    
+    <!-- JavaScript -->
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html>

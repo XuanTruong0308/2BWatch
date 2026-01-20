@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout/admin-layout :: layout(
+        pageTitle=${method.paymentMethodId != null ? 'Sửa Phương Thức' : 'Thêm Phương Thức'},
+        activeMenu='payments',
+        content=~{::content},
+        customStyles=~{},
+        customScripts=~{}
+      )}">
+<body>
+    <div th:fragment="content">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="table-container">
+                    <h4 class="mb-4" th:text="${method.paymentMethodId != null ? 'Sửa Phương Thức Thanh Toán' : 'Thêm Phương Thức Thanh Toán'}">Thêm Phương Thức</h4>
+                    
+                    <form th:action="@{/admin/payment-methods/save}" th:object="${method}" method="post">
+                        <input type="hidden" th:field="*{paymentMethodId}">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Tên Phương Thức <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" th:field="*{methodName}" required>
+                            <div class="form-text">VD: COD, Bank Transfer, VNPay, Momo</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Mô Tả</label>
+                            <textarea class="form-control" th:field="*{description}" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Phí Giao Dịch (%)</label>
+                            <input type="number" class="form-control" th:field="*{fee}" step="0.01" min="0" max="100">
+                            <div class="form-text">Nhập 0 nếu không có phí</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" th:field="*{isActive}" id="isActive">
+                                <label class="form-check-label" for="isActive">
+                                    Kích hoạt
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Lưu
+                            </button>
+                            <a th:href="@{/admin/payment-methods}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Hủy
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

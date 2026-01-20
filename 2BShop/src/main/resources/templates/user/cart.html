@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base-layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Giỏ hàng - 2BSHOP</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <!-- Breadcrumb -->
+        <section class="breadcrumb-section">
+            <div class="container">
+                <nav class="breadcrumb">
+                    <a href="/">Trang chủ</a>
+                    <span>/</span>
+                    <span>Giỏ hàng</span>
+                </nav>
+            </div>
+        </section>
+
+        <!-- Cart Section -->
+        <section class="cart-section">
+            <div class="container">
+                <h1 class="page-title">GIỎ HÀNG CỦA BẠN</h1>
+
+                <!-- Empty Cart -->
+                <div class="empty-cart" th:if="${cartItems == null or cartItems.isEmpty()}">
+                    <i class="fas fa-shopping-cart"></i>
+                    <h2>Giỏ hàng trống</h2>
+                    <p>Bạn chưa có sản phẩm nào trong giỏ hàng</p>
+                    <a href="/watches" class="btn btn-primary btn-lg">Mua sắm ngay</a>
+                </div>
+
+                <!-- Cart with Items -->
+                <div class="cart-content" th:if="${cartItems != null and !cartItems.isEmpty()}">
+                    <div class="cart-grid">
+                        <!-- Cart Items -->
+                        <div class="cart-items">
+                            <div class="cart-item" th:each="item : ${cartItems}">
+                                <div class="item-image">
+                                    <a th:href="@{/watches/{id}(id=${item.watch.watchId})}">
+                                        <img th:src="${item.watch.images != null and !item.watch.images.isEmpty() ? item.watch.images[0].imageUrl : '/images/watches/default.jpg'}" 
+                                             th:alt="${item.watch.watchName}">
+                                    </a>
+                                </div>
+
+                                <div class="item-info">
+                                    <div class="item-brand" th:text="${item.watch.brand.brandName}">Brand</div>
+                                    <h3 class="item-name">
+                                        <a th:href="@{/watches/{id}(id=${item.watch.watchId})}" th:text="${item.watch.watchName}">Product Name</a>
+                                    </h3>
+                                    <div class="item-price">
+                                        <span class="price-unit" th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + ' ₫'">800,000 ₫</span>
+                                    </div>
+                                </div>
+
+                                <div class="item-quantity">
+                                    <label>Số lượng:</label>
+                                    <div class="quantity-input">
+                                        <button type="button" class="qty-btn" th:onclick="'updateCartQuantity(' + ${item.cartItemId} + ', -1)'">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <input type="number" th:value="${item.quantity}" min="1" readonly>
+                                        <button type="button" class="qty-btn" th:onclick="'updateCartQuantity(' + ${item.cartItemId} + ', 1)'">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="item-total">
+                                    <span class="label">Thành tiền:</span>
+                                    <span class="price" th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 'COMMA', 0, 'POINT')} + ' ₫'">1,600,000 ₫</span>
+                                </div>
+
+                                <button type="button" class="item-remove" th:onclick="'removeCartItem(' + ${item.cartItemId} + ')'">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Cart Summary -->
+                        <div class="cart-summary">
+                            <h3>TỔNG QUAN ĐƠN HÀNG</h3>
+                            
+                            <div class="summary-row">
+                                <span>Tạm tính:</span>
+                                <span th:text="${#numbers.formatDecimal(subtotal, 0, 'COMMA', 0, 'POINT')} + ' ₫'">2,400,000 ₫</span>
+                            </div>
+
+                            <div class="summary-row">
+                                <span>Phí vận chuyển:</span>
+                                <span th:text="${subtotal >= 500000 ? 'Miễn phí' : #numbers.formatDecimal(30000, 0, 'COMMA', 0, 'POINT') + ' ₫'}">Miễn phí</span>
+                            </div>
+
+                            <div class="summary-divider"></div>
+
+                            <div class="summary-row summary-total">
+                                <span>Tổng cộng:</span>
+                                <span th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' ₫'">2,400,000 ₫</span>
+                            </div>
+
+                            <a href="/checkout" class="btn btn-primary btn-lg btn-block">
+                                TIẾN HÀNH THANH TOÁN
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+
+                            <a href="/watches" class="btn btn-outline btn-block">
+                                <i class="fas fa-arrow-left"></i>
+                                Tiếp tục mua sắm
+                            </a>
+
+                            <!-- Features -->
+                            <div class="cart-features">
+                                <div class="feature">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <span>Thanh toán an toàn</span>
+                                </div>
+                                <div class="feature">
+                                    <i class="fas fa-truck"></i>
+                                    <span>Giao hàng nhanh</span>
+                                </div>
+                                <div class="feature">
+                                    <i class="fas fa-undo-alt"></i>
+                                    <span>Đổi trả dễ dàng</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

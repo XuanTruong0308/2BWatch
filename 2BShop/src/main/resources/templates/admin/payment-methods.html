@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout/admin-layout :: layout(
+        pageTitle='Phương Thức Thanh Toán',
+        activeMenu='payments',
+        content=~{::content},
+        customStyles=~{},
+        customScripts=~{}
+      )}">
+<body>
+    <div th:fragment="content">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Quản Lý Phương Thức Thanh Toán</h4>
+            <a th:href="@{/admin/payment-methods/new}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Thêm Phương Thức
+            </a>
+        </div>
+        
+        <!-- Payment Methods Table -->
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên Phương Thức</th>
+                            <th>Mô Tả</th>
+                            <th>Phí (%)</th>
+                            <th>Ngày Tạo</th>
+                            <th>Cập Nhật</th>
+                            <th class="text-center">Trạng Thái</th>
+                            <th class="text-center">Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="method : ${methods}">
+                            <td><strong th:text="${method.paymentMethodId}">1</strong></td>
+                            <td>
+                                <strong th:text="${method.methodName}">COD</strong>
+                            </td>
+                            <td th:text="${method.description}">Thanh toán khi nhận hàng</td>
+                            <td th:text="${method.fee != null ? method.fee + '%' : 'N/A'}">0%</td>
+                            <td th:text="${method.createdDate != null ? #temporals.format(method.createdDate, 'dd/MM/yyyy') : 'N/A'}">14/01/2026</td>
+                            <td th:text="${method.updatedDate != null ? #temporals.format(method.updatedDate, 'dd/MM/yyyy') : 'N/A'}">14/01/2026</td>
+                            <td class="text-center">
+                                <span class="badge" 
+                                      th:classappend="${method.isActive ? 'bg-success' : 'bg-secondary'}"
+                                      th:text="${method.isActive ? 'Active' : 'Inactive'}">Active</span>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a th:href="@{/admin/payment-methods/edit/{id}(id=${method.paymentMethodId})}" 
+                                       class="btn btn-primary" title="Sửa">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    
+                                    <form th:action="@{/admin/payment-methods/toggle-active/{id}(id=${method.paymentMethodId})}" 
+                                          method="post" 
+                                          style="display: inline;">
+                                        <button type="submit" 
+                                                class="btn" 
+                                                th:classappend="${method.isActive ? 'btn-warning' : 'btn-success'}"
+                                                th:title="${method.isActive ? 'Deactivate' : 'Activate'}">
+                                            <i th:class="${method.isActive ? 'fas fa-eye-slash' : 'fas fa-eye'}"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Empty State -->
+            <div th:if="${#lists.isEmpty(methods)}" class="text-center py-5">
+                <i class="fas fa-credit-card fa-3x text-muted mb-3"></i>
+                <p class="text-muted">Chưa có phương thức thanh toán nào</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

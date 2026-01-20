@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <header th:fragment="header">
+        <!-- Top Navbar -->
+        <div class="navbar-top">
+            <div class="container">
+                <div class="navbar-top-content">
+                    <a href="/" class="logo">2BSHOP</a>
+                    
+                    <form class="search-bar" action="/watches" method="get">
+                        <input type="text" name="search" placeholder="Tìm kiếm đồng hồ..." th:value="${search}">
+                        <button type="submit"><i class="fas fa-search"></i></button>
+                    </form>
+                    
+                    <div class="hotline">
+                        <div class="hotline-icon"><i class="fas fa-phone-alt"></i></div>
+                        <div class="hotline-info">
+                            <h6>Hotline</h6>
+                            <p>1900-xxxx</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Navbar -->
+        <div class="navbar-main">
+            <div class="container">
+                <div class="navbar-main-content">
+                    <nav>
+                        <ul class="nav-menu">
+                            <li><a href="/">Trang chủ</a></li>
+                            <li><a href="/watches">Sản phẩm</a></li>
+                            <li><a href="/watches/discount">Giảm giá</a></li>
+                            <li><a href="/watches/newest">Sản phẩm mới</a></li>
+                            <li><a href="/account">Tài khoản</a></li>
+                        </ul>
+                    </nav>
+                    
+                    <div class="nav-icons">
+                        <!-- User dropdown when authenticated -->
+                        <div th:if="${#authorization.expression('isAuthenticated()')}" class="user-dropdown">
+                            <a href="#" class="nav-icon user-menu-toggle" title="Tài khoản">
+                                <i class="fas fa-user"></i>
+                                <span class="user-name">
+                                    Xin chào, <span th:text="${#authentication.principal.fullName}">User</span>
+                                </span>
+                                <i class="fas fa-chevron-down"></i>
+                            </a>
+                            <div class="dropdown-menu">
+                                <a href="/account" class="dropdown-item">
+                                    <i class="fas fa-user-circle"></i> Thông tin tài khoản
+                                </a>
+                                <a href="/account/orders" class="dropdown-item">
+                                    <i class="fas fa-box"></i> Đơn hàng của tôi
+                                </a>
+                                <a href="/account/change-password" class="dropdown-item">
+                                    <i class="fas fa-key"></i> Đổi mật khẩu
+                                </a>
+                                <hr class="dropdown-divider">
+                                <a href="/logout" class="dropdown-item logout">
+                                    <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Show login link if not authenticated -->
+                        <a th:unless="${#authorization.expression('isAuthenticated()')}" 
+                           href="/login" 
+                           class="nav-icon" 
+                           title="Đăng nhập">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span class="nav-text">Đăng nhập</span>
+                        </a>
+                        
+                        <a href="/cart" class="nav-icon" title="Giỏ hàng">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="cart-badge" th:if="${cartItemCount != null and cartItemCount > 0}" th:text="${cartItemCount}">0</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+</body>
+</html>

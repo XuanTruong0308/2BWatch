@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout/admin-layout :: layout(
+        pageTitle='Quản Lý Người Dùng',
+        activeMenu='users',
+        content=~{::content},
+        customStyles=~{},
+        customScripts=~{}
+      )}">
+<body>
+    <div th:fragment="content">
+        <!-- Filters -->
+        <div class="table-container mb-4">
+            <div class="row align-items-center g-3">
+                <div class="col-md-4">
+                    <form method="get" class="input-group">
+                        <input type="text" name="keyword" class="form-control" placeholder="Tìm theo tên, email, SĐT..."
+                               th:value="${keyword}">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="col-md-3">
+                    <select class="form-select" onchange="window.location.href='/admin/users?isActive=' + this.value">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="true" th:selected="${selectedIsActive == true}">Active</option>
+                        <option value="false" th:selected="${selectedIsActive == false}">Banned</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-3 text-end ms-auto">
+                    <span class="badge bg-info fs-6">
+                        Tổng: <span th:text="${users.totalElements}">0</span> users
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Users Table -->
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Họ tên</th>
+                            <th>Email</th>
+                            <th>SĐT</th>
+                            <th>Vai trò</th>
+                            <th class="text-center">Đơn hàng</th>
+                            <th class="text-end">Tổng mua</th>
+                            <th class="text-center">Trạng thái</th>
+                            <th class="text-center">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="user : ${users}">
+                            <td><strong th:text="${user.userId}">1</strong></td>
+                            <td>
+                                <div>
+                                    <strong th:text="${user.fullName}">Nguyễn Văn A</strong><br>
+                                    <small class="text-muted" th:text="${user.username}">@username</small>
+                                </div>
+                            </td>
+                            <td th:text="${user.email}">email@example.com</td>
+                            <td th:text="${user.phoneNumber}">0123456789</td>
+                            <td>
+                                <span th:each="role : ${user.userRoles}" class="badge bg-secondary me-1" 
+                                      th:text="${role.role.roleName}">ROLE_USER</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-primary" th:text="${userOrderCounts.get(user.userId)}">0</span>
+                            </td>
+                            <td class="text-end" th:text="${#numbers.formatDecimal(userTotalSpents.get(user.userId), 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</td>
+                            <td class="text-center">
+                                <span class="badge" 
+                                      th:classappend="${user.isEnabled ? 'bg-success' : 'bg-danger'}"
+                                      th:text="${user.isEnabled ? 'Active' : 'Banned'}">Active</span>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a th:href="@{/admin/users/{id}(id=${user.userId})}" 
+                                       class="btn btn-primary" title="Chi tiết">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    
+                                    <form th:if="${user.isEnabled}" 
+                                          th:action="@{/admin/users/ban/{id}(id=${user.userId})}" 
+                                          method="post" 
+                                          style="display: inline;"
+                                          onsubmit="return confirm('Xác nhận ban user này?')">
+                                        <button type="submit" class="btn btn-danger" title="Ban">
+                                            <i class="fas fa-ban"></i>
+                                        </button>
+                                    </form>
+                                    
+                                    <form th:unless="${user.isEnabled}" 
+                                          th:action="@{/admin/users/unban/{id}(id=${user.userId})}" 
+                                          method="post" 
+                                          style="display: inline;">
+                                        <button type="submit" class="btn btn-success" title="Unban">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            <nav th:if="${users.totalPages > 1}" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${users.first ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/admin/users(page=${users.number - 1}, keyword=${keyword}, isActive=${selectedIsActive})}">Trước</a>
+                    </li>
+                    
+                    <li class="page-item" 
+                        th:each="i : ${#numbers.sequence(0, users.totalPages - 1)}"
+                        th:classappend="${i == users.number ? 'active' : ''}">
+                        <a class="page-link" th:href="@{/admin/users(page=${i}, keyword=${keyword}, isActive=${selectedIsActive})}" 
+                           th:text="${i + 1}">1</a>
+                    </li>
+                    
+                    <li class="page-item" th:classappend="${users.last ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/admin/users(page=${users.number + 1}, keyword=${keyword}, isActive=${selectedIsActive})}">Sau</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</body>
+</html>

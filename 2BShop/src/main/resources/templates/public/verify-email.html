@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác thực email - 2BShop</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <div th:replace="~{fragments/header :: header}"></div>
+    
+    <!-- Main Content -->
+    <div class="auth-container">
+        <div class="auth-box">
+            <div class="auth-header">
+                <div class="verify-icon">
+                    <i class="fas fa-envelope-open-text"></i>
+                </div>
+                <h2>Xác thực tài khoản</h2>
+                <p>Vui lòng nhập email để hoàn tất kích hoạt tài khoản</p>
+            </div>
+            
+            <form th:action="@{/confirm-register}" method="post" class="auth-form">
+                <input type="hidden" name="token" th:value="${token}">
+                
+                <div class="form-group">
+                    <label for="email">
+                        <i class="fas fa-envelope"></i> Email
+                    </label>
+                    <input type="email" 
+                           id="email" 
+                           name="email" 
+                           class="form-control" 
+                           placeholder="Nhập email đã đăng ký"
+                           required
+                           autofocus>
+                    <small class="form-text text-muted">
+                        Nhập email bạn đã sử dụng khi đăng ký để xác nhận
+                    </small>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-check-circle"></i> Xác thực tài khoản
+                </button>
+                
+                <div class="auth-footer">
+                    <span>Chưa nhận được email?</span>
+                    <a href="/resend-verification" class="register-link">Gửi lại</a>
+                </div>
+            </form>
+            
+            <div class="verification-info">
+                <div class="info-item">
+                    <i class="fas fa-clock"></i>
+                    <span>Link có hiệu lực trong 24 giờ</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Bảo mật và an toàn tuyệt đối</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+    
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html>

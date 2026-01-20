@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout/admin-layout :: layout(
+        pageTitle='Chi Tiết User - ' + ${user.fullName},
+        activeMenu='users',
+        content=~{::content},
+        customStyles=~{},
+        customScripts=~{}
+      )}">
+<body>
+    <div th:fragment="content">
+        <div class="row">
+            <!-- Left Column - User Info & Orders -->
+            <div class="col-md-8">
+                <!-- User Info -->
+                <div class="table-container mb-4">
+                    <h5 class="mb-4">Thông Tin Cá Nhân</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>ID:</strong> <span th:text="${user.userId}">1</span></p>
+                            <p><strong>Username:</strong> <span th:text="${user.username}">@username</span></p>
+                            <p><strong>Họ tên:</strong> <span th:text="${user.fullName}">Nguyễn Văn A</span></p>
+                            <p><strong>Email:</strong> <span th:text="${user.email}">email@example.com</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>SĐT:</strong> <span th:text="${user.phoneNumber ?: 'Chưa cập nhật'}">0123456789</span></p>
+                            <p><strong>Địa chỉ:</strong> <span th:text="${user.address ?: 'Chưa cập nhật'}">123 ABC Street</span></p>
+                            <p><strong>Ngày tạo:</strong> <span th:text="${#temporals.format(user.createdDate, 'dd/MM/yyyy HH:mm')}">01/01/2026</span></p>
+                            <p><strong>Trạng thái:</strong> 
+                                <span class="badge" 
+                                      th:classappend="${user.isEnabled ? 'bg-success' : 'bg-danger'}"
+                                      th:text="${user.isEnabled ? 'Active' : 'Banned'}">Active</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Orders History -->
+                <div class="table-container">
+                    <h5 class="mb-4">Lịch Sử Đơn Hàng (<span th:text="${orderCount}">0</span>)</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Mã ĐH</th>
+                                    <th>Ngày đặt</th>
+                                    <th class="text-end">Tổng tiền</th>
+                                    <th class="text-center">Trạng thái</th>
+                                    <th class="text-center">Chi tiết</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="order : ${orders}">
+                                    <td><strong th:text="'ORD' + ${#strings.padLeft(order.orderId, 6, '0')}">ORD000001</strong></td>
+                                    <td th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy')}">14/01/2026</td>
+                                    <td class="text-end" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + '₫'">1,000,000₫</td>
+                                    <td class="text-center">
+                                        <span class="badge" 
+                                              th:classappend="${order.orderStatus == 'PENDING' ? 'bg-warning text-dark' : 
+                                                               order.orderStatus == 'CONFIRMED' ? 'bg-info' :
+                                                               order.orderStatus == 'SHIPPING' ? 'bg-primary' :
+                                                               order.orderStatus == 'DELIVERED' ? 'bg-success' : 'bg-danger'}"
+                                              th:text="${order.orderStatus}">PENDING</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <a th:href="@{/admin/orders/{id}(id=${order.orderId})}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column - Stats & Actions -->
+            <div class="col-md-4">
+                <!-- Statistics -->
+                <div class="table-container mb-4">
+                    <h5 class="mb-4">Thống Kê</h5>
+                    <div class="stat-card mb-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        <p class="mb-1">Tổng Đơn Hàng</p>
+                        <h3 class="mb-0" th:text="${orderCount}">0</h3>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); color: white;">
+                        <p class="mb-1">Tổng Chi Tiêu</p>
+                        <h3 class="mb-0" th:text="${#numbers.formatDecimal(totalSpent, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</h3>
+                    </div>
+                </div>
+                
+                <!-- Roles -->
+                <div class="table-container mb-4">
+                    <h5 class="mb-3">Vai Trò</h5>
+                    <div th:each="role : ${user.userRoles}">
+                        <span class="badge bg-secondary fs-6" th:text="${role.role.roleName}">ROLE_USER</span>
+                    </div>
+                </div>
+                
+                <!-- Actions -->
+                <div class="table-container mb-4">
+                    <h5 class="mb-3">Thao Tác</h5>
+                    
+                    <form th:if="${user.isEnabled}" 
+                          th:action="@{/admin/users/ban/{id}(id=${user.userId})}" 
+                          method="post"
+                          onsubmit="return confirm('Xác nhận ban user này?')">
+                        <div class="mb-3">
+                            <label class="form-label">Lý do ban:</label>
+                            <textarea name="reason" class="form-control" rows="3" placeholder="Vi phạm quy định..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-danger w-100">
+                            <i class="fas fa-ban"></i> Ban User
+                        </button>
+                    </form>
+                    
+                    <form th:unless="${user.isEnabled}" 
+                          th:action="@{/admin/users/unban/{id}(id=${user.userId})}" 
+                          method="post">
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-check"></i> Unban User
+                        </button>
+                    </form>
+                </div>
+                
+                <a th:href="@{/admin/users}" class="btn btn-secondary w-100">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

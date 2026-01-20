@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout/admin-layout :: layout(
+        pageTitle='Lịch Sử Ban',
+        activeMenu='bans',
+        content=~{::content},
+        customStyles=~{},
+        customScripts=~{}
+      )}">
+<body>
+    <div th:fragment="content">
+        <!-- Filters & Stats -->
+        <div class="table-container mb-4">
+            <div class="row align-items-center g-3">
+                <div class="col-md-3">
+                    <select class="form-select" onchange="window.location.href='/admin/bans?isActive=' + this.value">
+                        <option value="">Tất cả</option>
+                        <option value="true" th:selected="${isActive == true}">Active (Đang ban)</option>
+                        <option value="false" th:selected="${isActive == false}">Inactive (Đã hết hạn)</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-3 ms-auto text-end">
+                    <span class="badge bg-danger fs-6">
+                        Đang ban: <span th:text="${activeBanCount}">0</span>
+                    </span>
+                    <span class="badge bg-secondary fs-6 ms-2">
+                        Tổng: <span th:text="${banLogs.totalElements}">0</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Ban Logs Table -->
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User</th>
+                            <th>Loại Vi Phạm</th>
+                            <th>Ngày Bắt Đầu</th>
+                            <th>Ngày Kết Thúc</th>
+                            <th>Thời Gian</th>
+                            <th>Lý Do</th>
+                            <th class="text-center">Trạng Thái</th>
+                            <th class="text-center">Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="log : ${banLogs}">
+                            <td><strong th:text="${log.banLogId}">1</strong></td>
+                            <td>
+                                <a th:href="@{/admin/users/{id}(id=${log.user.userId})}" class="text-decoration-none">
+                                    <strong th:text="${log.user.fullName}">Nguyễn Văn A</strong><br>
+                                    <small class="text-muted" th:text="${log.user.email}">email@example.com</small>
+                                </a>
+                            </td>
+                            <td>
+                                <span class="badge bg-warning text-dark" th:text="${log.violationType.typeName}">Spam</span>
+                            </td>
+                            <td th:text="${#temporals.format(log.banStartDate, 'dd/MM/yyyy HH:mm')}">14/01/2026 10:00</td>
+                            <td th:text="${log.banEndDate != null ? #temporals.format(log.banEndDate, 'dd/MM/yyyy HH:mm') : 'Vô thời hạn'}">15/01/2026 10:00</td>
+                            <td>
+                                <span th:if="${log.banDuration != null}" 
+                                      th:text="${log.banDuration} + ' ngày'">7 ngày</span>
+                                <span th:unless="${log.banDuration != null}" class="text-danger">Vĩnh viễn</span>
+                            </td>
+                            <td>
+                                <span th:text="${log.reason}" class="text-truncate" style="max-width: 200px; display: inline-block;" 
+                                      th:title="${log.reason}">Vi phạm quy định...</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge" 
+                                      th:classappend="${log.isActive ? 'bg-danger' : 'bg-secondary'}"
+                                      th:text="${log.isActive ? 'Active' : 'Inactive'}">Active</span>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a th:href="@{/admin/bans/user/{userId}(userId=${log.user.userId})}" 
+                                       class="btn btn-primary" title="Lịch sử ban">
+                                        <i class="fas fa-history"></i>
+                                    </a>
+                                    
+                                    <form th:if="${log.isActive}" 
+                                          th:action="@{/admin/bans/unban/{userId}(userId=${log.user.userId})}" 
+                                          method="post" 
+                                          style="display: inline;">
+                                        <button type="submit" class="btn btn-success" title="Unban">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            <nav th:if="${banLogs.totalPages > 1}" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${banLogs.first ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/admin/bans(page=${banLogs.number - 1}, isActive=${isActive})}">Trước</a>
+                    </li>
+                    
+                    <li class="page-item" 
+                        th:each="i : ${#numbers.sequence(0, banLogs.totalPages - 1)}"
+                        th:classappend="${i == banLogs.number ? 'active' : ''}">
+                        <a class="page-link" th:href="@{/admin/bans(page=${i}, isActive=${isActive})}" 
+                           th:text="${i + 1}">1</a>
+                    </li>
+                    
+                    <li class="page-item" th:classappend="${banLogs.last ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/admin/bans(page=${banLogs.number + 1}, isActive=${isActive})}">Sau</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</body>
+</html>

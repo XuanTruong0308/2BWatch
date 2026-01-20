@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout/admin-layout :: layout(
+        pageTitle='Danh Sách User Bị Ban',
+        activeMenu='bans',
+        content=~{::content},
+        customStyles=~{},
+        customScripts=~{}
+      )}">
+<body>
+    <div th:fragment="content">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">User Đang Bị Ban</h4>
+            <span class="badge bg-danger fs-5">
+                Tổng: <span th:text="${bannedUsers.totalElements}">0</span> users
+            </span>
+        </div>
+        
+        <!-- Banned Users Table -->
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>SĐT</th>
+                            <th>Loại Vi Phạm</th>
+                            <th>Ngày Ban</th>
+                            <th>Ngày Hết Hạn</th>
+                            <th>Lý Do</th>
+                            <th class="text-center">Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="log : ${bannedUsers}">
+                            <td><strong th:text="${log.user.userId}">1</strong></td>
+                            <td>
+                                <a th:href="@{/admin/users/{id}(id=${log.user.userId})}" class="text-decoration-none">
+                                    <strong th:text="${log.user.fullName}">Nguyễn Văn A</strong><br>
+                                    <small class="text-muted" th:text="'@' + ${log.user.username}">@username</small>
+                                </a>
+                            </td>
+                            <td th:text="${log.user.email}">email@example.com</td>
+                            <td th:text="${log.user.phoneNumber ?: 'N/A'}">0123456789</td>
+                            <td>
+                                <span class="badge bg-warning text-dark" th:text="${log.violationType.typeName}">Spam</span>
+                            </td>
+                            <td th:text="${#temporals.format(log.banStartDate, 'dd/MM/yyyy')}">14/01/2026</td>
+                            <td>
+                                <span th:if="${log.banEndDate != null}" 
+                                      th:text="${#temporals.format(log.banEndDate, 'dd/MM/yyyy')}"
+                                      th:classappend="${#temporals.createNow().isBefore(log.banEndDate) ? '' : 'text-danger'}">15/01/2026</span>
+                                <span th:unless="${log.banEndDate != null}" class="text-danger">
+                                    <strong>Vĩnh viễn</strong>
+                                </span>
+                            </td>
+                            <td>
+                                <span th:text="${log.reason}" class="text-truncate" style="max-width: 250px; display: inline-block;" 
+                                      th:title="${log.reason}">Vi phạm quy định...</span>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a th:href="@{/admin/bans/user/{userId}(userId=${log.user.userId})}" 
+                                       class="btn btn-primary" title="Lịch sử ban">
+                                        <i class="fas fa-history"></i>
+                                    </a>
+                                    
+                                    <form th:action="@{/admin/bans/unban/{userId}(userId=${log.user.userId})}" 
+                                          method="post" 
+                                          style="display: inline;"
+                                          onsubmit="return confirm('Xác nhận unban user này?')">
+                                        <button type="submit" class="btn btn-success" title="Unban">
+                                            <i class="fas fa-check-circle"></i> Unban
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Empty State -->
+            <div th:if="${#lists.isEmpty(bannedUsers.content)}" class="text-center py-5">
+                <i class="fas fa-smile fa-3x text-success mb-3"></i>
+                <p class="text-muted">Không có user nào bị ban</p>
+            </div>
+            
+            <!-- Pagination -->
+            <nav th:if="${bannedUsers.totalPages > 1}" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${bannedUsers.first ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/admin/banned-users(page=${bannedUsers.number - 1})}">Trước</a>
+                    </li>
+                    
+                    <li class="page-item" 
+                        th:each="i : ${#numbers.sequence(0, bannedUsers.totalPages - 1)}"
+                        th:classappend="${i == bannedUsers.number ? 'active' : ''}">
+                        <a class="page-link" th:href="@{/admin/banned-users(page=${i})}" 
+                           th:text="${i + 1}">1</a>
+                    </li>
+                    
+                    <li class="page-item" th:classappend="${bannedUsers.last ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/admin/banned-users(page=${bannedUsers.number + 1})}">Sau</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        
+        <!-- Quick Info -->
+        <div class="table-container mt-4">
+            <h5 class="mb-3">Lưu ý</h5>
+            <ul class="mb-0">
+                <li>User bị ban sẽ không thể đăng nhập vào hệ thống</li>
+                <li>Nút "Unban" sẽ kích hoạt lại tài khoản ngay lập tức</li>
+                <li>Xem lịch sử ban để biết thêm chi tiết về các lần vi phạm trước đó</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

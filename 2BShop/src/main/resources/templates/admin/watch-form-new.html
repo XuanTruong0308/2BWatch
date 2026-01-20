@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout/admin-layout :: layout(
+        pageTitle=${isEdit ? 'Sửa Sản Phẩm' : 'Thêm Sản Phẩm'},
+        activeMenu='watches',
+        content=~{::content},
+        customStyles=~{},
+        customScripts=~{}
+      )}">
+<body>
+    <div th:fragment="content">
+        <form th:action="@{/admin/watches/save}" method="post" enctype="multipart/form-data">
+            <input type="hidden" th:field="${watch.watchId}">
+            
+            <div class="row">
+                <!-- Left Column - Basic Info -->
+                <div class="col-md-8">
+                    <div class="table-container mb-4">
+                        <h5 class="mb-4">Thông Tin Cơ Bản</h5>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Tên Sản Phẩm <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" th:field="${watch.watchName}" required>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Thương Hiệu <span class="text-danger">*</span></label>
+                                <select class="form-select" th:field="${watch.brand.brandId}" required>
+                                    <option value="">-- Chọn thương hiệu --</option>
+                                    <option th:each="brand : ${brands}" 
+                                            th:value="${brand.brandId}" 
+                                            th:text="${brand.brandName}">Brand</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Danh Mục <span class="text-danger">*</span></label>
+                                <select class="form-select" th:field="${watch.category.categoryId}" required>
+                                    <option value="">-- Chọn danh mục --</option>
+                                    <option th:each="category : ${categories}" 
+                                            th:value="${category.categoryId}" 
+                                            th:text="${category.categoryName}">Category</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Mô Tả</label>
+                            <textarea class="form-control" th:field="${watch.description}" rows="4"></textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Giá Gốc (₫) <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" th:field="${watch.price}" min="0" required>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Giảm Giá (%)</label>
+                                <input type="number" class="form-control" th:field="${watch.discountPercent}" min="0" max="100">
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Tồn Kho <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" th:field="${watch.stockQuantity}" min="0" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Specifications -->
+                    <div class="table-container">
+                        <h5 class="mb-4">Thông Số Kỹ Thuật</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Đường Kính</label>
+                                <input type="text" class="form-control" th:field="${watch.dialSize}">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Chất Liệu Vỏ</label>
+                                <input type="text" class="form-control" th:field="${watch.caseMaterial}">
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Chất Liệu Dây</label>
+                                <input type="text" class="form-control" th:field="${watch.strapMaterial}">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Bộ Máy</label>
+                                <input type="text" class="form-control" th:field="${watch.movement}">
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Chống Nước</label>
+                                <input type="text" class="form-control" th:field="${watch.waterResistance}">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Năm Sản Xuất</label>
+                                <input type="number" class="form-control" th:field="${watch.yearOfManufacture}" min="1900" max="2100">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Column - Images & Status -->
+                <div class="col-md-4">
+                    <div class="table-container mb-4">
+                        <h5 class="mb-3">Ảnh Chính</h5>
+                        <input type="file" class="form-control mb-3" name="mainImage" accept="image/*">
+                        
+                        <div th:if="${isEdit && watch.mainImage != null}" class="text-center">
+                            <img th:src="@{'/uploads/watches/' + ${watch.mainImage.imageUrl}}" 
+                                 class="img-fluid rounded" 
+                                 style="max-height: 200px;">
+                        </div>
+                    </div>
+                    
+                    <div class="table-container mb-4">
+                        <h5 class="mb-3">Ảnh Phụ</h5>
+                        <input type="file" class="form-control" name="galleryImages" accept="image/*" multiple>
+                        <small class="text-muted">Có thể chọn nhiều ảnh</small>
+                    </div>
+                    
+                    <div class="table-container">
+                        <h5 class="mb-3">Trạng Thái</h5>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" th:field="${watch.isActive}">
+                            <label class="form-check-label">Active</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="text-end mt-4">
+                <a th:href="@{/admin/watches}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Hủy
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Lưu Sản Phẩm
+                </button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

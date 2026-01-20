@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout/admin-layout :: layout(
+        pageTitle='Lịch Sử Ban - ' + ${user.fullName},
+        activeMenu='bans',
+        content=~{::content},
+        customStyles=~{},
+        customScripts=~{}
+      )}">
+<body>
+    <div th:fragment="content">
+        <!-- User Info -->
+        <div class="table-container mb-4">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h4 class="mb-2">Lịch Sử Ban - <span th:text="${user.fullName}">Nguyễn Văn A</span></h4>
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-envelope"></i> <span th:text="${user.email}">email@example.com</span> | 
+                        <i class="fas fa-user"></i> <span th:text="'@' + ${user.username}">@username</span>
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <span class="badge fs-5" 
+                          th:classappend="${user.isEnabled ? 'bg-success' : 'bg-danger'}"
+                          th:text="${user.isEnabled ? 'Active' : 'Banned'}">Active</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="table-container">
+                    <div class="text-center">
+                        <i class="fas fa-ban fa-2x text-danger mb-2"></i>
+                        <h3 class="mb-0" th:text="${totalBans}">0</h3>
+                        <p class="text-muted mb-0">Tổng Số Lần Ban</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="table-container">
+                    <div class="text-center">
+                        <i class="fas fa-exclamation-triangle fa-2x text-warning mb-2"></i>
+                        <h3 class="mb-0" th:text="${activeBans}">0</h3>
+                        <p class="text-muted mb-0">Ban Đang Hoạt Động</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="table-container">
+                    <div class="text-center">
+                        <i class="fas fa-history fa-2x text-info mb-2"></i>
+                        <h3 class="mb-0" th:text="${expiredBans}">0</h3>
+                        <p class="text-muted mb-0">Ban Đã Hết Hạn</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Ban History Table -->
+        <div class="table-container">
+            <h5 class="mb-3">Lịch Sử Chi Tiết</h5>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Loại Vi Phạm</th>
+                            <th>Ngày Ban</th>
+                            <th>Ngày Hết Hạn</th>
+                            <th>Thời Gian</th>
+                            <th>Lý Do</th>
+                            <th class="text-center">Trạng Thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="log : ${banLogs}">
+                            <td><strong th:text="${log.banLogId}">1</strong></td>
+                            <td>
+                                <span class="badge bg-warning text-dark" th:text="${log.violationType.typeName}">Spam</span>
+                            </td>
+                            <td>
+                                <span th:text="${#temporals.format(log.banStartDate, 'dd/MM/yyyy HH:mm')}">14/01/2026 10:00</span><br>
+                                <small class="text-muted" th:text="${#temporals.format(log.banStartDate, 'EEEE', new java.util.Locale('vi'))}">Thứ Hai</small>
+                            </td>
+                            <td>
+                                <span th:if="${log.banEndDate != null}">
+                                    <span th:text="${#temporals.format(log.banEndDate, 'dd/MM/yyyy HH:mm')}">15/01/2026 10:00</span><br>
+                                    <small class="text-muted" th:text="${#temporals.format(log.banEndDate, 'EEEE', new java.util.Locale('vi'))}">Thứ Ba</small>
+                                </span>
+                                <span th:unless="${log.banEndDate != null}" class="text-danger">
+                                    <strong>Vĩnh viễn</strong>
+                                </span>
+                            </td>
+                            <td>
+                                <span th:if="${log.banDuration != null}" 
+                                      class="badge bg-info"
+                                      th:text="${log.banDuration} + ' ngày'">7 ngày</span>
+                                <span th:unless="${log.banDuration != null}" class="badge bg-dark">Vĩnh viễn</span>
+                            </td>
+                            <td>
+                                <p class="mb-0" th:text="${log.reason}">Vi phạm quy định...</p>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge" 
+                                      th:classappend="${log.isActive ? 'bg-danger' : 'bg-secondary'}"
+                                      th:text="${log.isActive ? 'Active' : 'Inactive'}">Active</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Empty State -->
+            <div th:if="${#lists.isEmpty(banLogs)}" class="text-center py-5">
+                <i class="fas fa-smile fa-3x text-success mb-3"></i>
+                <p class="text-muted">User chưa bao giờ bị ban</p>
+            </div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="mt-4 d-flex gap-2">
+            <a th:href="@{/admin/users/{id}(id=${user.userId})}" class="btn btn-primary">
+                <i class="fas fa-user"></i> Xem Profile
+            </a>
+            <a th:href="@{/admin/bans}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
+    </div>
+</body>
+</html>

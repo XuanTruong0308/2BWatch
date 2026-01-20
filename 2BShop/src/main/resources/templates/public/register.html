@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký - BShop</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <div th:replace="~{fragments/header :: header}"></div>
+    
+    <div th:fragment="content">
+        <div class="auth-container auth-container-register">
+            <div class="auth-box">
+                <div class="auth-header">
+                    <h2>Đăng ký tài khoản</h2>
+                    <p>Tạo tài khoản mới để mua sắm tại 2BShop</p>
+                </div>
+                
+                <!-- Error Message -->
+                <div th:if="${error}" class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span th:text="${error}"></span>
+                </div>
+                
+                <!-- Success Message -->
+                <div th:if="${success}" class="alert alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <span th:text="${success}"></span>
+                </div>
+                
+                <form th:action="@{/register}" method="post" class="auth-form register-form" th:object="${registerDTO}">
+                    <div class="form-row-2col">
+                        <div class="form-group">
+                            <label for="fullName">
+                                <i class="fas fa-user"></i> Họ và tên
+                            </label>
+                            <input type="text" 
+                                   id="fullName" 
+                                   th:field="*{fullName}"
+                                   class="form-control" 
+                                   placeholder="Nhập họ và tên"
+                                   required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="userName">
+                                <i class="fas fa-user-tag"></i> Tên đăng nhập
+                            </label>
+                            <input type="text" 
+                                   id="userName" 
+                                   th:field="*{userName}"
+                                   class="form-control" 
+                                   placeholder="Chọn tên đăng nhập"
+                                   required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row-2col">
+                        <div class="form-group">
+                            <label for="email">
+                                <i class="fas fa-envelope"></i> Email
+                            </label>
+                            <input type="email" 
+                                   id="email" 
+                                   th:field="*{email}"
+                                   class="form-control" 
+                                   placeholder="Nhập địa chỉ email"
+                                   required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone">
+                                <i class="fas fa-phone"></i> Số điện thoại
+                            </label>
+                            <input type="tel" 
+                                   id="phone" 
+                                   th:field="*{phone}"
+                                   class="form-control" 
+                                   placeholder="Nhập số điện thoại"
+                                   pattern="[0-9]{10,11}"
+                                   required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row-2col">
+                        <div class="form-group">
+                            <label for="password">
+                                <i class="fas fa-lock"></i> Mật khẩu
+                            </label>
+                            <input type="password" 
+                                   id="password" 
+                                   th:field="*{password}"
+                                   class="form-control" 
+                                   placeholder="Tạo mật khẩu (tối thiểu 6 ký tự)"
+                                   minlength="6"
+                                   required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="confirmPassword">
+                                <i class="fas fa-lock"></i> Xác nhận mật khẩu
+                            </label>
+                            <input type="password" 
+                                   id="confirmPassword" 
+                                   th:field="*{confirmPassword}"
+                                   class="form-control" 
+                                   placeholder="Nhập lại mật khẩu"
+                                   required>
+                        </div>
+                    </div>
+                    
+                    <div class="terms-group">
+                        <input type="checkbox" id="terms" class="terms-checkbox" required>
+                        <label for="terms" class="terms-label">
+                            Tôi đồng ý với <a href="/terms">Điều khoản dịch vụ</a> và <a href="/privacy">Chính sách bảo mật</a>
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-user-plus"></i> Đăng ký
+                    </button>
+                    
+                    <div class="auth-footer">
+                        <span>Đã có tài khoản?</span>
+                        <a href="/login" class="register-link">Đăng nhập ngay</a>
+                    </div>
+                </form>
+                
+                <div class="auth-divider">
+                    <span>HOẶC</span>
+                </div>
+                
+                <div class="social-buttons-row">
+                    <button class="btn btn-social btn-google">
+                        <i class="fab fa-google"></i>
+                        <span>Google</span>
+                    </button>
+                    <button class="btn btn-social btn-facebook">
+                        <i class="fab fa-facebook-f"></i>
+                        <span>Facebook</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+    
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base-layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title th:text="${watch.watchName}">Chi tiết sản phẩm</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <!-- Breadcrumb -->
+        <section class="breadcrumb-section">
+            <div class="container">
+                <nav class="breadcrumb">
+                    <a href="/">Trang chủ</a>
+                    <span>/</span>
+                    <a href="/watches">Sản phẩm</a>
+                    <span>/</span>
+                    <span th:text="${watch.watchName}">Tên sản phẩm</span>
+                </nav>
+            </div>
+        </section>
+
+        <!-- Product Detail -->
+        <section class="product-detail-section">
+            <div class="container">
+                <div class="product-detail-grid">
+                    <!-- Product Images -->
+                    <div class="product-images">
+                        <div class="main-image">
+                            <img th:src="${watch.images != null and !watch.images.isEmpty() ? watch.images[0].imageUrl : '/images/watches/default.jpg'}" 
+                                 th:alt="${watch.watchName}" 
+                                 id="mainProductImage">
+                            
+                            <!-- Discount Badge -->
+                            <div class="discount-badge" th:if="${watch.discountPercent != null and watch.discountPercent > 0}">
+                                <span th:text="'-' + ${watch.discountPercent} + '%'">-20%</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Thumbnail Images -->
+                        <div class="thumbnail-images" th:if="${watch.images != null and watch.images.size() > 1}">
+                            <div class="thumbnail" th:each="image, iter : ${watch.images}" 
+                                 th:classappend="${iter.index == 0 ? 'active' : ''}"
+                                 th:onclick="'changeMainImage(\'' + ${image.imageUrl} + '\')'">
+                                <img th:src="${image.imageUrl}" th:alt="${watch.watchName}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Product Info -->
+                    <div class="product-detail-info">
+                        <!-- Brand & Name -->
+                        <div class="product-brand-name">
+                            <span class="brand-tag" th:text="${watch.brand.brandName}">Brand</span>
+                            <h1 class="product-name" th:text="${watch.watchName}">Product Name</h1>
+                        </div>
+
+                        <!-- Rating & Sold Count -->
+                        <div class="product-stats">
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                                <span class="rating-text">4.5/5</span>
+                            </div>
+                            <span class="divider">|</span>
+                            <span class="sold-count">
+                                <i class="fas fa-box"></i>
+                                Đã bán: <strong th:text="${watch.soldCount}">0</strong>
+                            </span>
+                        </div>
+
+                        <!-- Price -->
+                        <div class="product-price-section">
+                            <div class="price-box">
+                                <!-- Original Price -->
+                                <span class="original-price" 
+                                      th:if="${watch.discountPercent != null and watch.discountPercent > 0}"
+                                      th:text="${#numbers.formatDecimal(watch.price, 0, 'COMMA', 0, 'POINT')} + ' ₫'">
+                                    1,000,000 ₫
+                                </span>
+                                
+                                <!-- Sale Price -->
+                                <span class="sale-price" th:text="${#numbers.formatDecimal(watch.getPriceAfterDiscount(), 0, 'COMMA', 0, 'POINT')} + ' ₫'">
+                                    800,000 ₫
+                                </span>
+                            </div>
+                            
+                            <!-- Stock Status -->
+                            <div class="stock-status" th:classappend="${watch.stockQuantity > 0 ? 'in-stock' : 'out-of-stock'}">
+                                <i th:class="${watch.stockQuantity > 0 ? 'fas fa-check-circle' : 'fas fa-times-circle'}"></i>
+                                <span th:text="${watch.stockQuantity > 0 ? 'Còn hàng (' + watch.stockQuantity + ')' : 'Hết hàng'}">Còn hàng</span>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="product-description">
+                            <h3>Mô tả sản phẩm</h3>
+                            <p th:text="${watch.description}">Mô tả sản phẩm...</p>
+                        </div>
+
+                        <!-- Specifications -->
+                        <div class="product-specs">
+                            <h3>Thông số kỹ thuật</h3>
+                            <ul>
+                                <li>
+                                    <span class="spec-label">Thương hiệu:</span>
+                                    <span class="spec-value" th:text="${watch.brand.brandName}">Brand</span>
+                                </li>
+                                <li>
+                                    <span class="spec-label">Danh mục:</span>
+                                    <span class="spec-value" th:text="${watch.category.categoryName}">Category</span>
+                                </li>
+                                <li>
+                                    <span class="spec-label">Bảo hành:</span>
+                                    <span class="spec-value">12 tháng</span>
+                                </li>
+                                <li>
+                                    <span class="spec-label">Xuất xứ:</span>
+                                    <span class="spec-value">Chính hãng</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Quantity & Add to Cart -->
+                        <div class="product-actions">
+                            <div class="quantity-selector">
+                                <label>Số lượng:</label>
+                                <div class="quantity-input">
+                                    <button type="button" onclick="decreaseQuantity()" class="qty-btn">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <input type="number" id="quantity" value="1" min="1" th:max="${watch.stockQuantity}">
+                                    <button type="button" onclick="increaseQuantity()" class="qty-btn">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <button th:if="${watch.stockQuantity > 0}" 
+                                    class="btn btn-primary btn-lg btn-add-to-cart"
+                                    th:onclick="'addToCart(' + ${watch.watchId} + ')'">
+                                <i class="fas fa-shopping-cart"></i>
+                                THÊM VÀO GIỎ HÀNG
+                            </button>
+                            
+                            <button th:if="${watch.stockQuantity <= 0}" 
+                                    class="btn btn-secondary btn-lg" disabled>
+                                HẾT HÀNG
+                            </button>
+                        </div>
+
+                        <!-- Features -->
+                        <div class="product-features">
+                            <div class="feature-item">
+                                <i class="fas fa-shipping-fast"></i>
+                                <div>
+                                    <strong>Miễn phí vận chuyển</strong>
+                                    <p>Đơn hàng từ 500.000đ</p>
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-shield-alt"></i>
+                                <div>
+                                    <strong>Bảo hành chính hãng</strong>
+                                    <p>12 tháng toàn quốc</p>
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-undo-alt"></i>
+                                <div>
+                                    <strong>Đổi trả 7 ngày</strong>
+                                    <p>Miễn phí không cần lý do</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Related Products -->
+        <section class="section section-white">
+            <div class="container">
+                <div class="section-title">
+                    <h2>SẢN PHẨM TƯƠNG TỰ</h2>
+                    <p>Có thể bạn quan tâm</p>
+                </div>
+                
+                <div class="products-grid">
+                    <div class="product-card" th:each="product : ${relatedProducts}">
+                        <a th:href="@{/watches/{id}(id=${product.watchId})}">
+                            <div class="product-image-wrapper">
+                                <img th:src="${product.images != null and !product.images.isEmpty() ? product.images[0].imageUrl : '/images/watches/default.jpg'}" 
+                                     th:alt="${product.watchName}" 
+                                     class="product-image">
+                                
+                                <div class="product-badge" th:if="${product.discountPercent != null and product.discountPercent > 0}">
+                                    <span th:text="'-' + ${product.discountPercent} + '%'">-20%</span>
+                                </div>
+                            </div>
+                        </a>
+                        
+                        <div class="product-info">
+                            <div class="product-brand" th:text="${product.brand.brandName}">Brand</div>
+                            <h3 class="product-title">
+                                <a th:href="@{/watches/{id}(id=${product.watchId})}" th:text="${product.watchName}">Product Name</a>
+                            </h3>
+                            
+                            <div class="product-price">
+                                <span class="price-old" 
+                                      th:if="${product.discountPercent != null and product.discountPercent > 0}"
+                                      th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' ₫'">1,000,000 ₫</span>
+                                <span class="price-current" th:text="${#numbers.formatDecimal(product.getPriceAfterDiscount(), 0, 'COMMA', 0, 'POINT')} + ' ₫'">800,000 ₫</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script th:inline="javascript">
+        function changeMainImage(imageUrl) {
+            document.getElementById('mainProductImage').src = imageUrl;
+            
+            // Update active thumbnail
+            document.querySelectorAll('.thumbnail').forEach(thumb => thumb.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
+
+        function increaseQuantity() {
+            const input = document.getElementById('quantity');
+            const max = parseInt(input.max);
+            const current = parseInt(input.value);
+            if (current < max) {
+                input.value = current + 1;
+            }
+        }
+
+        function decreaseQuantity() {
+            const input = document.getElementById('quantity');
+            const current = parseInt(input.value);
+            if (current > 1) {
+                input.value = current - 1;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kết quả thanh toán - 2BShop</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .payment-result-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 40px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .result-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        
+        .result-icon.success {
+            color: #27ae60;
+        }
+        
+        .result-icon.failed {
+            color: #e74c3c;
+        }
+        
+        .result-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #1a1a1a;
+        }
+        
+        .result-message {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .order-info {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 30px 0;
+            text-align: left;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .info-value {
+            color: #1a1a1a;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 14px 30px;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+        
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="payment-result-container">
+        <!-- Success Icon -->
+        <div th:if="${success}" class="result-icon success">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        
+        <!-- Failed Icon -->
+        <div th:unless="${success}" class="result-icon failed">
+            <i class="fas fa-times-circle"></i>
+        </div>
+        
+        <!-- Title -->
+        <h1 class="result-title" th:text="${success} ? 'Thanh toán thành công!' : 'Thanh toán thất bại!'">
+            Kết quả thanh toán
+        </h1>
+        
+        <!-- Message -->
+        <p class="result-message" th:text="${message}">
+            Thông báo kết quả thanh toán
+        </p>
+        
+        <!-- Order Info (Success) -->
+        <div th:if="${success}" class="order-info">
+            <div class="info-row">
+                <span class="info-label">Mã đơn hàng:</span>
+                <span class="info-value" th:text="${orderCode}">ORD000001</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Số tiền thanh toán:</span>
+                <span class="info-value" th:text="${#numbers.formatDecimal(amount, 0, 'COMMA', 0, 'POINT')} + ' VND'">1,000,000 VND</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Mã giao dịch VNPay:</span>
+                <span class="info-value" th:text="${transactionCode}">14123456</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Ngân hàng:</span>
+                <span class="info-value" th:text="${bankCode}">NCB</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Thời gian:</span>
+                <span class="info-value" th:text="${payDate}">20260111143000</span>
+            </div>
+        </div>
+        
+        <!-- Order Info (Failed) -->
+        <div th:unless="${success}" class="order-info">
+            <div class="info-row">
+                <span class="info-label">Mã đơn hàng:</span>
+                <span class="info-value" th:text="${orderCode}">ORD000001</span>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="btn-group">
+            <a th:if="${success}" href="/account/orders" class="btn btn-primary">
+                <i class="fas fa-list"></i> Xem đơn hàng
+            </a>
+            
+            <a th:unless="${success}" href="/cart" class="btn btn-primary">
+                <i class="fas fa-redo"></i> Thử lại
+            </a>
+            
+            <a href="/" class="btn btn-secondary">
+                <i class="fas fa-home"></i> Về trang chủ
+            </a>
+        </div>
+    </div>
+</body>
+</html>

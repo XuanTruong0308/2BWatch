@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout/admin-layout :: layout(
+        pageTitle='Giao Dịch Thanh Toán',
+        activeMenu='payments',
+        content=~{::content},
+        customStyles=~{},
+        customScripts=~{}
+      )}">
+<body>
+    <div th:fragment="content">
+        <!-- Filters -->
+        <div class="table-container mb-4">
+            <div class="row align-items-center g-3">
+                <div class="col-md-3">
+                    <select class="form-select" id="statusFilter">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="PENDING" th:selected="${status == 'PENDING'}">PENDING</option>
+                        <option value="SUCCESS" th:selected="${status == 'SUCCESS'}">SUCCESS</option>
+                        <option value="FAILED" th:selected="${status == 'FAILED'}">FAILED</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-3">
+                    <select class="form-select" id="methodFilter">
+                        <option value="">Tất cả phương thức</option>
+                        <option th:each="method : ${paymentMethods}" 
+                                th:value="${method.paymentMethodId}" 
+                                th:text="${method.methodName}"
+                                th:selected="${methodId != null && methodId == method.paymentMethodId}">COD</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-3 ms-auto text-end">
+                    <span class="badge bg-info fs-6">
+                        Tổng: <span th:text="${transactions.totalElements}">0</span> giao dịch
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Transactions Table -->
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Mã GD</th>
+                            <th>Mã Đơn Hàng</th>
+                            <th>Phương Thức</th>
+                            <th class="text-end">Số Tiền</th>
+                            <th>Ngày GD</th>
+                            <th class="text-center">Trạng Thái</th>
+                            <th class="text-center">Chi Tiết</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="transaction : ${transactions}">
+                            <td><strong th:text="${transaction.transactionCode}">TXN123456</strong></td>
+                            <td>
+                                <a th:href="@{/admin/orders/{id}(id=${transaction.order.orderId})}" class="text-decoration-none">
+                                    <strong th:text="'ORD' + ${#strings.padLeft(transaction.order.orderId, 6, '0')}">ORD000001</strong>
+                                </a>
+                            </td>
+                            <td th:text="${transaction.paymentMethod.methodName}">COD</td>
+                            <td class="text-end">
+                                <strong th:text="${#numbers.formatDecimal(transaction.amount, 0, 'COMMA', 0, 'POINT')} + '₫'">1,000,000₫</strong>
+                            </td>
+                            <td th:text="${#temporals.format(transaction.transactionDate, 'dd/MM/yyyy HH:mm')}">14/01/2026 10:30</td>
+                            <td class="text-center">
+                                <span class="badge" 
+                                      th:classappend="${transaction.status == 'PENDING' ? 'bg-warning text-dark' : 
+                                                       transaction.status == 'SUCCESS' ? 'bg-success' : 'bg-danger'}"
+                                      th:text="${transaction.status}">SUCCESS</span>
+                            </td>
+                            <td class="text-center">
+                                <a th:href="@{/admin/payment-transactions/{id}(id=${transaction.transactionId})}" 
+                                   class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" class="text-end"><strong>Tổng cộng:</strong></td>
+                            <td class="text-end">
+                                <strong th:text="${#numbers.formatDecimal(totalAmount, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</strong>
+                            </td>
+                            <td colspan="3"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            <nav th:if="${transactions.totalPages > 1}" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${transactions.first ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/admin/payment-transactions(page=${transactions.number - 1}, status=${status}, methodId=${methodId})}">Trước</a>
+                    </li>
+                    
+                    <li class="page-item" 
+                        th:each="i : ${#numbers.sequence(0, transactions.totalPages - 1)}"
+                        th:classappend="${i == transactions.number ? 'active' : ''}">
+                        <a class="page-link" th:href="@{/admin/payment-transactions(page=${i}, status=${status}, methodId=${methodId})}" 
+                           th:text="${i + 1}">1</a>
+                    </li>
+                    
+                    <li class="page-item" th:classappend="${transactions.last ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/admin/payment-transactions(page=${transactions.number + 1}, status=${status}, methodId=${methodId})}">Sau</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</body>
+</html>
+
+<script th:inline="javascript">
+    document.getElementById('statusFilter').addEventListener('change', function() {
+        applyFilters();
+    });
+    
+    document.getElementById('methodFilter').addEventListener('change', function() {
+        applyFilters();
+    });
+    
+    function applyFilters() {
+        const status = document.getElementById('statusFilter').value;
+        const methodId = document.getElementById('methodFilter').value;
+        
+        let url = '/admin/payment-transactions?';
+        if (status) url += 'status=' + status + '&';
+        if (methodId) url += 'methodId=' + methodId;
+        
+        window.location.href = url;
+    }
+</script>
