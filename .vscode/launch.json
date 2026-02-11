@@ -2,6 +2,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Application",
+            "request": "launch",
+            "mainClass": "boiz.shop._2BShop.Application",
+            "projectName": "2BShop"
+        },
+        {
+            "type": "java",
             "name": "Spring Boot-Application<2BShop>",
             "request": "launch",
             "cwd": "${workspaceFolder}",
