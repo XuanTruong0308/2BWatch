@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/base-layout}">
+
+<head>
+    <title>Quản lý Tài khoản Ngân hàng</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="container mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Quản lý Tài khoản Ngân hàng</h2>
+                <a th:href="@{/admin/bank-accounts/add}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Thêm Tài khoản
+                </a>
+            </div>
+
+            <div th:if="${success}" class="alert alert-success" role="alert" th:text="${success}"></div>
+            <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+
+            <table class="table table-bordered table-hover">
+                <thead class="thead-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên Ngân hàng</th>
+                        <th>Mã NH (Code)</th>
+                        <th>Số Tài khoản</th>
+                        <th>Chủ Tài khoản</th>
+                        <th>QR Code</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="bank : ${bankAccounts}">
+                        <td th:text="${bank.bankAccountId}"></td>
+                        <td th:text="${bank.bankName}"></td>
+                        <td th:text="${bank.bankCode}"></td>
+                        <td th:text="${bank.accountNumber}"></td>
+                        <td th:text="${bank.accountHolder}"></td>
+                        <td>
+                            <img th:if="${bank.qrImageUrl}" th:src="${bank.qrImageUrl}" style="height: 50px;" alt="QR">
+                            <span th:unless="${bank.qrImageUrl}" class="text-muted">Chưa có QR</span>
+                        </td>
+                        <td>
+                            <span th:if="${bank.isActive}" class="badge badge-success">Hoạt động</span>
+                            <span th:unless="${bank.isActive}" class="badge badge-secondary">Tạm khóa</span>
+                        </td>
+                        <td>
+                            <a th:href="@{/admin/bank-accounts/edit/{id}(id=${bank.bankAccountId})}"
+                                class="btn btn-sm btn-warning">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a th:href="@{/admin/bank-accounts/delete/{id}(id=${bank.bankAccountId})}"
+                                class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa?');">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>

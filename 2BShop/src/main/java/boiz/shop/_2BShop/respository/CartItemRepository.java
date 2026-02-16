@@ -16,17 +16,21 @@ import java.util.Optional;
 @Repository
 public interface CartItemRepository extends JpaRepository<CartItem, Integer> {
     List<CartItem> findByCartCartId(Integer cartId);
+
     Optional<CartItem> findByCartCartIdAndWatchWatchId(Integer cartId, Integer watchId);
+
     void deleteByCartCartId(Integer cartId);
-    
+
     // Thêm các methods cho CartService
     List<CartItem> findByCart(Cart cart);
-    
+
     Optional<CartItem> findByCartAndWatch(Cart cart, Watch watch);
-    
+
+    List<CartItem> findByCartAndIsSelected(Cart cart, Boolean isSelected);
+
     @Transactional
     void deleteByCart(Cart cart);
-    
+
     @Transactional
     @Modifying
     @Query("DELETE FROM CartItem ci WHERE ci.watch.watchId = :watchId")

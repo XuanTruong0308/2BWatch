@@ -25,7 +25,7 @@ import boiz.shop._2BShop.respository.WatchRepository;
 
 @Service
 public class DashboardService {
-    
+
     @Autowired
     private OrderRepository orderRepo;
 
@@ -34,34 +34,33 @@ public class DashboardService {
 
     @Autowired
     private WatchRepository watchRepo;
-    
+
     @Autowired
     private OrderDetailRepository orderDetailRepository;
 
-    //Doanh thu theo khoảng thời gian
+    // Doanh thu theo khoảng thời gian
     public BigDecimal getRevenue(String period) {
         LocalDateTime startDate = getStartDate(period);
         LocalDateTime endDate = LocalDateTime.now();
-        
+
         List<String> validStatuses = Arrays.asList("DELIVERED", "COMPLETED");
-        
+
         BigDecimal revenue = orderRepo.sumTotalAmountByStatus(
-            startDate, endDate, validStatuses
-        );
-        
+                startDate, endDate, validStatuses);
+
         return revenue != null ? revenue : BigDecimal.ZERO;
     }
 
-    //Đếm số đơn hàng theo khoảng thời gian
+    // Đếm số đơn hàng theo khoảng thời gian
     public Long getOrderCount(String period) {
         LocalDateTime startDate = getStartDate(period);
         LocalDateTime endDate = LocalDateTime.now();
-    
+
         List<Order> orders = orderRepo.findByOrderDateBetween(startDate, endDate);
         return (long) orders.size();
     }
 
-    //lấy sản phẩm được active
+    // lấy sản phẩm được active
     public Long getProductCount() {
         return watchRepo.countByIsActiveTrue();
     }
@@ -71,11 +70,11 @@ public class DashboardService {
         long totalUsers = userRepo.count();
 
         long adminCount = userRepo.countByRoleName("ADMIN");
-        
+
         return totalUsers - adminCount;
     }
 
-    //thống kê trạng thái đơn
+    // thống kê trạng thái đơn
     public List<Order> getRecentOrders() {
         return orderRepo.findTop10ByOrderByOrderDateDesc();
     }
@@ -92,7 +91,7 @@ public class DashboardService {
         return stats;
     }
 
-    //Thống kế lượt order theo brand
+    // Thống kế lượt order theo brand
     private Map<String, Long> getOrderStatsByBrand() {
         Map<String, Long> stats = new LinkedHashMap<>();
 
@@ -103,13 +102,11 @@ public class DashboardService {
             stats.put(brandName, stats.getOrDefault(brandName, 0L) + 1);
         }
 
-
         return stats.entrySet().stream()
                 .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
                 .collect(LinkedHashMap::new,
-                    (map, entry) -> map.put(entry.getKey(), entry.getValue()),
-                    LinkedHashMap::putAll
-                );
+                        (map, entry) -> map.put(entry.getKey(), entry.getValue()),
+                        LinkedHashMap::putAll);
     }
 
     public Map<String, Object> getRevenueChartData() {
@@ -120,24 +117,21 @@ public class DashboardService {
 
         LocalDate now = LocalDate.now();
 
-        //12 tháng gần nhất
-        for(int i = 11; i >= 0; i--) {
+        // 12 tháng gần nhất
+        for (int i = 11; i >= 0; i--) {
             LocalDate monthDate = now.minusMonths(i);
             LocalDate monthStart = monthDate.withDayOfMonth(1);
             LocalDate monthEnd = monthDate.with(TemporalAdjusters.lastDayOfMonth());
-        
-        
-            //Label: "Jan 2026"
+
+            // Label: "Jan 2026"
             String label = monthDate.getMonth().toString().substring(0, 3) + " " + monthDate.getYear();
             labels.add(label);
 
-            //Renvue tháng đó
-            BigDecimal revenue = orderRepo.
-            sumTotalAmountByDateRangeAndStatus(
+            // Renvue tháng đó
+            BigDecimal revenue = orderRepo.sumTotalAmountByDateRangeAndStatus(
                     monthStart.atStartOfDay(),
                     monthEnd.atTime(23, 59, 59),
-                    Arrays.asList("DELIVERED", "COMPLETED")
-            );
+                    Arrays.asList("DELIVERED", "COMPLETED"));
 
             data.add(revenue != null ? revenue : BigDecimal.ZERO);
         }
@@ -183,22 +177,18 @@ public class DashboardService {
         LocalDate now = LocalDate.now();
         LocalDate lastMonthStart = now.minusMonths(1).withDayOfMonth(1);
         LocalDate lastMonthEnd = now.minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
-        
+
         LocalDate thisMonthStart = now.withDayOfMonth(1);
         LocalDate thisMonthEnd = now;
-        
-        long lastMonthCount = orderRepo.findByOrderDateBetween
-        (
-            lastMonthStart.atStartOfDay(),
-            lastMonthEnd.atTime(LocalTime.MAX)
-        ).size();
 
-        long thisMonthCount = orderRepo.findByOrderDateBetween
-        (
-            thisMonthStart.atStartOfDay(),
-            thisMonthEnd.atTime(LocalTime.MAX)
-        ).size();
-    
+        long lastMonthCount = orderRepo.findByOrderDateBetween(
+                lastMonthStart.atStartOfDay(),
+                lastMonthEnd.atTime(LocalTime.MAX)).size();
+
+        long thisMonthCount = orderRepo.findByOrderDateBetween(
+                thisMonthStart.atStartOfDay(),
+                thisMonthEnd.atTime(LocalTime.MAX)).size();
+
         if (lastMonthCount == 0) {
             return thisMonthCount > 0 ? 100.0 : 0.0;
         }

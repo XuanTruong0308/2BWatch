@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giỏ hàng - 2BShop</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- jQuery (Required for AJAX) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+    <!-- Header -->
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-area">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <ul class="breadcrumb-list">
+                        <li><a href="/">Trang chủ</a></li>
+                        <li class="active">Giỏ hàng</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Area -->
+    <div class="cart-main-area section-padding">
+        <div class="container">
+            <!-- Notification Banner -->
+            <div class="cart-notification mb-4" th:if="${summary != null && summary.discountAmount > 0}">
+                <i class="fas fa-gift mr-2"></i>
+                Tuyệt vời! Bạn được ưu đãi giảm <span
+                    th:text="${#numbers.formatDecimal(summary.discountAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
+                <button class="close-notification"><i class="fas fa-times"></i></button>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12">
+                    <!-- Cart Header -->
+                    <div class="cart-header-bar d-none d-lg-flex">
+                        <div class="col-checkbox">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="checkAllHead">
+                                <label class="custom-control-label" for="checkAllHead"></label>
+                            </div>
+                        </div>
+                        <div class="col-product">SẢN PHẨM (<span th:text="${cartItems.size()}">0</span>)</div>
+                        <div class="col-price text-center">ĐƠN GIÁ</div>
+                        <div class="col-qty text-center">SỐ LƯỢNG</div>
+                        <div class="col-total text-center">THÀNH TIỀN</div>
+                        <div class="col-action text-center"><i class="fas fa-trash-alt"></i></div>
+                    </div>
+
+                    <!-- Empty Cart -->
+                    <div th:if="${#lists.isEmpty(cartItems)}" class="empty-cart-box text-center">
+                        <img src="/images/empty-cart.png" alt="Empty Cart"
+                            style="max-width: 200px; margin-bottom: 20px;">
+                        <p>Giỏ hàng của bạn đang trống</p>
+                        <a href="/" class="btn btn-primary">MUA SẮM NGAY</a>
+                    </div>
+
+                    <!-- Cart Items -->
+                    <div class="cart-items-list">
+                        <div class="cart-item-row" th:each="item : ${cartItems}">
+                            <div class="col-checkbox">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input item-checkbox"
+                                        th:id="'check-' + ${item.cartItemId}" th:checked="${item.isSelected}"
+                                        th:data-id="${item.cartItemId}">
+                                    <label class="custom-control-label" th:for="'check-' + ${item.cartItemId}"></label>
+                                </div>
+                            </div>
+                            <div class="col-product d-flex align-items-center justify-content-between">
+                                <div class="product-info">
+                                    <a th:href="@{/watches/{id}(id=${item.watch.watchId})}" class="product-title"
+                                        th:text="${item.watch.watchName}">Watch Name</a>
+                                    <div class="product-meta" th:text="${item.watch.brand.brandName}">Brand</div>
+                                </div>
+
+                            </div>
+                            <div class="col-price text-center">
+                                <div class="price-group">
+                                    <span class="current-price"
+                                        th:text="${#numbers.formatDecimal(item.watch.getPriceAfterDiscount(), 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
+                                    <span class="old-price" th:if="${item.watch.discountPercent > 0}"
+                                        th:text="${#numbers.formatDecimal(item.watch.price, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
+                                </div>
+                            </div>
+                            <div class="col-qty text-center">
+                                <div class="quantity-selector">
+                                    <input type="number" class="cart-plus-minus-box" th:value="${item.quantity}"
+                                        th:data-id="${item.cartItemId}" min="1" th:max="${item.watch.stockQuantity}">
+                                </div>
+                            </div>
+                            <div class="col-total text-center">
+                                <span class="item-total"
+                                    th:text="${#numbers.formatDecimal(item.watch.getPriceAfterDiscount().multiply(item.quantity), 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
+                            </div>
+                            <div class="col-action text-center">
+                                <a href="#" class="remove-item-btn" th:data-id="${item.cartItemId}"><i
+                                        class="fas fa-trash-alt"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sticky Footer Cart -->
+                    <div class="cart-footer-sticky" th:if="${!#lists.isEmpty(cartItems)}">
+                        <div class="container container-sticky">
+                            <div class="footer-left">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="checkAllFooter">
+                                    <label class="custom-control-label" for="checkAllFooter"
+                                        style="margin-right: 10px;">Chọn tất cả (<span
+                                            th:text="${cartItems.size()}"></span>)</label>
+                                </div>
+                                <a href="#" onclick="removeAll()" class="text-danger ml-4">Xóa tất cả</a>
+                            </div>
+                            <div class="footer-right display-flex align-items-center">
+                                <div class="total-info mr-4 text-right" style="margin-right: 30px;">
+                                    <div>Tổng thanh toán (<span class="selected-count">0</span> sản phẩm):</div>
+                                    <div class="final-price"
+                                        th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' ₫'"
+                                        style="margin-right: 4px">0 ₫
+                                    </div>
+                                </div>
+                                <div class="checkout-btn-wrapper"
+                                    th:classappend="${total.compareTo(T(java.math.BigDecimal).ZERO) == 0} ? 'disabled'">
+                                    <a href="/checkout" class="btn btn-checkout">MUA HÀNG</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <!-- Main JS -->
+    <script th:src="@{/js/main.js}"></script>
+
+    <script th:inline="javascript">
+        // Cart update logic
+        $(document).ready(function () {
+            updateSelectedCount();
+
+            // Update quantity change
+            $('.cart-plus-minus-box').on('change', function () {
+                updateCartItem($(this).data('id'), $(this).val());
+            });
+
+            // Remove item
+            $('.remove-item-btn').on('click', function (e) {
+                e.preventDefault();
+                if (confirm('Bạn có chắc muốn xóa sản phẩm này?')) {
+                    removeCartItem($(this).data('id'));
+                }
+            });
+
+            // Close notification
+            $('.close-notification').on('click', function () {
+                $(this).closest('.cart-notification').fadeOut();
+            });
+
+            // Individual Selection
+            $('.item-checkbox').on('change', function () {
+                toggleSelection($(this).data('id'), $(this).is(':checked'));
+                updateCheckAllState();
+            });
+
+            // Select All (Head)
+            $('#checkAllHead').on('change', function () {
+                toggleAll($(this).is(':checked'));
+            });
+
+            // Select All (Footer)
+            $('#checkAllFooter').on('change', function () {
+                toggleAll($(this).is(':checked'));
+            });
+
+            updateCheckAllState();
+        });
+
+        function updateSelectedCount() {
+            let count = $('.item-checkbox:checked').length;
+            $('.selected-count').text(count);
+
+            // Disable checkout if no items selected
+            if (count === 0) {
+                $('.checkout-btn-wrapper').addClass('disabled');
+                $('.btn-checkout').addClass('disabled').attr('href', 'javascript:void(0)');
+            } else {
+                $('.checkout-btn-wrapper').removeClass('disabled');
+                $('.btn-checkout').removeClass('disabled').attr('href', '/checkout');
+            }
+        }
+
+        function updateCheckAllState() {
+            let totalItems = $('.item-checkbox').length;
+            let checkedItems = $('.item-checkbox:checked').length;
+            let isAllChecked = totalItems > 0 && totalItems === checkedItems;
+
+            $('#checkAllHead').prop('checked', isAllChecked);
+            $('#checkAllFooter').prop('checked', isAllChecked);
+            updateSelectedCount();
+        }
+
+        function toggleSelection(id, isSelected) {
+            $.ajax({
+                url: '/cart/select',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    cartItemId: id,
+                    isSelected: isSelected
+                }),
+                success: function (response) {
+                    if (response.success) {
+                        location.reload(); // Reload to recalculate total
+                    }
+                }
+            });
+        }
+
+        function toggleAll(isSelected) {
+            $.ajax({
+                url: '/cart/select-all',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    isSelected: isSelected
+                }),
+                success: function (response) {
+                    if (response.success) {
+                        location.reload();
+                    }
+                }
+            });
+        }
+
+        function updateCartItem(id, quantity) {
+            $.ajax({
+                url: '/cart/update',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    cartItemId: id,
+                    quantity: quantity
+                }),
+                success: function (response) {
+                    if (response.success) {
+                        location.reload();
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function (xhr) {
+                    alert('Lỗi: ' + (xhr.responseJSON ? xhr.responseJSON.message : xhr.statusText));
+                }
+            });
+        }
+
+        function removeCartItem(id) {
+            $.ajax({
+                url: '/cart/remove',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    cartItemId: id
+                }),
+                success: function (response) {
+                    if (response.success) {
+                        location.reload();
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function (xhr) {
+                    alert('Lỗi: ' + (xhr.responseJSON ? xhr.responseJSON.message : xhr.statusText));
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

@@ -7,6 +7,8 @@ IF OBJECT_ID('ban_logs', 'U') IS NOT NULL DROP TABLE ban_logs;
 IF OBJECT_ID('payment_transactions', 'U') IS NOT NULL DROP TABLE payment_transactions;
 IF OBJECT_ID('order_details', 'U') IS NOT NULL DROP TABLE order_details;
 IF OBJECT_ID('orders', 'U') IS NOT NULL DROP TABLE orders;
+IF OBJECT_ID('coupons', 'U') IS NOT NULL DROP TABLE coupons;
+IF OBJECT_ID('bank_accounts', 'U') IS NOT NULL DROP TABLE bank_accounts;
 IF OBJECT_ID('cart_items', 'U') IS NOT NULL DROP TABLE cart_items;
 IF OBJECT_ID('carts', 'U') IS NOT NULL DROP TABLE carts;
 IF OBJECT_ID('watch_images', 'U') IS NOT NULL DROP TABLE watch_images;
@@ -46,13 +48,14 @@ CREATE TABLE roles (
     role_name NVARCHAR(20) UNIQUE NOT NULL
 );
 
--- Table: user_roles
+-- Table: user_roles (junction table with foreign keys)
 CREATE TABLE user_roles (
     user_role_id INT PRIMARY KEY IDENTITY(1,1),
     user_id INT NOT NULL,
     role_id INT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (role_id) REFERENCES roles(role_id) ON DELETE CASCADE
+    FOREIGN KEY (role_id) REFERENCES roles(role_id) ON DELETE CASCADE,
+    UNIQUE(user_id, role_id)
 );
 
 -- Table: verification_tokens
@@ -163,6 +166,12 @@ CREATE TABLE orders (
     receiver_name NVARCHAR(100) NOT NULL,
     order_status NVARCHAR(20) DEFAULT 'PENDING',
     payment_method_id INT NOT NULL,
+    bank_account_id INT,
+    deposit_required BIT DEFAULT 0,
+    deposit_amount DECIMAL(18,2),
+    deposit_paid BIT DEFAULT 0,
+    coupon_code NVARCHAR(50),
+    discount_amount DECIMAL(18,2) DEFAULT 0,
     order_date DATETIME DEFAULT GETDATE(),
     updated_date DATETIME DEFAULT GETDATE(),
     notes NVARCHAR(500),
@@ -196,6 +205,41 @@ CREATE TABLE payment_transactions (
     FOREIGN KEY (order_id) REFERENCES orders(order_id),
     FOREIGN KEY (payment_method_id) REFERENCES payment_methods(payment_method_id)
 );
+
+-- Table: coupons
+CREATE TABLE coupons (
+    coupon_id INT PRIMARY KEY IDENTITY(1,1),
+    code NVARCHAR(50) UNIQUE NOT NULL,
+    discount_type NVARCHAR(20) NOT NULL, -- 'PERCENTAGE' or 'FIXED'
+    discount_value DECIMAL(18,2) NOT NULL,
+    min_order_value DECIMAL(18,2),
+    max_discount DECIMAL(18,2),
+    usage_limit INT,
+    used_count INT DEFAULT 0,
+    valid_from DATETIME,
+    valid_until DATETIME,
+    is_active BIT DEFAULT 1,
+    description NVARCHAR(500),
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE()
+);
+
+-- Table: bank_accounts
+CREATE TABLE bank_accounts (
+    bank_account_id INT PRIMARY KEY IDENTITY(1,1),
+    bank_name NVARCHAR(100) NOT NULL,
+    bank_code NVARCHAR(20) NOT NULL, -- For VietQR
+    account_number NVARCHAR(50) NOT NULL,
+    account_holder NVARCHAR(200) NOT NULL,
+    qr_image_url NVARCHAR(500),
+    is_active BIT DEFAULT 1,
+    display_order INT DEFAULT 0,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE()
+);
+
+-- Add Foreign Key for bank_account_id in orders
+ALTER TABLE orders ADD FOREIGN KEY (bank_account_id) REFERENCES bank_accounts(bank_account_id);
 
 -- ===================================
 -- 6. SECURITY & BAN SYSTEM
@@ -301,13 +345,15 @@ UPDATE watches SET sold_count = 38 WHERE watch_id = 8; -- Fossil Gen 6
 UPDATE watches SET sold_count = 32 WHERE watch_id = 9; -- Seiko 5 Sports
 
 -- Insert admin user (password: admin123 - remember to encode with BCrypt in production)
--- BCrypt hash for "admin123": $2a$10$XXX... (you need to generate this)
+-- BCrypt hash for "admin123": $2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG
 INSERT INTO users (username, password, email, full_name, phone, is_enabled, is_banned) 
 VALUES 
 ('admin', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', 'admin@2bshop.com', N'Administrator', '0123456789', 1, 0);
 
--- Assign ADMIN role to admin user
+-- Assign roles to admin user (admin có cả ADMIN và USER roles)
 INSERT INTO user_roles (user_id, role_id) 
-VALUES (1, 1); -- user_id=1 (admin), role_id=1 (ADMIN)
+VALUES 
+(1, 1),  -- user_id=1 (admin), role_id=1 (ADMIN)
+(1, 2);  -- user_id=1 (admin), role_id=2 (USER)
 
 GO

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base-layout :: layout(~{::title}, ~{::content})}">
+
+<head>
+    <title>Thanh toán - 2BShop</title>
+</head>
+
+<body>
+    <div th:fragment="content">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb-area">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <ul class="breadcrumb-list">
+                            <li><a href="/">Trang chủ</a></li>
+                            <li><a href="/cart">Giỏ hàng</a></li>
+                            <li class="active">Thanh toán</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Checkout Area -->
+        <div class="checkout-area section-padding">
+            <div class="container">
+                <form action="/checkout/place-order" method="post" id="checkoutForm">
+                    <div class="row">
+                        <!-- Invoice Details -->
+                        <div class="col-lg-7">
+                            <div class="checkout-box">
+                                <h3 class="cart-page-title">Thông tin giao hàng</h3>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="single-input-item">
+                                            <label>Họ và tên người nhận <span class="required">*</span></label>
+                                            <input type="text" name="receiverName" required
+                                                th:value="${user?.fullName}">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="single-input-item">
+                                            <label>Số điện thoại <span class="required">*</span></label>
+                                            <input type="text" name="phone" required th:value="${user?.phone}">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="single-input-item">
+                                            <label>Email <span class="required">*</span></label>
+                                            <input type="email" name="email" required th:value="${user?.email}">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="single-input-item">
+                                            <label>Địa chỉ nhận hàng <span class="required">*</span></label>
+                                            <input type="text" name="address" required th:value="${user?.address}"
+                                                placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="single-input-item">
+                                            <label>Ghi chú đơn hàng</label>
+                                            <textarea name="notes"
+                                                placeholder="Ghi chú về đơn hàng, ví dụ: thời gian hay chỉ dẫn địa điểm giao hàng chi tiết hơn."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order Summary -->
+                        <div class="col-lg-5">
+                            <div class="order-summary-box">
+                                <h3 class="cart-page-title">Đơn hàng của bạn</h3>
+
+                                <div class="your-order-table table-responsive">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th class="product-name">Sản phẩm</th>
+                                                <th class="product-total">Tổng</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="cart_item" th:each="item : ${cartItems}">
+                                                <td class="product-name">
+                                                    <span th:text="${item.watch.watchName}">Product Name</span>
+                                                    <strong class="product-quantity"> × <span
+                                                            th:text="${item.quantity}">1</span></strong>
+                                                    <br>
+                                                    <small
+                                                        th:text="${#numbers.formatDecimal(item.watch.getPriceAfterDiscount(), 0, 'COMMA', 0, 'POINT')} + ' ₫'">Price</small>
+                                                </td>
+                                                <td class="product-total">
+                                                    <span class="amount"
+                                                        th:text="${#numbers.formatDecimal(item.watch.getPriceAfterDiscount().multiply(item.quantity), 0, 'COMMA', 0, 'POINT')} + ' ₫'">Total</span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr class="cart-subtotal">
+                                                <th>Tạm tính</th>
+                                                <td><span
+                                                        th:text="${#numbers.formatDecimal(summary.subtotal, 0, 'COMMA', 0, 'POINT')} + ' ₫'">Subtotal</span>
+                                                </td>
+                                            </tr>
+                                            <tr class="cart-subtotal" th:if="${summary.discountAmount > 0}">
+                                                <th>Giảm giá</th>
+                                                <td>-<span
+                                                        th:text="${#numbers.formatDecimal(summary.discountAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">Discount</span>
+                                                </td>
+                                            </tr>
+                                            <tr class="shipping">
+                                                <th>Phí vận chuyển</th>
+                                                <td>
+                                                    <span th:if="${summary.shippingFee == 0}">Miễn phí</span>
+                                                    <span th:if="${summary.shippingFee > 0}"
+                                                        th:text="${#numbers.formatDecimal(summary.shippingFee, 0, 'COMMA', 0, 'POINT')} + ' ₫'">Fee</span>
+                                                </td>
+                                            </tr>
+                                            <tr class="order-total">
+                                                <th>Tổng cộng</th>
+                                                <td><strong><span class="amount"
+                                                            th:text="${#numbers.formatDecimal(summary.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">Total</span></strong>
+                                                </td>
+                                            </tr>
+
+                                            <!-- Deposit Info -->
+                                            <tr class="deposit-info" th:if="${summary.depositRequired}">
+                                                <td colspan="2" style="background: #fffdf5; padding: 15px;">
+                                                    <div style="color: #d4af37; font-weight: bold;">
+                                                        <i class="fas fa-exclamation-circle"></i> ĐƠN HÀNG GIÁ TRỊ CAO
+                                                    </div>
+                                                    <div style="margin-top: 5px;">
+                                                        Tiền cọc (25%): <strong style="color: #d4af37;"
+                                                            th:text="${#numbers.formatDecimal(summary.depositAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">Deposit</strong>
+                                                    </div>
+                                                    <div style="font-size: 13px; color: #666;">
+                                                        Cần thanh toán còn lại: <span
+                                                            th:text="${#numbers.formatDecimal(summary.totalAmount.subtract(summary.depositAmount), 0, 'COMMA', 0, 'POINT')} + ' ₫'">Remaining</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+
+                                <div class="payment-method mt-4">
+                                    <h4 style="font-size: 18px; margin-bottom: 20px;">Phương thức thanh toán</h4>
+
+                                    <!-- COD -->
+                                    <div class="payment-method-item" onclick="selectPayment('COD')">
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="payment_cod" name="paymentMethod" value="COD"
+                                                class="custom-control-input" checked>
+                                            <label class="custom-control-label" for="payment_cod">Thanh toán khi nhận
+                                                hàng (COD)</label>
+                                        </div>
+                                        <div class="payment-desc mt-2" style="font-size: 13px; color: #666;">
+                                            <span th:if="${summary.depositRequired}">
+                                                Bạn cần cọc trước 25% giá trị đơn hàng. Phần còn lại sẽ thanh toán khi
+                                                nhận hàng.
+                                            </span>
+                                            <span th:unless="${summary.depositRequired}">
+                                                Thanh toán toàn bộ giá trị đơn hàng khi nhận hàng.
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- BANKING -->
+                                    <div class="payment-method-item" onclick="selectPayment('BANKING')">
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="payment_banking" name="paymentMethod"
+                                                value="BANKING" class="custom-control-input">
+                                            <label class="custom-control-label" for="payment_banking">Chuyển khoản ngân
+                                                hàng</label>
+                                        </div>
+
+                                        <div id="banking-details" class="bank-details" style="display:none;">
+                                            <p style="font-size: 13px; margin-bottom: 10px;">Vui lòng chọn ngân hàng:
+                                            </p>
+
+                                            <!-- Bank Grid -->
+                                            <div class="bank-selection-grid">
+                                                <div th:each="bank : ${bankAccounts}" class="bank-option-card"
+                                                    onclick="selectBank(this)" th:data-id="${bank.bankAccountId}"
+                                                    th:data-name="${bank.bankName}"
+                                                    th:data-number="${bank.accountNumber}"
+                                                    th:data-owner="${bank.accountHolder}"
+                                                    th:data-qr="${bank.getQrCodeUrl()}">
+
+                                                    <!-- Logo Placeholder -->
+                                                    <div class="bank-logo-small d-flex align-items-center justify-content-center"
+                                                        style="font-size: 24px; color: #d4af37;">
+                                                        <i class="fas fa-university"></i>
+                                                    </div>
+
+                                                    <div class="bank-name-small" th:text="${bank.bankName}">Bank Name
+                                                    </div>
+                                                    <input type="radio" name="bankAccountId"
+                                                        th:value="${bank.bankAccountId}" required style="display:none">
+                                                </div>
+                                            </div>
+
+                                            <!-- Details Panel -->
+                                            <div id="selected-bank-info" style="display:none;">
+                                                <div class="bank-detail-card">
+                                                    <div class="bank-qr-col">
+                                                        <img id="display-qr" src="" class="qr-image-large" alt="QR Code"
+                                                            onerror="this.onerror=null;this.src='/images/default_product_placeholder.png'">
+                                                    </div>
+                                                    <div class="bank-text-col">
+                                                        <h4 id="display-bank-name"
+                                                            style="color: #333; margin-bottom: 5px; font-weight: bold;">
+                                                            Bank Name</h4>
+                                                        <p style="margin-bottom: 3px;">STK: <strong id="display-acc-num"
+                                                                style="color: #d4af37; font-size: 18px;">Number</strong>
+                                                        </p>
+                                                        <p style="margin-bottom: 10px;">Chủ TK: <span id="display-owner"
+                                                                style="font-weight: 500;">Holder</span></p>
+
+                                                        <div class="fake-payment-box">
+                                                            <p
+                                                                style="font-size: 12px; margin-bottom: 5px; color: #666;">
+                                                                <i class="fas fa-info-circle"></i> DEMO: Nhập mã giao
+                                                                dịch
+                                                            </p>
+                                                            <div class="input-group">
+                                                                <input type="text" name="transactionCodeInput"
+                                                                    id="transactionCode"
+                                                                    class="form-control form-control-sm"
+                                                                    placeholder="Mã giao dịch..." required disabled>
+                                                                <div class="input-group-append">
+                                                                    <button type="button" class="btn btn-primary btn-sm"
+                                                                        onclick="simulatePayment(this)">
+                                                                        <i class="fas fa-magic"></i> Giả lập
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                            <small class="text-success mt-1" id="payment-status"
+                                                                style="display:none; font-weight: bold;">
+                                                                <i class="fas fa-check-circle"></i> Đã nhận mã: <span
+                                                                    id="filled-code"></span>
+                                                            </small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="place-order mt-4">
+                                        <button type="submit" class="btn btn-primary btn-block btn-lg"
+                                            style="width: 100%;">ĐẶT HÀNG</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Ensure jQuery is available
+                if (typeof jQuery === 'undefined') {
+                    console.error('jQuery is not loaded!');
+                    return;
+                }
+
+                window.selectPayment = function (method) {
+                    // Update radio buttons
+                    if (method === 'COD') {
+                        $('#payment_cod').prop('checked', true);
+                        $('#banking-details').slideUp();
+                        $('input[name="bankAccountId"]').prop('required', false);
+                        $('#transactionCode').prop('disabled', true);
+                    } else {
+                        $('#payment_banking').prop('checked', true);
+                        $('#banking-details').slideDown();
+                        $('input[name="bankAccountId"]').prop('required', true);
+                        // No default selection, user must click a bank
+                    }
+
+                    // Active class
+                    $('.payment-method-item').removeClass('active');
+                    $('input[value="' + method + '"]').closest('.payment-method-item').addClass('active');
+                }
+
+                function selectBank(element) {
+                    // Highlight card
+                    $('.bank-option-card').removeClass('active');
+                    $(element).addClass('active');
+
+                    // Check radio
+                    $(element).find('input[type="radio"]').prop('checked', true);
+
+                    // Get data
+                    var id = $(element).data('id');
+                    var name = $(element).data('name');
+                    var number = $(element).data('number');
+                    var owner = $(element).data('owner');
+                    var qr = $(element).data('qr');
+
+                    // Update display
+                    $('#display-bank-name').text(name);
+                    $('#display-acc-num').text(number);
+                    $('#display-owner').text(owner);
+                    if (qr && qr !== 'null') {
+                        $('#display-qr').attr('src', qr);
+                    } else {
+                        $('#display-qr').attr('src', '/images/default_product_placeholder.png');
+                    }
+
+                    // Show details
+                    $('#selected-bank-info').slideDown();
+
+                    // Enable fake payment input
+                    $('#transactionCode').prop('disabled', false);
+                }
+
+                function simulatePayment(btn) {
+                    var randomCode = 'DEMO' + Math.floor(100000 + Math.random() * 900000);
+                    console.log("FAKE PAYMENT CODE GENERATED: " + randomCode);
+
+                    // Simulate typing/filling
+                    $('#transactionCode').val(randomCode);
+
+                    // Show status
+                    $('#filled-code').text(randomCode);
+                    $('#payment-status').fadeIn();
+
+                    // Append code to notes if needed, handled by form submit if inputs share name? 
+                    // We named it 'notes' but likely we want it separate. 
+                    // Since this input is disabled when COD, it won't submit.
+                    // When enabled, it submits as 'notes'. 
+                    // BUT we already have a textarea named 'notes'. 
+                    // This might create "note1, note2". 
+                    // Let's rename it to 'transactionCode' and ignore it server side, 
+                    // BUT append it to the real notes textarea before submit.
+                }
+
+                // Validate form on submit
+                $('#checkoutForm').submit(function (e) {
+                    if ($('input[name="paymentMethod"]:checked').val() === 'BANKING') {
+                        if ($('input[name="bankAccountId"]:checked').length === 0) {
+                            alert('Vui lòng chọn ngân hàng chuyển khoản');
+                            e.preventDefault();
+                            return;
+                        }
+
+                        // Append transaction code to notes
+                        var code = $('#transactionCode').val();
+                        if (code) {
+                            var currentNote = $('textarea[name="notes"]').val(); // This selector needs to match the textarea
+                            // Textarea name is 'notes' in the public/checkout.html? I verified it is.
+                            // Wait, user/checkout.html has "note", public/checkout.html has "notes".
+                            // Check line 124 of public/checkout.html: <textarea name="notes" ...>
+
+                            // Append it
+                            var newNote = currentNote + (currentNote ? ". " : "") + "[Mã GD: " + code + "]";
+                            $('textarea[name="notes"]').val(newNote);
+                        }
+                    }
+                });
+
+                // Expose functions to window
+                window.selectBank = selectBank;
+                window.simulatePayment = simulatePayment;
+            });
+        </script>
+    </div>
+</body>
+
+</html>

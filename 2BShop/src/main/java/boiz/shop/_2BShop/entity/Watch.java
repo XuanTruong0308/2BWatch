@@ -16,31 +16,31 @@ public class Watch {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "watch_id")
     private Integer watchId;
-    
+
     @Column(name = "watch_name", nullable = false, length = 200)
     private String watchName;
-    
+
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String description;
-    
+
     @Column(nullable = false, precision = 18, scale = 2)
     private BigDecimal price;
-    
+
     @Column(name = "discount_percent")
     private Integer discountPercent = 0;
-    
+
     @Column(name = "stock_quantity")
     private Integer stockQuantity = 0;
-    
+
     @Column(name = "sold_count")
     private Integer soldCount = 0;
-    
+
     @Column(name = "is_active")
     private Boolean isActive = true;
-    
+
     @Column(name = "created_date")
     private LocalDateTime createdDate = LocalDateTime.now();
-    
+
     @Column(name = "updated_date")
     private LocalDateTime updatedDate = LocalDateTime.now();
 
@@ -55,18 +55,18 @@ public class Watch {
 
     @OneToMany(mappedBy = "watch", cascade = CascadeType.ALL)
     private List<WatchImage> images;
-    
+
     @OneToMany(mappedBy = "watch", cascade = CascadeType.ALL)
     private List<CartItem> cartItems;
-    
+
     @OneToMany(mappedBy = "watch", cascade = CascadeType.ALL)
     private List<OrderDetail> orderDetails;
-    
+
     // Business method
     public BigDecimal getPriceAfterDiscount() {
         if (discountPercent != null && discountPercent > 0) {
             BigDecimal discount = price.multiply(BigDecimal.valueOf(discountPercent))
-                                      .divide(BigDecimal.valueOf(100));
+                    .divide(BigDecimal.valueOf(100));
             return price.subtract(discount);
         }
         return price;

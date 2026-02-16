@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi Tiết Đơn Hàng - BOIZ SHOP</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .order-detail-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #1a1a2e;
+            text-decoration: none;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        .order-header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .order-header h1 {
+            margin: 0 0 10px 0;
+            font-size: 24px;
+        }
+        
+        .order-status {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-confirmed { background: #d1ecf1; color: #0c5460; }
+        .status-shipping { background: #cce5ff; color: #004085; }
+        .status-delivered { background: #d4edda; color: #155724; }
+        .status-completed { background: #d4edda; color: #155724; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
+        
+        .order-body {
+            background: white;
+            padding: 30px;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #1a1a2e;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .info-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .info-label {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-weight: 600;
+            color: #333;
+            font-size: 15px;
+        }
+        
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .products-table th {
+            background: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .products-table td {
+            padding: 15px 12px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .product-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .product-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        
+        .product-name {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .product-brand {
+            color: #666;
+            font-size: 13px;
+        }
+        
+        .summary-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 15px;
+        }
+        
+        .summary-row.total {
+            font-size: 20px;
+            font-weight: 700;
+            color: #e74c3c;
+            border-top: 2px solid #ddd;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+        
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #dee2e6;
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -29px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #1a1a2e;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #1a1a2e;
+        }
+        
+        .timeline-item.active::before {
+            background: #28a745;
+            box-shadow: 0 0 0 2px #28a745;
+        }
+        
+        .timeline-date {
+            color: #666;
+            font-size: 13px;
+        }
+        
+        .timeline-title {
+            font-weight: 600;
+            color: #333;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <header th:replace="~{fragments/header :: header}"></header>
+    
+    <div class="order-detail-container">
+        <a th:href="@{/my-orders}" class="back-link">
+            <i class="fas fa-arrow-left"></i> Quay lại danh sách đơn hàng
+        </a>
+        
+        <div class="order-header">
+            <h1>
+                <i class="fas fa-receipt"></i> 
+                Đơn hàng #<span th:text="${'ORD' + #strings.substring('00000' + order.orderId, -6)}"></span>
+            </h1>
+            <p>Ngày đặt: <span th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}"></span></p>
+            <div class="order-status" 
+                 th:classappend="${'status-' + #strings.toLowerCase(order.orderStatus)}">
+                <span th:text="${order.orderStatus == 'PENDING' ? 'Chờ xử lý' : 
+                                order.orderStatus == 'CONFIRMED' ? 'Đã xác nhận' :
+                                order.orderStatus == 'SHIPPING' ? 'Đang giao' :
+                                order.orderStatus == 'DELIVERED' ? 'Đã giao' :
+                                order.orderStatus == 'COMPLETED' ? 'Hoàn thành' :
+                                order.orderStatus == 'CANCELLED' ? 'Đã hủy' : order.orderStatus}"></span>
+            </div>
+        </div>
+        
+        <div class="order-body">
+            <!-- Order Information -->
+            <div class="section">
+                <h2 class="section-title"><i class="fas fa-info-circle"></i> Thông tin đơn hàng</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Người nhận</div>
+                        <div class="info-value" th:text="${order.receiverName}"></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Số điện thoại</div>
+                        <div class="info-value" th:text="${order.shippingPhone}"></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Địa chỉ giao hàng</div>
+                        <div class="info-value" th:text="${order.shippingAddress}"></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Phương thức thanh toán</div>
+                        <div class="info-value" th:text="${order.paymentMethod.methodName}"></div>
+                    </div>
+                </div>
+                <div th:if="${order.notes != null && !order.notes.isEmpty()}" class="info-item" style="margin-top: 15px">
+                    <div class="info-label">Ghi chú</div>
+                    <div class="info-value" th:text="${order.notes}"></div>
+                </div>
+            </div>
+            
+            <!-- Products -->
+            <div class="section">
+                <h2 class="section-title"><i class="fas fa-shopping-bag"></i> Sản phẩm</h2>
+                <table class="products-table">
+                    <thead>
+                        <tr>
+                            <th>Sản phẩm</th>
+                            <th style="text-align: center; width: 100px">Số lượng</th>
+                            <th style="text-align: right; width: 120px">Đơn giá</th>
+                            <th style="text-align: right; width: 120px">Thành tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="detail : ${order.orderDetails}">
+                            <td>
+                                <div class="product-info">
+                                    <img th:src="${detail.watch.getPrimaryImageUrl()}" 
+                                         alt="Product" class="product-image">
+                                    <div>
+                                        <div class="product-name" th:text="${detail.watch.watchName}"></div>
+                                        <div class="product-brand" th:text="${detail.watch.brand.brandName}"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="text-align: center" th:text="${detail.quantity}"></td>
+                            <td style="text-align: right">
+                                <div th:text="${#numbers.formatDecimal(detail.unitPrice, 0, 'COMMA', 0, 'POINT') + '₫'}"></div>
+                                <div th:if="${detail.discountAmount > 0}" 
+                                     style="color: #e74c3c; font-size: 12px">
+                                    -<span th:text="${#numbers.formatDecimal(detail.discountAmount, 0, 'COMMA', 0, 'POINT') + '₫'}"></span>
+                                </div>
+                            </td>
+                            <td style="text-align: right; font-weight: 600" 
+                                th:text="${#numbers.formatDecimal(detail.subtotal, 0, 'COMMA', 0, 'POINT') + '₫'}"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="summary-box">
+                    <div class="summary-row">
+                        <span>Tạm tính:</span>
+                        <span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT') + '₫'}"></span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Phí vận chuyển:</span>
+                        <span>Miễn phí</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>TỔNG CỘNG:</span>
+                        <span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT') + '₫'}"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Order Timeline -->
+            <div class="section">
+                <h2 class="section-title"><i class="fas fa-history"></i> Lịch sử đơn hàng</h2>
+                <div class="timeline">
+                    <div class="timeline-item active">
+                        <div class="timeline-date" th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}"></div>
+                        <div class="timeline-title">Đơn hàng đã được tạo</div>
+                    </div>
+                    <div class="timeline-item" th:classappend="${order.orderStatus != 'PENDING' ? 'active' : ''}">
+                        <div class="timeline-date" th:if="${order.orderStatus != 'PENDING'}" 
+                             th:text="${order.updatedDate != null ? #temporals.format(order.updatedDate, 'dd/MM/yyyy HH:mm') : ''}"></div>
+                        <div class="timeline-title">Đơn hàng đã được xác nhận</div>
+                    </div>
+                    <div class="timeline-item" th:classappend="${order.orderStatus == 'SHIPPING' || order.orderStatus == 'DELIVERED' || order.orderStatus == 'COMPLETED' ? 'active' : ''}">
+                        <div class="timeline-title">Đang giao hàng</div>
+                    </div>
+                    <div class="timeline-item" th:classappend="${order.orderStatus == 'DELIVERED' || order.orderStatus == 'COMPLETED' ? 'active' : ''}">
+                        <div class="timeline-title">Đã giao hàng</div>
+                    </div>
+                    <div class="timeline-item" th:classappend="${order.orderStatus == 'COMPLETED' ? 'active' : ''}">
+                        <div class="timeline-title">Hoàn thành</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

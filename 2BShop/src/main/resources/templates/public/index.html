@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,14 +8,24 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body>
     <!-- Header -->
     <div th:replace="~{fragments/header :: header}"></div>
-    
+
     <!-- Main Content -->
     <div th:fragment="content">
         <!-- Hero Section -->
         <section class="hero-section">
+            <!-- Video Background -->
+            <video autoplay muted loop playsinline class="hero-video">
+                <source th:src="@{/video/hero-section.mp4}" type="video/mp4">
+                Trình duyệt của bạn không hỗ trợ video.
+            </video>
+            
+            <!-- Video Overlay -->
+            <div class="hero-overlay"></div>
+            
             <div class="container">
                 <div class="hero-content">
                     <h1 class="hero-title">WELCOME TO 2BSHOP</h1>
@@ -26,7 +37,7 @@
                 </div>
             </div>
         </section>
-        
+
         <!-- Best Sellers Section -->
         <section id="bestsellers" class="section section-white">
             <div class="container">
@@ -34,66 +45,65 @@
                     <h2>BÁN CHẠY NHẤT</h2>
                     <p>Top 3 sản phẩm được khách hàng yêu thích nhất</p>
                 </div>
-                
+
                 <div class="products-grid">
                     <!-- BACKEND: Controller truyền List<Watch> bestSellers vào model -->
                     <!-- Example: model.addAttribute("bestSellers", watchService.getTop3BestSellers()); -->
-                    
+
                     <div class="product-card" th:each="watch : ${bestSellers}">
                         <a th:href="@{/watches/{id}(id=${watch.watchId})}">
                             <div class="product-image-wrapper">
                                 <!-- BACKEND: Lấy ảnh primary từ watch.images -->
-                                <img th:src="${watch.images != null and !watch.images.isEmpty() ? watch.images[0].imageUrl : '/images/watches/default.jpg'}" 
-                                     th:alt="${watch.watchName}" 
-                                     class="product-image">
-                                
+                                <img th:src="${watch.images != null and !watch.images.isEmpty() ? watch.images[0].imageUrl : '/images/watches/default.jpg'}"
+                                    th:alt="${watch.watchName}" class="product-image">
+
                                 <div class="product-badge">
                                     <i class="fas fa-fire"></i> HOT
                                 </div>
                             </div>
                         </a>
-                        
+
                         <div class="product-info">
                             <!-- BACKEND: watch.brand.brandName -->
                             <div class="product-brand" th:text="${watch.brand.brandName}">Brand</div>
-                            
+
                             <!-- BACKEND: watch.watchName -->
                             <h3 class="product-name">
                                 <a th:href="@{/watches/{id}(id=${watch.watchId})}" th:text="${watch.watchName}">
                                     Watch Name
                                 </a>
                             </h3>
-                            
+
                             <div class="product-price">
                                 <!-- BACKEND: Tính giá sau giảm = price * (1 - discountPercent/100) -->
-                                <span class="price-current" th:text="${#numbers.formatDecimal(watch.price * (1 - watch.discountPercent/100.0), 0, 'COMMA', 0, 'POINT')} + '₫'">
+                                <span class="price-current"
+                                    th:text="${#numbers.formatDecimal(watch.price * (1 - watch.discountPercent/100.0), 0, 'COMMA', 0, 'POINT')} + '₫'">
                                     1,000,000₫
                                 </span>
-                                
+
                                 <!-- Hiển thị giá gốc nếu có giảm giá -->
-                                <span class="price-original" 
-                                      th:if="${watch.discountPercent > 0}"
-                                      th:text="${#numbers.formatDecimal(watch.price, 0, 'COMMA', 0, 'POINT')} + '₫'">
+                                <span class="price-original" th:if="${watch.discountPercent > 0}"
+                                    th:text="${#numbers.formatDecimal(watch.price, 0, 'COMMA', 0, 'POINT')} + '₫'">
                                     1,200,000₫
                                 </span>
                             </div>
-                            
+
                             <div class="product-meta">
                                 <!-- BACKEND: watch.soldCount -->
                                 <div class="product-sold">
                                     <i class="fas fa-shopping-bag"></i>
                                     <span th:text="${watch.soldCount} + ' đã bán'">0 đã bán</span>
                                 </div>
-                                
+
                                 <!-- BACKEND: watch.stockQuantity -->
                                 <div th:if="${watch.stockQuantity > 0}">Còn hàng</div>
                                 <div th:unless="${watch.stockQuantity > 0}">Hết hàng</div>
                             </div>
-                            
+
                             <div class="product-actions">
-                                <button class="btn btn-outline btn-sm" 
-                                        th:onclick="'addToCart(' + ${watch.watchId} + ')'"
-                                        th:disabled="${watch.stockQuantity <= 0}">
+                                <button class="btn btn-outline btn-sm"
+                                    th:onclick="'addToCart(' + ${watch.watchId} + ')'"
+                                    th:disabled="${watch.stockQuantity <= 0}">
                                     <i class="fas fa-cart-plus"></i> Thêm vào giỏ
                                 </button>
                                 <a th:href="@{/watches/{id}(id=${watch.watchId})}" class="btn btn-primary btn-sm">
@@ -105,7 +115,7 @@
                 </div>
             </div>
         </section>
-        
+
         <!-- Newest Products Section -->
         <section class="section section-gray">
             <div class="container">
@@ -113,59 +123,58 @@
                     <h2>SẢN PHẨM MỚI NHẤT</h2>
                     <p>Những mẫu đồng hồ mới nhất vừa về</p>
                 </div>
-                
+
                 <div class="products-grid">
                     <!-- BACKEND: Controller truyền List<Watch> newestProducts vào model -->
                     <!-- Example: model.addAttribute("newestProducts", watchService.getTop3Newest()); -->
-                    
+
                     <div class="product-card" th:each="watch : ${newestProducts}">
                         <a th:href="@{/watches/{id}(id=${watch.watchId})}">
                             <div class="product-image-wrapper">
-                                <img th:src="${watch.images != null and !watch.images.isEmpty() ? watch.images[0].imageUrl : '/images/watches/default.jpg'}" 
-                                     th:alt="${watch.watchName}" 
-                                     class="product-image">
-                                
+                                <img th:src="${watch.images != null and !watch.images.isEmpty() ? watch.images[0].imageUrl : '/images/watches/default.jpg'}"
+                                    th:alt="${watch.watchName}" class="product-image">
+
                                 <div class="product-badge new">
                                     <i class="fas fa-star"></i> MỚI
                                 </div>
                             </div>
                         </a>
-                        
+
                         <div class="product-info">
                             <div class="product-brand" th:text="${watch.brand.brandName}">Brand</div>
-                            
+
                             <h3 class="product-name">
                                 <a th:href="@{/watches/{id}(id=${watch.watchId})}" th:text="${watch.watchName}">
                                     Watch Name
                                 </a>
                             </h3>
-                            
+
                             <div class="product-price">
-                                <span class="price-current" th:text="${#numbers.formatDecimal(watch.price * (1 - watch.discountPercent/100.0), 0, 'COMMA', 0, 'POINT')} + '₫'">
+                                <span class="price-current"
+                                    th:text="${#numbers.formatDecimal(watch.price * (1 - watch.discountPercent/100.0), 0, 'COMMA', 0, 'POINT')} + '₫'">
                                     1,000,000₫
                                 </span>
-                                
-                                <span class="price-original" 
-                                      th:if="${watch.discountPercent > 0}"
-                                      th:text="${#numbers.formatDecimal(watch.price, 0, 'COMMA', 0, 'POINT')} + '₫'">
+
+                                <span class="price-original" th:if="${watch.discountPercent > 0}"
+                                    th:text="${#numbers.formatDecimal(watch.price, 0, 'COMMA', 0, 'POINT')} + '₫'">
                                     1,200,000₫
                                 </span>
                             </div>
-                            
+
                             <div class="product-meta">
                                 <div class="product-sold">
                                     <i class="fas fa-shopping-bag"></i>
                                     <span th:text="${watch.soldCount} + ' đã bán'">0 đã bán</span>
                                 </div>
-                                
+
                                 <div th:if="${watch.stockQuantity > 0}">Còn hàng</div>
                                 <div th:unless="${watch.stockQuantity > 0}">Hết hàng</div>
                             </div>
-                            
+
                             <div class="product-actions">
-                                <button class="btn btn-outline btn-sm" 
-                                        th:onclick="'addToCart(' + ${watch.watchId} + ')'"
-                                        th:disabled="${watch.stockQuantity <= 0}">
+                                <button class="btn btn-outline btn-sm"
+                                    th:onclick="'addToCart(' + ${watch.watchId} + ')'"
+                                    th:disabled="${watch.stockQuantity <= 0}">
                                     <i class="fas fa-cart-plus"></i> Thêm vào giỏ
                                 </button>
                                 <a th:href="@{/watches/{id}(id=${watch.watchId})}" class="btn btn-primary btn-sm">
@@ -177,7 +186,7 @@
                 </div>
             </div>
         </section>
-        
+
         <!-- Biggest Discount Section -->
         <section class="section section-white">
             <div class="container">
@@ -185,59 +194,58 @@
                     <h2>GIẢM GIÁ SÂU NHẤT</h2>
                     <p>Cơ hội sở hữu đồng hồ cao cấp với giá tốt nhất</p>
                 </div>
-                
+
                 <div class="products-grid">
                     <!-- BACKEND: Controller truyền List<Watch> biggestDiscounts vào model -->
                     <!-- Example: model.addAttribute("biggestDiscounts", watchService.getTop3BiggestDiscount()); -->
-                    
+
                     <div class="product-card" th:each="watch : ${biggestDiscounts}">
                         <a th:href="@{/watches/{id}(id=${watch.watchId})}">
                             <div class="product-image-wrapper">
-                                <img th:src="${watch.images != null and !watch.images.isEmpty() ? watch.images[0].imageUrl : '/images/watches/default.jpg'}" 
-                                     th:alt="${watch.watchName}" 
-                                     class="product-image">
-                                
+                                <img th:src="${watch.images != null and !watch.images.isEmpty() ? watch.images[0].imageUrl : '/images/watches/default.jpg'}"
+                                    th:alt="${watch.watchName}" class="product-image">
+
                                 <div class="product-badge discount" th:if="${watch.discountPercent > 0}">
                                     -<span th:text="${watch.discountPercent}">0</span>%
                                 </div>
                             </div>
                         </a>
-                        
+
                         <div class="product-info">
                             <div class="product-brand" th:text="${watch.brand.brandName}">Brand</div>
-                            
+
                             <h3 class="product-name">
                                 <a th:href="@{/watches/{id}(id=${watch.watchId})}" th:text="${watch.watchName}">
                                     Watch Name
                                 </a>
                             </h3>
-                            
+
                             <div class="product-price">
-                                <span class="price-current" th:text="${#numbers.formatDecimal(watch.price * (1 - watch.discountPercent/100.0), 0, 'COMMA', 0, 'POINT')} + '₫'">
+                                <span class="price-current"
+                                    th:text="${#numbers.formatDecimal(watch.price * (1 - watch.discountPercent/100.0), 0, 'COMMA', 0, 'POINT')} + '₫'">
                                     1,000,000₫
                                 </span>
-                                
-                                <span class="price-original" 
-                                      th:if="${watch.discountPercent > 0}"
-                                      th:text="${#numbers.formatDecimal(watch.price, 0, 'COMMA', 0, 'POINT')} + '₫'">
+
+                                <span class="price-original" th:if="${watch.discountPercent > 0}"
+                                    th:text="${#numbers.formatDecimal(watch.price, 0, 'COMMA', 0, 'POINT')} + '₫'">
                                     1,200,000₫
                                 </span>
                             </div>
-                            
+
                             <div class="product-meta">
                                 <div class="product-sold">
                                     <i class="fas fa-shopping-bag"></i>
                                     <span th:text="${watch.soldCount} + ' đã bán'">0 đã bán</span>
                                 </div>
-                                
+
                                 <div th:if="${watch.stockQuantity > 0}">Còn hàng</div>
                                 <div th:unless="${watch.stockQuantity > 0}">Hết hàng</div>
                             </div>
-                            
+
                             <div class="product-actions">
-                                <button class="btn btn-outline btn-sm" 
-                                        th:onclick="'addToCart(' + ${watch.watchId} + ')'"
-                                        th:disabled="${watch.stockQuantity <= 0}">
+                                <button class="btn btn-outline btn-sm"
+                                    th:onclick="'addToCart(' + ${watch.watchId} + ')'"
+                                    th:disabled="${watch.stockQuantity <= 0}">
                                     <i class="fas fa-cart-plus"></i> Thêm vào giỏ
                                 </button>
                                 <a th:href="@{/watches/{id}(id=${watch.watchId})}" class="btn btn-primary btn-sm">
@@ -249,10 +257,11 @@
                 </div>
             </div>
         </section>
-    
-    <!-- Footer -->
-    <div th:replace="~{fragments/footer :: footer}"></div>
-    
-    <script th:src="@{/js/main.js}"></script>
+
+        <!-- Footer -->
+        <div th:replace="~{fragments/footer :: footer}"></div>
+
+        <script th:src="@{/js/main.js}"></script>
 </body>
+
 </html>

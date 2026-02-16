@@ -354,7 +354,7 @@
                         </thead>
                         <tbody>
                             <tr th:each="order : ${recentOrders}">
-                                <td th:text="${order.id}">#001</td>
+                                <td th:text="${order.orderId}">#001</td>
                                 <td th:text="${order.user.fullName}">Nguyen Van A</td>
                                 <td th:text="${order.totalAmount}">1,000,000 VNĐ</td>
                                 <td>
@@ -362,7 +362,7 @@
                                 </td>
                                 <td th:text="${order.createdAt}">01/01/2026</td>
                                 <td>
-                                    <a th:href="@{/admin/orders/{id}(id=${order.id})}" class="btn-action"><i class="fas fa-eye"></i></a>
+                                    <a th:href="@{/admin/orders/{id}(id=${order.orderId})}" class="btn-action"><i class="fas fa-eye"></i></a>
                                 </td>
                             </tr>
                             <!-- Fallback nếu không có data -->

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base-layout}">
+<head>
+    <title>Đặt hàng thành công - 2BShop</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb-area">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <ul class="breadcrumb-list">
+                            <li><a href="/">Trang chủ</a></li>
+                            <li class="active">Hoàn tất đơn hàng</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Complete Area -->
+        <div class="order-complete-area section-padding">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8 text-center">
+                        <div class="order-complete-content">
+                            <i class="fas fa-check-circle" style="font-size: 80px; color: #28a745; margin-bottom: 20px;"></i>
+                            <h3 class="mb-4">Đặt hàng thành công!</h3>
+                            <p class="lead">Cảm ơn bạn đã mua sắm tại 2BShop. Mã đơn hàng của bạn là: <strong th:text="'#' + ${orderId}">#12345</strong></p>
+                            
+                            <div class="alert alert-info mt-4">
+                                Chúng tôi đã gửi email xác nhận đơn hàng đến địa chỉ email của bạn.
+                                <br>
+                                Nhân viên của chúng tôi sẽ sớm liên hệ để xác nhận đơn hàng.
+                            </div>
+                            
+                            <div class="mt-5">
+                                <h5 class="mb-3">Tải hóa đơn VAT</h5>
+                                <a th:href="@{'/invoice/' + ${orderId} + '/word'}" class="btn btn-primary mr-2">
+                                    <i class="fas fa-file-word"></i> Tải file Word (.docx)
+                                </a>
+                                <a th:href="@{'/invoice/' + ${orderId} + '/pdf'}" class="btn btn-danger">
+                                    <i class="fas fa-file-pdf"></i> Tải file PDF (.pdf)
+                                </a>
+                            </div>
+                            
+                            <div class="mt-5">
+                                <a href="/" class="btn btn-outline-dark">Tiếp tục mua sắm</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

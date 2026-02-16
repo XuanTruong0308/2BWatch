@@ -30,167 +30,163 @@ import boiz.shop._2BShop.respository.ViolationTypeRepository;
 @Controller
 @RequestMapping("/admin/bans")
 public class BanAdminController {
-    
+
     @Autowired
     private UserRepository userRepo;
-    
+
     @Autowired
     private BanLogRepository banLogRepo;
-    
+
     @Autowired
     private ViolationTypeRepository violationTypeRepo;
-    
+
     /**
      * List all ban logs với pagination
      * URL: /admin/bans
      */
     @GetMapping
     public String listBanLogs(
-        @RequestParam(required = false) Boolean isActive,
-        @RequestParam(defaultValue = "0") int page,
-        Model model
-    ) {
+            @RequestParam(required = false) Boolean isActive,
+            @RequestParam(defaultValue = "0") int page,
+            Model model) {
         Pageable pageable = PageRequest.of(page, 50, Sort.by("banStartDate").descending());
-        
+
         Page<BanLog> banLogs;
-        
+
         if (isActive != null) {
             banLogs = banLogRepo.findByIsActive(isActive, pageable);
         } else {
             banLogs = banLogRepo.findAll(pageable);
         }
-        
+
         // Count currently banned users (isEnabled = false)
         long bannedCount = userRepo.findByIsEnabled(false, PageRequest.of(0, 1)).getTotalElements();
-        
+
         model.addAttribute("banLogs", banLogs);
         model.addAttribute("bannedCount", bannedCount);
         model.addAttribute("selectedIsActive", isActive);
-        
+
         return "admin/ban-logs";
     }
-    
+
     /**
      * List all banned users
      * URL: /admin/bans/banned-users
      */
     @GetMapping("/banned-users")
     public String listBannedUsers(
-        @RequestParam(defaultValue = "0") int page,
-        Model model
-    ) {
+            @RequestParam(defaultValue = "0") int page,
+            Model model) {
         Pageable pageable = PageRequest.of(page, 20, Sort.by("updatedDate").descending());
         Page<User> bannedUsers = userRepo.findByIsEnabled(false, pageable);
-        
+
         model.addAttribute("bannedUsers", bannedUsers);
-        
+
         return "admin/banned-users";
     }
-    
+
     /**
      * Ban user from UserAdminController
      * URL: POST /admin/bans/ban/{userId}
      */
     @PostMapping("/ban/{userId}")
     public String banUser(
-        @PathVariable Integer userId,
-        @RequestParam(required = false) String reason,
-        @RequestParam(required = false) Integer violationTypeId,
-        @RequestParam(defaultValue = "0") Integer durationMinutes,
-        RedirectAttributes redirectAttributes
-    ) {
+            @PathVariable Integer userId,
+            @RequestParam(required = false) String reason,
+            @RequestParam(required = false) Integer violationTypeId,
+            @RequestParam(defaultValue = "0") Integer durationMinutes,
+            RedirectAttributes redirectAttributes) {
         try {
             User user = userRepo.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-            
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
             // Don't ban admin
             boolean isAdmin = user.getUserRoles().stream()
-                .anyMatch(ur -> ur.getRole().getRoleName().equals("ROLE_ADMIN"));
-            
+                    .anyMatch(ur -> ur.getRole().getRoleName().equals("ADMIN"));
+
             if (isAdmin) {
                 throw new RuntimeException("Không thể ban admin!");
             }
-            
+
             // Ban user
             user.setIsEnabled(false);
             user.setUpdatedDate(LocalDateTime.now());
             userRepo.save(user);
-            
+
             // Create ban log
             BanLog banLog = new BanLog();
             banLog.setUser(user);
-            
+
             // Set violation type (default = 1 nếu không có)
             if (violationTypeId != null && violationTypeId > 0) {
                 ViolationType violationType = violationTypeRepo.findById(violationTypeId)
-                    .orElse(null);
+                        .orElse(null);
                 banLog.setViolationType(violationType);
             } else {
                 // Default violation type
                 ViolationType defaultType = violationTypeRepo.findById(1)
-                    .orElse(null);
+                        .orElse(null);
                 banLog.setViolationType(defaultType);
             }
-            
+
             banLog.setViolationCount(1);
             banLog.setBanDurationMinutes(durationMinutes > 0 ? durationMinutes : null);
             banLog.setBanStartDate(LocalDateTime.now());
-            
+
             // Calculate ban end date
             if (durationMinutes > 0) {
                 banLog.setBanEndDate(LocalDateTime.now().plusMinutes(durationMinutes));
             }
-            
+
             banLog.setIsActive(true);
             banLog.setReason(reason != null ? reason : "Vi phạm quy định");
-            
+
             banLogRepo.save(banLog);
-            
+
             redirectAttributes.addFlashAttribute("success", "Đã ban user thành công!");
-            
+
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
             e.printStackTrace();
         }
-        
+
         return "redirect:/admin/users";
     }
-    
+
     /**
      * Unban user
      * URL: POST /admin/bans/unban/{userId}
      */
     @PostMapping("/unban/{userId}")
     public String unbanUser(
-        @PathVariable Integer userId,
-        RedirectAttributes redirectAttributes
-    ) {
+            @PathVariable Integer userId,
+            RedirectAttributes redirectAttributes) {
         try {
             User user = userRepo.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-            
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
             // Unban user
             user.setIsEnabled(true);
             user.setUpdatedDate(LocalDateTime.now());
             userRepo.save(user);
-            
+
             // Deactivate active ban logs
             List<BanLog> activeBans = banLogRepo.findByUserUserIdAndIsActiveTrue(userId);
             for (BanLog banLog : activeBans) {
                 banLog.setIsActive(false);
                 banLogRepo.save(banLog);
             }
-            
+
             redirectAttributes.addFlashAttribute("success", "Đã unban user thành công!");
-            
+
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
             e.printStackTrace();
         }
-        
+
         return "redirect:/admin/users";
     }
-    
+
     /**
      * View ban history of a specific user
      * URL: /admin/bans/user/{userId}
@@ -198,13 +194,13 @@ public class BanAdminController {
     @GetMapping("/user/{userId}")
     public String userBanHistory(@PathVariable Integer userId, Model model) {
         User user = userRepo.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
-        
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+
         List<BanLog> banHistory = banLogRepo.findByUserUserId(userId);
-        
+
         model.addAttribute("user", user);
         model.addAttribute("banHistory", banHistory);
-        
+
         return "admin/user-ban-history";
     }
 }

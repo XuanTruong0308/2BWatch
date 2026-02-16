@@ -4,7 +4,31 @@
 [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://www.oracle.com/java/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-## 📋 Mô Tả Project
+## � Quick Start
+
+### Run Server
+```bash
+# Option 1: Use start menu
+start.bat  # Choose [1] Server only
+
+# Option 2: Manual
+cd 2BShop
+mvnw.cmd spring-boot:run
+```
+
+Access: http://localhost:8080
+
+### VNPay Payment Testing
+```bash
+# Start server + tunnel
+start.bat  # Choose [2] Server + Cloudflared
+
+# Then follow: VNPAY_GUIDE.md
+```
+
+---
+
+## �📋 Mô Tả Project
 
 2BShop là một ứng dụng thương mại điện tử chuyên bán đồng hồ, được xây dựng bằng Spring Boot 4.x và Java 21. Hệ thống cung cấp đầy đủ chức năng cho cả khách hàng và quản trị viên.
 

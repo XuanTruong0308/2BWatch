@@ -42,34 +42,31 @@ public class OrderAdminController {
 
     @GetMapping
     public String listOrders(
-        @RequestParam(required = false) String status,
-        @RequestParam(required = false) String keyword,
-        @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fromDate,
-        @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate toDate,
-        @RequestParam(defaultValue = "0") int page,
-        Model model
-    ) {
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fromDate,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate toDate,
+            @RequestParam(defaultValue = "0") int page,
+            Model model) {
         Pageable pageable = PageRequest.of(page, 20, Sort.by("orderDate").descending());
 
         Page<Order> orders;
 
-        if(keyword != null && !keyword.trim().isEmpty()) {
+        if (keyword != null && !keyword.trim().isEmpty()) {
             orders = orderRepo.searchOrders(keyword, pageable);
-        }else if(status != null && !status.trim().isEmpty()) {
+        } else if (status != null && !status.trim().isEmpty()) {
             orders = orderRepo.findByOrderStatusAndOrderDateBetween(
-                status, 
-                fromDate.atStartOfDay(), 
-                toDate.atTime(LocalTime.MAX),
-                pageable
-            );
-        } else if(status != null && !status.equals("ALL")) {
+                    status,
+                    fromDate.atStartOfDay(),
+                    toDate.atTime(LocalTime.MAX),
+                    pageable);
+        } else if (status != null && !status.equals("ALL")) {
             orders = orderRepo.findByOrderStatus(status, pageable);
-        } else if(fromDate != null && toDate != null) {
+        } else if (fromDate != null && toDate != null) {
             orders = orderRepo.findByOrderDateBetween(
-                fromDate.atStartOfDay(),
-                toDate.atTime(LocalTime.MAX),
-                pageable
-            );
+                    fromDate.atStartOfDay(),
+                    toDate.atTime(LocalTime.MAX),
+                    pageable);
         } else {
             orders = orderRepo.findAll(pageable);
         }
@@ -87,8 +84,7 @@ public class OrderAdminController {
     @GetMapping("/{id}")
     public String orderDetail(@PathVariable Integer id, Model model) {
         Order order = orderRepo.findById(id)
-            .orElseThrow(() -> new RuntimeException
-            ("Không tìm thấy id đơn hàng: "+ id));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy id đơn hàng: " + id));
 
         List<OrderDetail> orderDetails = orderDetailRepo.findByOrderOrderId(id);
 
@@ -102,16 +98,15 @@ public class OrderAdminController {
 
     @PostMapping("/update-status")
     public String updateOrderStatus(
-        @RequestParam Integer orderId,
-        @RequestParam String newStatus,
-        RedirectAttributes redirectAttributes
-    ) {
+            @RequestParam Integer orderId,
+            @RequestParam String newStatus,
+            RedirectAttributes redirectAttributes) {
         try {
             Order order = orderRepo.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Khoong tìm thấy đơn hàng với ID: " + orderId));
+                    .orElseThrow(() -> new RuntimeException("Khoong tìm thấy đơn hàng với ID: " + orderId));
 
             List<String> validStatuses = getValidNextStatuses(order.getOrderStatus());
-            if(!validStatuses.contains(newStatus)) {
+            if (!validStatuses.contains(newStatus)) {
                 throw new RuntimeException("Không thể chuyển từ " + order.getOrderStatus() + " sang " + newStatus);
             }
 
@@ -128,20 +123,19 @@ public class OrderAdminController {
 
     @PostMapping("/cancel/{id}")
     public String cancelOrder(
-        @PathVariable Integer id,
-        @RequestParam(required = false) String reason,
-        RedirectAttributes redirectAttributes
-    ) {
+            @PathVariable Integer id,
+            @RequestParam(required = false) String reason,
+            RedirectAttributes redirectAttributes) {
         try {
             orderService.cancelOrder(id, reason);
-            
+
             redirectAttributes.addFlashAttribute("success", "Đã hủy đơn hàng thành công!");
-            
+
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
             e.printStackTrace();
         }
-        
+
         return "redirect:/admin/orders/" + id;
     }
 

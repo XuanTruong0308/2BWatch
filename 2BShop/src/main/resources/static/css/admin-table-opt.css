@@ -1,0 +1,37 @@
+/* ===================================
+   ADMIN TABLE OPTIMIZATION
+   Product name column with max-width and tooltip
+   =================================== */
+
+/* Product Name Cell - Thu nhỏ và truncate */
+.product-name-cell {
+    max-width: 250px;
+    min-width: 200px;
+}
+
+.product-name-cell strong {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+/* Tooltip on hover */
+.product-name-cell:hover {
+    cursor: help;
+    position: relative;
+}
+
+/* Action Buttons Optimization */
+.btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+    .product-name-cell {
+        max-width: 150px;
+        min-width: 120px;
+    }
+}

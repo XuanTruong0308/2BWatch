@@ -67,8 +67,8 @@
                             <td th:text="${user.email}">email@example.com</td>
                             <td th:text="${user.phoneNumber}">0123456789</td>
                             <td>
-                                <span th:each="role : ${user.userRoles}" class="badge bg-secondary me-1" 
-                                      th:text="${role.role.roleName}">ROLE_USER</span>
+                                <span th:each="role : ${user.roles}" class="badge bg-secondary me-1" 
+                                      th:text="${role}">ROLE_USER</span>
                             </td>
                             <td class="text-center">
                                 <span class="badge bg-primary" th:text="${userOrderCounts.get(user.userId)}">0</span>

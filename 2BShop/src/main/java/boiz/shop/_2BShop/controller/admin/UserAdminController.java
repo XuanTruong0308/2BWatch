@@ -34,18 +34,17 @@ public class UserAdminController {
 
     @GetMapping
     public String listUsers(
-        @RequestParam(required = false) String keyword,
-        @RequestParam(required = false) Boolean isActive,
-        @RequestParam(defaultValue = "0") int page,
-        Model model
-    ) {
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Boolean isActive,
+            @RequestParam(defaultValue = "0") int page,
+            Model model) {
         Pageable pageable = PageRequest.of(page, 20, Sort.by("createdDate").descending());
 
         Page<User> users;
 
-        if(keyword != null && !keyword.trim().isEmpty()) {
+        if (keyword != null && !keyword.trim().isEmpty()) {
             users = userRepo.searchUsers(keyword, pageable);
-        } else if(isActive != null) {
+        } else if (isActive != null) {
             users = userRepo.findByIsEnabled(isActive, pageable);
         } else {
             users = userRepo.findAll(pageable);
@@ -57,7 +56,7 @@ public class UserAdminController {
         for (User user : users.getContent()) {
             long orderCount = orderRepo.countByUserUserId(user.getUserId());
             BigDecimal totalSpent = orderRepo.sumTotalAmountByUserUserId(user.getUserId());
-            
+
             userOrderCounts.put(user.getUserId(), orderCount);
             userTotalSpents.put(user.getUserId(), totalSpent != null ? totalSpent : BigDecimal.ZERO);
         }
@@ -73,19 +72,18 @@ public class UserAdminController {
 
     @GetMapping("/{id}")
     public String userDetail(
-        @PathVariable Integer id,
-        Model model
-    ) {
+            @PathVariable Integer id,
+            Model model) {
         User user = userRepo.findById(id)
-            .orElseThrow(() -> new RuntimeException("Không tìm thấy user với id: " + id));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy user với id: " + id));
 
         var orders = orderRepo.findByUserUserId(id);
-        
+
         // Stats
         long orderCount = orders.size();
         BigDecimal totalSpent = orders.stream()
-            .map(order -> order.getTotalAmount())
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .map(order -> order.getTotalAmount())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         model.addAttribute("user", user);
         model.addAttribute("orders", orders);
@@ -97,18 +95,17 @@ public class UserAdminController {
 
     @PostMapping("/ban/{id}")
     public String banUser(
-        @PathVariable Integer id,
-        @RequestParam(required = false) String reason,
-        RedirectAttributes redirectAttributes
-    ) {
+            @PathVariable Integer id,
+            @RequestParam(required = false) String reason,
+            RedirectAttributes redirectAttributes) {
         try {
             User user = userRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy user với id"));
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy user với id"));
 
             boolean isAdmin = user.getUserRoles().stream()
-                .anyMatch(ur -> ur.getRole().getRoleName().equals("ROLE_ADMIN"));
+                    .anyMatch(ur -> ur.getRole().getRoleName().equals("ADMIN"));
 
-            if(isAdmin) {
+            if (isAdmin) {
                 throw new RuntimeException("Không thể ban admin");
             }
 
@@ -124,18 +121,16 @@ public class UserAdminController {
 
     @PostMapping("/unban/{id}")
     public String unbanUser(
-        @PathVariable Integer id,
-        RedirectAttributes redirectAttributes
-    ) {
+            @PathVariable Integer id,
+            RedirectAttributes redirectAttributes) {
         try {
-            User user = userRepo.findById
-                (id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
+            User user = userRepo.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
             user.setIsEnabled(true);
             userRepo.save(user);
 
             redirectAttributes.addFlashAttribute("success", "Đã unban user thành công!");
-                
+
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
         }

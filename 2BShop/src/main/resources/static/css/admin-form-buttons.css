@@ -1,0 +1,40 @@
+/* ===================================
+   ADMIN FORM - STICKY ACTION BUTTONS
+   Đảm bảo nút Lưu luôn hiển thị
+   =================================== */
+
+.form-action-buttons {
+    position: sticky;
+    bottom: 0;
+    z-index: 1000;
+    margin-left: -1.5rem;
+    margin-right: -1.5rem;
+    margin-bottom: -1.5rem;
+}
+
+.form-action-buttons .btn-lg {
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    min-width: 120px;
+}
+
+.gap-2 {
+    gap: 0.5rem;
+}
+
+/* Mobile responsive */
+@media (max-width: 576px) {
+    .form-action-buttons {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: 0;
+        border-radius: 0;
+    }
+
+    .form-action-buttons .btn-lg {
+        flex: 1;
+    }
+}

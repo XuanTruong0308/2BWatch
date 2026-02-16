@@ -489,6 +489,31 @@ a:hover {
     overflow: hidden;
 }
 
+/* Video Background */
+.hero-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+    object-fit: cover;
+}
+
+/* Video Overlay - Giảm opacity để video nổi lên */
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(26, 54, 93, 0.5);
+    z-index: 1;
+}
+
 .hero-section::before {
     content: '';
     position: absolute;
@@ -500,11 +525,12 @@ a:hover {
         repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(212, 175, 55, 0.03) 2px, rgba(212, 175, 55, 0.03) 4px),
         repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(212, 175, 55, 0.03) 2px, rgba(212, 175, 55, 0.03) 4px);
     background-size: 50px 50px;
+    z-index: 2;
 }
 
 .hero-content {
     position: relative;
-    z-index: 1;
+    z-index: 3;
 }
 
 .hero-title {
@@ -666,8 +692,21 @@ a:hover {
     background: var(--success-green);
 }
 
+.product-badge.badge-new {
+    background: var(--success-green);
+}
+
 .product-badge.discount {
     background: var(--burgundy);
+}
+
+.product-badge.badge-sale {
+    background: var(--burgundy);
+}
+
+.price-sale {
+    color: var(--burgundy) !important;
+    font-weight: 700;
 }
 
 .product-info {
@@ -739,6 +778,82 @@ a:hover {
     flex: 1;
     padding: 12px 20px;
     font-size: 13px;
+}
+
+/* ===================================
+   PAGINATION STYLES
+   =================================== */
+
+.pagination-container {
+    margin-top: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+}
+
+.pagination-info {
+    text-align: center;
+    color: var(--slate-gray);
+    font-size: 14px;
+}
+
+.pagination-info strong {
+    color: var(--primary-navy);
+    font-weight: 600;
+}
+
+.load-more {
+    text-align: center;
+}
+
+.load-more .btn {
+    min-width: 200px;
+    box-shadow: var(--box-shadow);
+}
+
+.pagination {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.pagination-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 45px;
+    height: 45px;
+    padding: 0 15px;
+    border: 1px solid var(--light-slate);
+    background: white;
+    color: var(--slate-gray);
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: var(--border-radius);
+    transition: all var(--transition-speed);
+    cursor: pointer;
+}
+
+.pagination-btn:hover {
+    border-color: var(--accent-gold);
+    color: var(--accent-gold);
+    transform: translateY(-2px);
+    box-shadow: var(--box-shadow);
+}
+
+.pagination-btn.active {
+    background: var(--accent-gold);
+    color: var(--primary-navy);
+    border-color: var(--accent-gold);
+    font-weight: 600;
+}
+
+.pagination-dots {
+    color: var(--slate-gray);
+    padding: 0 5px;
 }
 
 /* ===================================

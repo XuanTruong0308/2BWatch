@@ -1,7 +1,7 @@
 package boiz.shop._2BShop.service;
 
 import boiz.shop._2BShop.entity.User;
-import boiz.shop._2BShop.entity.UserRole;
+// import removed
 import boiz.shop._2BShop.respository.UserRepository;
 import boiz.shop._2BShop.security.CustomUserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,14 +40,12 @@ public class CustomUserDetailsService implements UserDetailsService {
                 true, // accountNonExpired
                 true, // credentialsNonExpired
                 true, // accountNonLocked
-                getAuthorities(user)
-        );
+                getAuthorities(user));
     }
 
     private Collection<? extends GrantedAuthority> getAuthorities(User user) {
         return user.getUserRoles().stream()
-                .map(UserRole::getRole)
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRoleName()))
+                .map(userRole -> new SimpleGrantedAuthority("ROLE_" + userRole.getRole().getRoleName()))
                 .collect(Collectors.toList());
     }
 }

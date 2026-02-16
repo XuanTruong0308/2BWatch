@@ -92,8 +92,8 @@
                 <!-- Roles -->
                 <div class="table-container mb-4">
                     <h5 class="mb-3">Vai Trò</h5>
-                    <div th:each="role : ${user.userRoles}">
-                        <span class="badge bg-secondary fs-6" th:text="${role.role.roleName}">ROLE_USER</span>
+                    <div th:each="role : ${user.roles}">
+                        <span class="badge bg-secondary fs-6" th:text="${role}">ROLE_USER</span>
                     </div>
                 </div>
                 

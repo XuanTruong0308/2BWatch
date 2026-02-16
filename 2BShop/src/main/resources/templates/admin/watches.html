@@ -44,10 +44,12 @@
                     <i class="fas fa-home"></i>
                     <span>Về Trang Chủ</span>
                 </a>
-                <a href="/logout" class="admin-nav-item">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Đăng Xuất</span>
-                </a>
+                <form th:action="@{/logout}" method="post" style="margin: 0;">
+                    <button type="submit" class="admin-nav-item" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer;">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Đăng Xuất</span>
+                    </button>
+                </form>
             </nav>
         </aside>
 
@@ -108,7 +110,7 @@
                         </thead>
                         <tbody>
                             <tr th:each="watch : ${watches}">
-                                <td th:text="${watch.id}">1</td>
+                                <td th:text="${watch.watchId}">1</td>
                                 <td>
                                     <img th:src="@{/uploads/{img}(img=${watch.imageUrl})}" 
                                          alt="Watch" class="table-thumbnail">
@@ -126,11 +128,11 @@
                                     </span>
                                 </td>
                                 <td class="table-actions">
-                                    <a th:href="@{/admin/watches/edit/{id}(id=${watch.id})}" 
+                                    <a th:href="@{/admin/watches/edit/{id}(id=${watch.watchId})}" 
                                        class="btn-action" title="Sửa">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <form th:action="@{/admin/watches/delete/{id}(id=${watch.id})}" 
+                                    <form th:action="@{/admin/watches/delete/{id}(id=${watch.watchId})}" 
                                           method="post" style="display: inline;">
                                         <button type="submit" class="btn-action danger" 
                                                 onclick="return confirm('Xác nhận xóa đồng hồ này?')" title="Xóa">

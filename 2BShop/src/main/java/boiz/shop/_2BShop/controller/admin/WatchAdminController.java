@@ -61,13 +61,12 @@ public class WatchAdminController {
      */
     @GetMapping
     public String listWatches(
-        @RequestParam(required = false) String keyword,
-        @RequestParam(required = false) Integer brandId,
-        @RequestParam(required = false) Integer categoryId,
-        @RequestParam(required = false) Boolean isActive,
-        @RequestParam(defaultValue = "0") int page,
-        Model model
-    ) {
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Integer brandId,
+            @RequestParam(required = false) Integer categoryId,
+            @RequestParam(required = false) Boolean isActive,
+            @RequestParam(defaultValue = "0") int page,
+            Model model) {
         Pageable pageable = PageRequest.of(page, 20, Sort.by("createdDate").descending());
 
         Page<Watch> watches;
@@ -123,8 +122,8 @@ public class WatchAdminController {
     @GetMapping("/edit/{id}")
     public String editWatchForm(@PathVariable Integer id, Model model) {
         Watch watch = watchRepo.findById(id)
-            .orElseThrow(() -> new RuntimeException("Không tìm thấy đồng hồ với id: " + id));
-            
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đồng hồ với id: " + id));
+
         model.addAttribute("watch", watch);
         model.addAttribute("brands", watchBrandRepo.findAll());
         model.addAttribute("categories", watchCategoryRepo.findAll());
@@ -139,11 +138,10 @@ public class WatchAdminController {
      */
     @PostMapping("/save")
     public String saveWatch(
-        @ModelAttribute Watch watch,
-        @RequestParam(required = false) MultipartFile mainImage,
-        @RequestParam(required = false) List<MultipartFile> galleryImages,
-        RedirectAttributes redirectAttributes
-    ) {
+            @ModelAttribute Watch watch,
+            @RequestParam(required = false) MultipartFile mainImage,
+            @RequestParam(required = false) List<MultipartFile> galleryImages,
+            RedirectAttributes redirectAttributes) {
         try {
             // Set timestamps
             if (watch.getWatchId() == null) {
@@ -159,19 +157,19 @@ public class WatchAdminController {
             // Upload main image
             if (mainImage != null && !mainImage.isEmpty()) {
                 String imagePath = fileUploadService.uploadWatchImage(mainImage, "main");
-            
+
                 // Create or update main image
                 WatchImage mainImg = savedWatch.getImages().stream()
-                    .filter(img -> img.getIsPrimary())
-                    .findFirst()
-                    .orElse(new WatchImage());
+                        .filter(img -> img.getIsPrimary())
+                        .findFirst()
+                        .orElse(new WatchImage());
 
                 mainImg.setWatch(savedWatch);
                 mainImg.setImageUrl(imagePath);
                 mainImg.setIsPrimary(true);
                 watchImageRepo.save(mainImg);
             }
-            
+
             // Upload gallery images
             if (galleryImages != null && !galleryImages.isEmpty()) {
                 for (MultipartFile file : galleryImages) {
@@ -186,14 +184,14 @@ public class WatchAdminController {
                     }
                 }
             }
-            
+
             redirectAttributes.addFlashAttribute("success", "Lưu sản phẩm thành công!");
-            
+
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
             e.printStackTrace();
         }
-        
+
         return "redirect:/admin/watches";
     }
 
@@ -203,12 +201,11 @@ public class WatchAdminController {
      */
     @PostMapping("/delete/{id}")
     public String deleteWatch(
-        @PathVariable Integer id,
-        RedirectAttributes redirectAttributes
-    ) {
+            @PathVariable Integer id,
+            RedirectAttributes redirectAttributes) {
         try {
             Watch watch = watchRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đồng hồ"));
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy đồng hồ"));
 
             // Check if watch is in any order
             boolean hasOrders = orderDetailRepo.existsByWatchWatchId(id);
@@ -219,8 +216,8 @@ public class WatchAdminController {
                 watch.setUpdatedDate(LocalDateTime.now());
                 watchRepo.save(watch);
 
-                redirectAttributes.addFlashAttribute("warning", 
-                    "Sản phẩm đã có trong đơn hàng. Đã chuyển sang trạng thái Inactive.");
+                redirectAttributes.addFlashAttribute("warning",
+                        "Sản phẩm đã có trong đơn hàng. Đã chuyển sang trạng thái Inactive.");
             } else {
                 // Xóa images trước
                 List<WatchImage> images = watch.getImages();
@@ -241,7 +238,7 @@ public class WatchAdminController {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
             e.printStackTrace();
         }
-        
+
         return "redirect:/admin/watches";
     }
 
@@ -251,12 +248,11 @@ public class WatchAdminController {
      */
     @PostMapping("/toggle-active/{id}")
     public String toggleActive(
-        @PathVariable Integer id,
-        RedirectAttributes redirectAttributes
-    ) {
+            @PathVariable Integer id,
+            RedirectAttributes redirectAttributes) {
         try {
             Watch watch = watchRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đồng hồ"));
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy đồng hồ"));
 
             watch.setIsActive(!watch.getIsActive());
             watch.setUpdatedDate(LocalDateTime.now());
@@ -277,23 +273,22 @@ public class WatchAdminController {
      */
     @PostMapping("/update-stock/{id}")
     public String updateStock(
-        @PathVariable Integer id,
-        @RequestParam Integer stockQuantity,
-        RedirectAttributes redirectAttributes
-    ) {
+            @PathVariable Integer id,
+            @RequestParam Integer stockQuantity,
+            RedirectAttributes redirectAttributes) {
         try {
             Watch watch = watchRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đồng hồ"));
-        
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy đồng hồ"));
+
             watch.setStockQuantity(stockQuantity);
             watch.setUpdatedDate(LocalDateTime.now());
             watchRepo.save(watch);
-            
+
             redirectAttributes.addFlashAttribute("success", "Cập nhật tồn kho thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
         }
-        
+
         return "redirect:/admin/watches";
     }
 }

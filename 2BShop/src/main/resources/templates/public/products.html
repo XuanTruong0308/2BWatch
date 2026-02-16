@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base-layout :: layout(~{::title}, ~{::content})}">
+
 <head>
     <title>Sản phẩm - 2BSHOP</title>
 </head>
+
 <body>
     <div th:fragment="content">
         <!-- Breadcrumb -->
@@ -21,11 +23,11 @@
             <div class="container">
                 <div class="section-title">
                     <h2 th:text="${pageTitle}">TẤT CẢ SẢN PHẨM</h2>
-                    <p th:text="${watches.size()} + ' sản phẩm'">Hiển thị tất cả sản phẩm</p>
+                    <p th:text="${totalItems != null ? totalItems + ' sản phẩm' : 'Hiển thị tất cả sản phẩm'}">Hiển thị tất cả sản phẩm</p>
                 </div>
 
                 <!-- No Results -->
-                <div class="empty-state" th:if="${watches.isEmpty()}">
+                <div class="empty-state" th:if="${watches == null || watches.isEmpty()}">
                     <i class="fas fa-search"></i>
                     <h3>Không tìm thấy sản phẩm</h3>
                     <p>Không có sản phẩm nào phù hợp với tìm kiếm của bạn</p>
@@ -33,43 +35,76 @@
                 </div>
 
                 <!-- Products Grid -->
-                <div class="products-grid" th:if="${!watches.isEmpty()}">
+                <div class="products-grid" th:if="${watches != null && !watches.isEmpty()}">
                     <div class="product-card" th:each="watch : ${watches}">
                         <a th:href="@{/watches/{id}(id=${watch.watchId})}">
                             <div class="product-image-wrapper">
-                                <img th:src="${watch.images != null and !watch.images.isEmpty() ? watch.images[0].imageUrl : '/images/watches/default.jpg'}" 
-                                     th:alt="${watch.watchName}" 
-                                     class="product-image">
-                                
-                                <div class="product-badge" th:if="${watch.discountPercent != null and watch.discountPercent > 0}">
+                                <img th:src="${watch.images != null and !watch.images.isEmpty() ? watch.images[0].imageUrl : '/images/watches/default.jpg'}"
+                                    th:alt="${watch.watchName}" class="product-image">
+
+                                <div class="product-badge"
+                                    th:if="${watch.discountPercent != null and watch.discountPercent > 0}">
                                     <span th:text="'-' + ${watch.discountPercent} + '%'">-20%</span>
                                 </div>
                             </div>
                         </a>
-                        
+
                         <div class="product-info">
                             <div class="product-brand" th:text="${watch.brand.brandName}">Brand</div>
                             <h3 class="product-title">
-                                <a th:href="@{/watches/{id}(id=${watch.watchId})}" th:text="${watch.watchName}">Product Name</a>
+                                <a th:href="@{/watches/{id}(id=${watch.watchId})}" th:text="${watch.watchName}">Product
+                                    Name</a>
                             </h3>
-                            
+
                             <div class="product-price">
-                                <span class="price-old" 
-                                      th:if="${watch.discountPercent != null and watch.discountPercent > 0}"
-                                      th:text="${#numbers.formatDecimal(watch.price, 0, 'COMMA', 0, 'POINT')} + ' ₫'">1,000,000 ₫</span>
-                                <span class="price-current" th:text="${#numbers.formatDecimal(watch.getPriceAfterDiscount(), 0, 'COMMA', 0, 'POINT')} + ' ₫'">800,000 ₫</span>
+                                <span class="price-old"
+                                    th:if="${watch.discountPercent != null and watch.discountPercent > 0}"
+                                    th:text="${#numbers.formatDecimal(watch.price, 0, 'COMMA', 0, 'POINT')} + ' ₫'">1,000,000
+                                    ₫</span>
+                                <span class="price-current"
+                                    th:text="${#numbers.formatDecimal(watch.getPriceAfterDiscount(), 0, 'COMMA', 0, 'POINT')} + ' ₫'">800,000
+                                    ₫</span>
                             </div>
-                            
-                            <button class="btn btn-primary btn-sm btn-add-cart" 
-                                    th:onclick="'addToCart(' + ${watch.watchId} + ')'">
+
+                            <button class="btn btn-primary btn-sm btn-add-cart"
+                                th:onclick="'addToCart(' + ${watch.watchId} + ')'">
                                 <i class="fas fa-shopping-cart"></i>
                                 Thêm vào giỏ
                             </button>
                         </div>
                     </div>
                 </div>
+
+                <!-- Pagination -->
+                <div class="pagination-container" th:if="${watches != null && !watches.isEmpty() && totalPages > 1}">
+                    <!-- <div class="pagination-info">
+                        <p>Hiển thị trang <strong th:text="${currentPage + 1}">1</strong> / <strong
+                                th:text="${totalPages}">5</strong></p>
+                    </div> -->
+
+                    <!-- Load More Button
+                    <div class="load-more" th:if="${currentPage + 1 < totalPages}">
+                        <a th:href="@{${baseUrl}(page=${currentPage + 1}, size=6, search=${search}, category=${category}, brand=${brand}, priceRange=${priceRange}, sortBy=${sortBy})}"
+                            class="btn btn-primary btn-lg">
+                            <i class="fas fa-arrow-down"></i>
+                            Xem thêm
+                        </a>
+                    </div> -->
+
+                    <!-- Page Numbers -->
+                    <div class="pagination">
+                        <!-- All Pages -->
+                        <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                            <a th:href="@{${baseUrl}(page=${i}, size=6, search=${search}, category=${category}, brand=${brand}, priceRange=${priceRange}, sortBy=${sortBy})}"
+                                class="pagination-btn"
+                                th:classappend="${i == currentPage} ? 'active' : ''"
+                                th:text="${i + 1}">1</a>
+                        </th:block>
+                    </div>
+                </div>
             </div>
         </section>
     </div>
 </body>
+
 </html>

@@ -44,7 +44,7 @@ public class SecurityConfig {
                 
                 // User pages - CẦN đăng nhập (USER role)
                 .requestMatchers("/cart/**", "/checkout/**", "/payment/**", "/orders/**", 
-                    "/profile/**", "/account").hasRole("USER")
+                    "/profile/**", "/account/**").hasRole("USER")
                 
                 // Admin pages - CẦN đăng nhập (ADMIN role)
                 .requestMatchers("/admin/**").hasRole("ADMIN")
@@ -63,7 +63,7 @@ public class SecurityConfig {
             )
             .logout(logout -> logout
                 .logoutUrl("/logout")
-                .logoutSuccessUrl("/?logout=true")
+                .logoutSuccessUrl("/login?logout=true")
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
                 .permitAll()

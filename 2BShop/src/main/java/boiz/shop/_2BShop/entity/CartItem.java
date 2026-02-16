@@ -15,21 +15,24 @@ public class CartItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "cart_item_id")
     private Integer cartItemId;
-    
+
     @ManyToOne
     @JoinColumn(name = "cart_id", nullable = false)
     private Cart cart;
-    
+
     @ManyToOne
     @JoinColumn(name = "watch_id", nullable = false)
     private Watch watch;
-    
+
     @Column(nullable = false)
     private Integer quantity;
-    
+
     @Column(precision = 18, scale = 2)
     private BigDecimal price;
-    
+
     @Column(name = "added_date")
     private LocalDateTime addedDate = LocalDateTime.now();
+
+    @Column(name = "is_selected")
+    private Boolean isSelected = true;
 }

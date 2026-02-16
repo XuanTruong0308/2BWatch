@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/base-layout}">
+
+<head>
+    <title>Thêm/Sửa Tài khoản Ngân hàng</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="container mt-4">
+            <h2 th:text="${bankAccount.bankAccountId == null ? 'Thêm Tài khoản Mới' : 'Cập nhật Tài khoản'}">Title</h2>
+
+            <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+
+            <form
+                th:action="@{${bankAccount.bankAccountId == null ? '/admin/bank-accounts/add' : '/admin/bank-accounts/edit/' + bankAccount.bankAccountId}}"
+                th:object="${bankAccount}" method="post">
+
+                <div class="form-group">
+                    <label>Tên Ngân hàng</label>
+                    <input type="text" class="form-control" th:field="*{bankName}"
+                        placeholder="VD: MB Bank, Vietcombank" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Mã Ngân hàng (VietQR Code)</label>
+                    <input type="text" class="form-control" th:field="*{bankCode}"
+                        placeholder="VD: MB, VCB, TECHCOMBANK" required>
+                    <small class="form-text text-muted">Mã này dùng để sinh QR tự động (tra cứu tại vietqr.io)</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Số Tài khoản</label>
+                    <input type="text" class="form-control" th:field="*{accountNumber}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Chủ Tài khoản</label>
+                    <input type="text" class="form-control" th:field="*{accountHolder}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Thứ tự hiển thị</label>
+                    <input type="number" class="form-control" th:field="*{displayOrder}" value="0">
+                </div>
+
+                <div class="form-check mb-3">
+                    <input type="checkbox" class="form-check-input" th:field="*{isActive}" id="isActive">
+                    <label class="form-check-label" for="isActive">Kích hoạt</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Lưu & Sinh Qr</button>
+                <a th:href="@{/admin/bank-accounts}" class="btn btn-secondary">Hủy</a>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>
