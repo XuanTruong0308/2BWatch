@@ -1,21 +1,46 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{admin/layout/admin-layout :: layout(
-        pageTitle='Chi Tiết Đơn Hàng #' + ${order.orderId},
+        pageTitle='Chi Tiết Đơn Hàng',
         activeMenu='orders',
         content=~{::content},
         customStyles=~{},
-        customScripts=~{}
+        customScripts=~{::scripts}
       )}">
 <body>
     <div th:fragment="content">
-        <div class="row">
+        <!-- Alert Messages -->
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:text="${error}">Error message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${success}">Success message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <div th:if="${warning}" class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <span th:text="${warning}">Warning message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${order == null}" class="alert alert-danger">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            Không tìm thấy thông tin đơn hàng. 
+            <a th:href="@{/admin/orders}" class="alert-link">Quay lại danh sách</a>
+        </div>
+
+        <div th:if="${order != null}" class="row">
             <!-- Left Column - Order Info -->
             <div class="col-md-8">
                 <!-- Order Details -->
                 <div class="table-container mb-4">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h5>Chi Tiết Sản Phẩm</h5>
+                        <h5>Chi Tiết Đơn Hàng #<span th:text="${order.orderId}">6</span></h5>
                         <span class="badge fs-6" 
                               th:classappend="${order.orderStatus == 'PENDING' ? 'bg-warning text-dark' : 
                                                order.orderStatus == 'CONFIRMED' ? 'bg-info' :
@@ -36,20 +61,16 @@
                         <tbody>
                             <tr th:each="detail : ${orderDetails}">
                                 <td>
-                                    <div class="d-flex align-items-center">
-                                        <img th:src="${detail.watch.getPrimaryImageUrl()}"
-                                             style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px; margin-right: 10px;">
-                                        <div>
-                                            <strong th:text="${detail.watch.watchName}">Product Name</strong><br>
-                                            <small class="text-muted" th:text="${detail.watch.brand.brandName}">Brand</small>
-                                        </div>
-                                    </div>
+                                    <strong th:text="${detail.watch?.watchName ?: 'Sản phẩm'}">Product Name</strong>
                                 </td>
                                 <td class="text-center" th:text="${detail.quantity}">1</td>
                                 <td class="text-end" th:text="${#numbers.formatDecimal(detail.unitPrice, 0, 'COMMA', 0, 'POINT')} + '₫'">1,000,000₫</td>
                                 <td class="text-end">
                                     <strong th:text="${#numbers.formatDecimal(detail.unitPrice * detail.quantity, 0, 'COMMA', 0, 'POINT')} + '₫'">1,000,000₫</strong>
                                 </td>
+                            </tr>
+                            <tr th:if="${orderDetails.isEmpty()}">
+                                <td colspan="4" class="text-center text-muted py-4">Không có sản phẩm</td>
                             </tr>
                         </tbody>
                         <tfoot>
@@ -68,75 +89,21 @@
                     <h5 class="mb-4">Thông Tin Giao Hàng</h5>
                     <div class="row">
                         <div class="col-md-6">
-                            <p><strong>Người nhận:</strong> <span th:text="${order.receiverName}">Nguyễn Văn A</span></p>
-                            <p><strong>Số điện thoại:</strong> <span th:text="${order.shippingPhone}">0123456789</span></p>
+                            <p><strong>Người nhận:</strong> <span th:text="${order.receiverName ?: 'N/A'}">Nguyễn Văn A</span></p>
+                            <p><strong>Số điện thoại:</strong> <span th:text="${order.shippingPhone ?: 'N/A'}">0123456789</span></p>
                         </div>
                         <div class="col-md-6">
-                            <p><strong>Địa chỉ:</strong> <span th:text="${order.shippingAddress}">123 ABC Street</span></p>
-                            <p><strong>Ghi chú:</strong> <span th:text="${order.note ?: 'Không có'}">Không có</span></p>
+                            <p><strong>Địa chỉ:</strong> <span th:text="${order.shippingAddress ?: 'N/A'}">123 ABC Street</span></p>
+                            <p><strong>Ngày đặt:</strong> <span th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}">12/02/2026</span></p>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Right Column - Actions & Info -->
+            <!-- Right Column - Actions -->
             <div class="col-md-4">
-                <!-- Customer Info -->
-                <div class="table-container mb-4">
-                    <h5 class="mb-3">Thông Tin Khách Hàng</h5>
-                    <p><strong>Họ tên:</strong> <span th:text="${order.user.fullName}">Nguyễn Văn A</span></p>
-                    <p><strong>Email:</strong> <span th:text="${order.user.email}">email@example.com</span></p>
-                    <p><strong>SĐT:</strong> <span th:text="${order.user.phoneNumber}">0123456789</span></p>
-                    <a th:href="@{/admin/users/{id}(id=${order.user.userId})}" class="btn btn-sm btn-outline-primary">
-                        <i class="fas fa-user"></i> Xem Profile
-                    </a>
-                </div>
-                
-                <!-- Order Info -->
-                <div class="table-container mb-4">
-                    <h5 class="mb-3">Thông Tin Đơn Hàng</h5>
-                    <p><strong>Mã ĐH:</strong> <span th:text="'ORD' + ${#strings.padLeft(order.orderId, 6, '0')}">ORD000001</span></p>
-                    <p><strong>Ngày đặt:</strong> <span th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}">14/01/2026 10:30</span></p>
-                    <hr>
-                    <p><strong>Phương thức:</strong> <span class="badge bg-secondary" th:text="${order.paymentMethod.methodName}">COD</span></p>
-                    
-                    <!-- Coupon Info -->
-                    <div th:if="${order.couponCode != null}">
-                        <p><strong>Mã giảm giá:</strong> <span class="text-primary" th:text="${order.couponCode}">CODE</span></p>
-                        <p><strong>Giảm giá:</strong> -<span th:text="${#numbers.formatDecimal(order.discountAmount, 0, 'COMMA', 0, 'POINT')}"></span>₫</p>
-                    </div>
-
-                    <!-- Deposit Info (if applicable) -->
-                    <div th:if="${order.depositRequired}" class="mt-3 p-2 bg-light rounded border">
-                        <h6 class="text-primary"><i class="fas fa-money-bill-wave"></i> Thông Tin Cọc</h6>
-                        <p class="mb-1"><strong>Cần cọc (25%):</strong> <span class="text-danger fw-bold" th:text="${#numbers.formatDecimal(order.depositAmount, 0, 'COMMA', 0, 'POINT')}"></span>₫</p>
-                        <p class="mb-1"><strong>Trạng thái:</strong> 
-                            <span th:if="${order.depositPaid}" class="badge bg-success">Đã Thanh Toán</span>
-                            <span th:unless="${order.depositPaid}" class="badge bg-warning text-dark">Chưa Thanh Toán</span>
-                        </p>
-                        <p class="mb-0"><strong>Còn lại:</strong> <span class="fw-bold" th:text="${#numbers.formatDecimal(order.getRemainingAmount(), 0, 'COMMA', 0, 'POINT')}"></span>₫</p>
-                        
-                        <!-- Actions for Deposit -->
-                        <div th:if="${!order.depositPaid && order.orderStatus != 'CANCELLED'}" class="mt-2">
-                             <form th:action="@{/admin/orders/confirm-deposit/{id}(id=${order.orderId})}" method="post" 
-                                   onsubmit="return confirm('Xác nhận khách đã thanh toán tiền cọc?')">
-                                <button type="submit" class="btn btn-sm btn-success w-100">
-                                    <i class="fas fa-check-circle"></i> Xác nhận đã cọc
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                    
-                    <!-- Bank Info (if Banking) -->
-                    <div th:if="${order.paymentMethodType == 'BANKING' && order.bankAccount != null}" class="mt-3 p-2 bg-light rounded border">
-                         <h6 class="text-info"><i class="fas fa-university"></i> Ngân hàng chuyển khoản</h6>
-                         <p class="mb-1"><strong th:text="${order.bankAccount.bankName}">Bank</strong></p>
-                         <p class="mb-0 small" th:text="${order.bankAccount.accountNumber}">00000000</p>
-                    </div>
-                </div>
-                
                 <!-- Update Status -->
-                <div class="table-container mb-4" th:if="${!validStatuses.empty}">
+                <div class="table-container mb-4" th:if="${!validStatuses.isEmpty()}">
                     <h5 class="mb-3">Cập Nhật Trạng Thái</h5>
                     <form th:action="@{/admin/orders/update-status}" method="post">
                         <input type="hidden" name="orderId" th:value="${order.orderId}">
@@ -144,14 +111,14 @@
                             <option value="">-- Chọn trạng thái --</option>
                             <option th:each="status : ${validStatuses}" th:value="${status}" th:text="${status}">STATUS</option>
                         </select>
-                        <button type="submit" class="btn btn-primary w-100">
+                        <button type="submit" class="btn w-100" style="background-color: var(--gold); color: white;">
                             <i class="fas fa-check"></i> Cập Nhật
                         </button>
                     </form>
                 </div>
                 
                 <!-- Cancel Order -->
-                <div class="table-container" th:if="${order.orderStatus != 'CANCELLED' && order.orderStatus != 'DELIVERED'}">
+                <div class="table-container mb-4" th:if="${order.orderStatus != 'CANCELLED' && order.orderStatus != 'DELIVERED'}">
                     <h5 class="mb-3">Hủy Đơn Hàng</h5>
                     <form th:action="@{/admin/orders/cancel/{id}(id=${order.orderId})}" method="post" 
                           onsubmit="return confirm('Xác nhận hủy đơn hàng này?')">
@@ -162,11 +129,24 @@
                     </form>
                 </div>
                 
-                <a th:href="@{/admin/orders}" class="btn btn-secondary w-100 mt-3">
+                <a th:href="@{/admin/orders}" class="btn btn-secondary w-100">
                     <i class="fas fa-arrow-left"></i> Quay lại
                 </a>
             </div>
         </div>
     </div>
+    
+    <th:block th:fragment="scripts">
+        <script>
+            // Auto-dismiss alerts after 5 seconds
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        </script>
+    </th:block>
 </body>
 </html>

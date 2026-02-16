@@ -5,16 +5,62 @@
         activeMenu='bans',
         content=~{::content},
         customStyles=~{},
-        customScripts=~{}
+        customScripts=~{::scripts}
       )}">
 <body>
     <div th:fragment="content">
+        <!-- Alert Messages -->
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:text="${error}">Error message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${success}">Success message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-users-slash fa-2x text-danger"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="text-muted mb-0">Users Đang Bị Ban</h6>
+                                <h3 class="mb-0" th:text="${bannedUsers.totalElements}">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-history fa-2x" style="color: var(--gold);"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="text-muted mb-0">Xem Tất Cả Lịch Sử</h6>
+                                <a th:href="@{/admin/bans}" class="btn btn-sm" style="background-color: var(--gold); color: white;">
+                                    <i class="fas fa-clock me-1"></i>Lịch Sử Ban Logs
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="mb-0">User Đang Bị Ban</h4>
-            <span class="badge bg-danger fs-5">
-                Tổng: <span th:text="${bannedUsers.totalElements}">0</span> users
-            </span>
+            <h4 class="mb-0">Danh Sách Users Đang Bị Ban</h4>
         </div>
         
         <!-- Banned Users Table -->
@@ -64,7 +110,7 @@
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm">
                                     <a th:href="@{/admin/bans/user/{userId}(userId=${log.user.userId})}" 
-                                       class="btn btn-primary" title="Lịch sử ban">
+                                       class="btn" style="background-color: var(--gold); color: white;" title="Lịch sử ban">
                                         <i class="fas fa-history"></i>
                                     </a>
                                     
@@ -85,7 +131,7 @@
             
             <!-- Empty State -->
             <div th:if="${#lists.isEmpty(bannedUsers.content)}" class="text-center py-5">
-                <i class="fas fa-smile fa-3x text-success mb-3"></i>
+                <i class="fas fa-smile fa-4x text-success mb-3" style="display: block;"></i>
                 <p class="text-muted">Không có user nào bị ban</p>
             </div>
             
@@ -93,18 +139,22 @@
             <nav th:if="${bannedUsers.totalPages > 1}" class="mt-4">
                 <ul class="pagination justify-content-center">
                     <li class="page-item" th:classappend="${bannedUsers.first ? 'disabled' : ''}">
-                        <a class="page-link" th:href="@{/admin/banned-users(page=${bannedUsers.number - 1})}">Trước</a>
+                        <a class="page-link" th:href="@{/admin/bans/banned-users(page=${bannedUsers.number - 1})}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
                     </li>
                     
                     <li class="page-item" 
                         th:each="i : ${#numbers.sequence(0, bannedUsers.totalPages - 1)}"
                         th:classappend="${i == bannedUsers.number ? 'active' : ''}">
-                        <a class="page-link" th:href="@{/admin/banned-users(page=${i})}" 
+                        <a class="page-link" th:href="@{/admin/bans/banned-users(page=${i})}" 
                            th:text="${i + 1}">1</a>
                     </li>
                     
                     <li class="page-item" th:classappend="${bannedUsers.last ? 'disabled' : ''}">
-                        <a class="page-link" th:href="@{/admin/banned-users(page=${bannedUsers.number + 1})}">Sau</a>
+                        <a class="page-link" th:href="@{/admin/bans/banned-users(page=${bannedUsers.number + 1})}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
                     </li>
                 </ul>
             </nav>
@@ -120,5 +170,18 @@
             </ul>
         </div>
     </div>
+    
+    <th:block th:fragment="scripts">
+        <script>
+            // Auto-dismiss alerts after 5 seconds
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        </script>
+    </th:block>
 </body>
 </html>

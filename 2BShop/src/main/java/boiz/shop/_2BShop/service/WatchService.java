@@ -116,12 +116,12 @@ public class WatchService {
     }
 
     /**
-     * Sản phẩm liên quan (cùng brand hoặc category)
+     * Sản phẩm liên quan (cùng brand)
      */
     public List<Watch> findRelatedProducts(Watch currentWatch, int limit) {
-        return watchRepository.findTop4ByBrandBrandNameOrCategoryCategoryNameAndWatchIdNot(
-                currentWatch.getBrand().getBrandName(),
-                currentWatch.getCategory().getCategoryName(),
+        // Chỉ lấy sản phẩm cùng brand, không bao gồm sản phẩm hiện tại
+        return watchRepository.findTop4ByBrandBrandIdAndWatchIdNotAndIsActiveTrue(
+                currentWatch.getBrand().getBrandId(),
                 currentWatch.getWatchId());
     }
 

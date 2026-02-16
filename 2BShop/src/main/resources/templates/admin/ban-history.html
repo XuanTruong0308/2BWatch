@@ -5,10 +5,23 @@
         activeMenu='bans',
         content=~{::content},
         customStyles=~{},
-        customScripts=~{}
+        customScripts=~{::scripts}
       )}">
 <body>
     <div th:fragment="content">
+        <!-- Alert Messages -->
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:text="${error}">Error message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${success}">Success message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
         <!-- User Info -->
         <div class="table-container mb-4">
             <div class="row align-items-center">
@@ -30,8 +43,8 @@
         <!-- Statistics -->
         <div class="row mb-4">
             <div class="col-md-4">
-                <div class="table-container">
-                    <div class="text-center">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
                         <i class="fas fa-ban fa-2x text-danger mb-2"></i>
                         <h3 class="mb-0" th:text="${totalBans}">0</h3>
                         <p class="text-muted mb-0">Tổng Số Lần Ban</p>
@@ -39,8 +52,8 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="table-container">
-                    <div class="text-center">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
                         <i class="fas fa-exclamation-triangle fa-2x text-warning mb-2"></i>
                         <h3 class="mb-0" th:text="${activeBans}">0</h3>
                         <p class="text-muted mb-0">Ban Đang Hoạt Động</p>
@@ -48,8 +61,8 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="table-container">
-                    <div class="text-center">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
                         <i class="fas fa-history fa-2x text-info mb-2"></i>
                         <h3 class="mb-0" th:text="${expiredBans}">0</h3>
                         <p class="text-muted mb-0">Ban Đã Hết Hạn</p>
@@ -94,10 +107,10 @@
                                 </span>
                             </td>
                             <td>
-                                <span th:if="${log.banDuration != null}" 
+                                <span th:if="${log.banDurationMinutes != null}" 
                                       class="badge bg-info"
-                                      th:text="${log.banDuration} + ' ngày'">7 ngày</span>
-                                <span th:unless="${log.banDuration != null}" class="badge bg-dark">Vĩnh viễn</span>
+                                      th:text="${log.banDurationMinutes / 60} + ' giờ'">7 giờ</span>
+                                <span th:unless="${log.banDurationMinutes != null}" class="badge bg-dark">Vĩnh viễn</span>
                             </td>
                             <td>
                                 <p class="mb-0" th:text="${log.reason}">Vi phạm quy định...</p>
@@ -114,14 +127,14 @@
             
             <!-- Empty State -->
             <div th:if="${#lists.isEmpty(banLogs)}" class="text-center py-5">
-                <i class="fas fa-smile fa-3x text-success mb-3"></i>
+                <i class="fas fa-smile fa-4x text-success mb-3" style="display: block;"></i>
                 <p class="text-muted">User chưa bao giờ bị ban</p>
             </div>
         </div>
         
         <!-- Actions -->
         <div class="mt-4 d-flex gap-2">
-            <a th:href="@{/admin/users/{id}(id=${user.userId})}" class="btn btn-primary">
+            <a th:href="@{/admin/users/{id}(id=${user.userId})}" class="btn" style="background-color: var(--gold); color: white;">
                 <i class="fas fa-user"></i> Xem Profile
             </a>
             <a th:href="@{/admin/bans}" class="btn btn-secondary">
@@ -129,5 +142,18 @@
             </a>
         </div>
     </div>
+    
+    <th:block th:fragment="scripts">
+        <script>
+            // Auto-dismiss alerts after 5 seconds
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        </script>
+    </th:block>
 </body>
 </html>

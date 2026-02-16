@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout/admin-layout :: layout(
+        pageTitle='Quản Lý Người Dùng',
+        activeMenu='users',
+        content=~{::content},
+        customStyles=~{::styles},
+        customScripts=~{::scripts}
+      )}">
+<head>
+    <th:block th:fragment="styles">
+        <style>
+            .avatar-preview {
+                max-width: 150px;
+                max-height: 150px;
+                border: 2px dashed #ddd;
+                border-radius: 8px;
+                padding: 5px;
+                display: none;
+                margin-top: 10px;
+            }
+            .avatar-preview img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                border-radius: 4px;
+            }
+            .role-checkbox-group {
+                display: flex;
+                gap: 20px;
+                flex-wrap: wrap;
+            }
+            .role-checkbox {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card">
+                    <div class="card-header" style="border-left: 4px solid var(--gold);">
+                        <h5 class="mb-0" th:text="${user.userId != null ? 'Chỉnh Sửa Người Dùng' : 'Thêm Người Dùng Mới'}">
+                            Thêm Người Dùng Mới
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Alert Messages -->
+                        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            <span th:text="${error}">Error message</span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        
+                        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <span th:text="${success}">Success message</span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
+                        <!-- User Form -->
+                        <form th:action="@{/admin/users/save}" method="post" th:object="${user}" id="userForm">
+                            <input type="hidden" th:field="*{userId}" />
+                            
+                            <div class="row">
+                                <!-- Left Column -->
+                                <div class="col-md-6">
+                                    <!-- Username -->
+                                    <div class="mb-3">
+                                        <label for="username" class="form-label">
+                                            Tên đăng nhập <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="username" 
+                                               th:field="*{username}" 
+                                               required
+                                               minlength="3"
+                                               th:readonly="${user.userId != null}"
+                                               placeholder="Nhập tên đăng nhập">
+                                        <small class="text-muted">Không thể thay đổi sau khi tạo</small>
+                                    </div>
+
+                                    <!-- Email -->
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label">
+                                            Email <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="email" 
+                                               class="form-control" 
+                                               id="email" 
+                                               th:field="*{email}" 
+                                               required
+                                               placeholder="Nhập email">
+                                    </div>
+
+                                    <!-- Full Name -->
+                                    <div class="mb-3">
+                                        <label for="fullName" class="form-label">Họ và tên</label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="fullName" 
+                                               th:field="*{fullName}" 
+                                               placeholder="Nhập họ và tên">
+                                    </div>
+
+                                    <!-- Phone -->
+                                    <div class="mb-3">
+                                        <label for="phone" class="form-label">Số điện thoại</label>
+                                        <input type="tel" 
+                                               class="form-control" 
+                                               id="phone" 
+                                               th:field="*{phone}" 
+                                               placeholder="Nhập số điện thoại">
+                                    </div>
+
+                                    <!-- Address -->
+                                    <div class="mb-3">
+                                        <label for="address" class="form-label">Địa chỉ</label>
+                                        <textarea class="form-control" 
+                                                  id="address" 
+                                                  th:field="*{address}" 
+                                                  rows="3" 
+                                                  placeholder="Nhập địa chỉ"></textarea>
+                                    </div>
+                                </div>
+
+                                <!-- Right Column -->
+                                <div class="col-md-6">
+                                    <!-- Password -->
+                                    <div class="mb-3">
+                                        <label for="password" class="form-label">
+                                            Mật khẩu 
+                                            <span class="text-danger" th:if="${user.userId == null}">*</span>
+                                            <span class="text-muted" th:if="${user.userId != null}">(Để trống nếu không đổi)</span>
+                                        </label>
+                                        <input type="password" 
+                                               class="form-control" 
+                                               id="password" 
+                                               name="newPassword"
+                                               th:required="${user.userId == null}"
+                                               minlength="6"
+                                               placeholder="Nhập mật khẩu">
+                                        <small class="text-muted">Tối thiểu 6 ký tự</small>
+                                    </div>
+
+                                    <!-- Confirm Password -->
+                                    <div class="mb-3" th:if="${user.userId == null}">
+                                        <label for="confirmPassword" class="form-label">
+                                            Xác nhận mật khẩu <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="password" 
+                                               class="form-control" 
+                                               id="confirmPassword" 
+                                               name="confirmPassword"
+                                               th:required="${user.userId == null}"
+                                               minlength="6"
+                                               placeholder="Nhập lại mật khẩu">
+                                    </div>
+
+                                    <!-- Avatar URL -->
+                                    <div class="mb-3">
+                                        <label for="avatarUrl" class="form-label">URL Avatar</label>
+                                        <input type="url" 
+                                               class="form-control" 
+                                               id="avatarUrl" 
+                                               th:field="*{avatarUrl}" 
+                                               placeholder="https://example.com/avatar.jpg"
+                                               oninput="previewAvatar(this.value)">
+                                        <div class="avatar-preview" id="avatarPreview">
+                                            <img id="avatarImage" src="" alt="Avatar Preview">
+                                        </div>
+                                    </div>
+
+                                    <!-- Roles -->
+                                    <div class="mb-3">
+                                        <label class="form-label">Vai trò</label>
+                                        <div class="role-checkbox-group">
+                                            <div class="role-checkbox" th:each="role : ${allRoles}">
+                                                <input type="checkbox" 
+                                                       th:id="${'role_' + role.roleId}"
+                                                       name="roleNames" 
+                                                       th:value="${role.roleName}"
+                                                       th:checked="${userRoleNames != null && #lists.contains(userRoleNames, role.roleName)}"
+                                                       class="form-check-input">
+                                                <label th:for="${'role_' + role.roleId}" 
+                                                       class="form-check-label" 
+                                                       th:text="${role.roleName}">ROLE</label>
+                                            </div>
+                                        </div>
+                                        <small class="text-muted">Chọn ít nhất 1 vai trò. Mặc định: USER</small>
+                                    </div>
+
+                                    <!-- Is Enabled -->
+                                    <div class="mb-3">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" 
+                                                   type="checkbox" 
+                                                   id="isEnabled" 
+                                                   th:field="*{isEnabled}">
+                                            <label class="form-check-label" for="isEnabled">
+                                                Kích hoạt tài khoản
+                                            </label>
+                                        </div>
+                                        <small class="text-muted">Tắt để ban user</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="d-flex justify-content-end gap-2 mt-4">
+                                <a th:href="@{/admin/users}" class="btn btn-secondary">
+                                    <i class="fas fa-times me-2"></i>Hủy
+                                </a>
+                                <button type="submit" class="btn" style="background-color: var(--gold); color: white;">
+                                    <i class="fas fa-save me-2"></i>
+                                    <span th:text="${user.userId != null ? 'Cập Nhật' : 'Tạo Mới'}">Lưu</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block th:fragment="scripts">
+        <script>
+            // Avatar preview
+            function previewAvatar(url) {
+                const preview = document.getElementById('avatarPreview');
+                const img = document.getElementById('avatarImage');
+                
+                if (url && url.trim() !== '') {
+                    img.src = url;
+                    preview.style.display = 'block';
+                    
+                    img.onerror = function() {
+                        preview.style.display = 'none';
+                    };
+                } else {
+                    preview.style.display = 'none';
+                }
+            }
+
+            // Load avatar preview on page load if URL exists
+            window.addEventListener('DOMContentLoaded', function() {
+                const avatarInput = document.getElementById('avatarUrl');
+                if (avatarInput && avatarInput.value) {
+                    previewAvatar(avatarInput.value);
+                }
+            });
+
+            // Password confirmation validation
+            const userForm = document.getElementById('userForm');
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+
+            if (userForm && confirmPasswordInput) {
+                userForm.addEventListener('submit', function(e) {
+                    if (passwordInput.value !== confirmPasswordInput.value) {
+                        e.preventDefault();
+                        alert('Mật khẩu xác nhận không khớp!');
+                        confirmPasswordInput.focus();
+                        return false;
+                    }
+                });
+            }
+
+            // Auto-dismiss alerts
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        </script>
+    </th:block>
+</body>
+</html>

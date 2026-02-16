@@ -36,15 +36,30 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+            .csrf(csrf -> csrf
+                .ignoringRequestMatchers("/cart/add", "/cart/update", "/cart/remove", "/cart/select", "/cart/select-all",
+                        "/checkout/place-order", "/logout")
+            )
             .authorizeHttpRequests(auth -> auth
                 // Public pages - KHÔNG cần đăng nhập
                 .requestMatchers("/", "/login", "/register", "/account/login", "/account/register",
                     "/watches/**", "/products/**", "/verify", "/confirm-register", "/resend-verification",
                     "/static/**", "/css/**", "/js/**", "/images/**", "/uploads/**", "/error").permitAll()
                 
-                // User pages - CẦN đăng nhập (USER role)
-                .requestMatchers("/cart/**", "/checkout/**", "/payment/**", "/orders/**", 
-                    "/profile/**", "/account/**").hasRole("USER")
+                // Public cart endpoints - Cho phép truy cập công khai
+                .requestMatchers("/cart/count", "/cart/add").permitAll()
+                
+                // Cart page - Chỉ cần đăng nhập (không yêu cầu role cụ thể)
+                .requestMatchers("/cart", "/cart/update", "/cart/remove", "/cart/select", "/cart/select-all").authenticated()
+                
+                // Checkout and orders - Chỉ cần đăng nhập
+                .requestMatchers("/checkout/**", "/payment/**", "/orders/**").authenticated()
+                
+                // Invoice downloads - Chỉ cần đăng nhập
+                .requestMatchers("/invoice/**").authenticated()
+                
+                // User account pages - CẦN đăng nhập (USER role)
+                .requestMatchers("/profile/**", "/account/**").hasRole("USER")
                 
                 // Admin pages - CẦN đăng nhập (ADMIN role)
                 .requestMatchers("/admin/**").hasRole("ADMIN")

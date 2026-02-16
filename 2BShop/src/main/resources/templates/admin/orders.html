@@ -1,178 +1,238 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Đơn Hàng - Admin</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body class="admin-body">
-    <div class="admin-container">
-        <!-- Sidebar -->
-        <aside class="admin-sidebar">
-            <div class="admin-logo">
-                <i class="fas fa-crown"></i>
-                <h2>2BShop Admin</h2>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout/admin-layout :: layout(
+        pageTitle='Quản Lý Đơn Hàng',
+        activeMenu='orders',
+        content=~{::content},
+        customStyles=~{},
+        customScripts=~{}
+      )}">
+<body>
+    <div th:fragment="content">
+        <!-- Alert Messages -->
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:text="${error}">Error message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${success}">Success message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <div th:if="${warning}" class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <span th:text="${warning}">Warning message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-shopping-cart fa-2x" style="color: var(--gold);"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="text-muted mb-0">Tổng Đơn Hàng</h6>
+                                <h3 class="mb-0" th:text="${totalOrders ?: 0}">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-clock fa-2x text-warning"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="text-muted mb-0">Chờ Xác Nhận</h6>
+                                <h3 class="mb-0" th:text="${pendingCount ?: 0}">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-truck fa-2x text-primary"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="text-muted mb-0">Đang Giao</h6>
+                                <h3 class="mb-0" th:text="${shippingCount ?: 0}">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-check-circle fa-2x text-success"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="text-muted mb-0">Đã Giao</h6>
+                                <h3 class="mb-0" th:text="${deliveredCount ?: 0}">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="table-container mb-4">
+            <form method="get" id="filterForm">
+                <div class="row align-items-center g-3">
+                    <div class="col-md-3">
+                        <input type="text" name="keyword" id="keyword" class="form-control" placeholder="Tìm theo tên, SĐT..." th:value="${keyword}">
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <select name="status" id="statusFilter" class="form-select">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="PENDING" th:selected="${selectedStatus == 'PENDING'}">Chờ xác nhận</option>
+                            <option value="CONFIRMED" th:selected="${selectedStatus == 'CONFIRMED'}">Đã xác nhận</option>
+                            <option value="SHIPPING" th:selected="${selectedStatus == 'SHIPPING'}">Đang giao</option>
+                            <option value="DELIVERED" th:selected="${selectedStatus == 'DELIVERED'}">Đã giao</option>
+                            <option value="CANCELLED" th:selected="${selectedStatus == 'CANCELLED'}">Đã hủy</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <input type="date" name="fromDate" id="fromDate" class="form-control" th:value="${fromDate}">
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <input type="date" name="toDate" id="toDate" class="form-control" th:value="${toDate}">
+                    </div>
+                    
+                    <div class="col-md-1">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-filter"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <a href="/admin/orders" class="btn btn-secondary w-100">
+                            <i class="fas fa-sync"></i> Làm mới
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Orders Table -->
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Mã ĐH</th>
+                            <th>Khách hàng</th>
+                            <th>Người nhận</th>
+                            <th>SĐT</th>
+                            <th>Ngày đặt</th>
+                            <th class="text-end">Tổng tiền</th>
+                            <th>Thanh toán</th>
+                            <th class="text-center">Trạng thái</th>
+                            <th class="text-center">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${orders == null or orders.content == null or orders.content.isEmpty()}">
+                            <td colspan="9" class="text-center py-5">
+                                <i class="fas fa-inbox fa-4x text-muted mb-3" style="display: block;"></i>
+                                <p class="text-muted">Không tìm thấy đơn hàng nào</p>
+                            </td>
+                        </tr>
+                        <tr th:each="order : ${orders}" th:unless="${orders == null or orders.content == null or orders.content.isEmpty()}">
+<td><strong th:text="|ORD${#numbers.formatInteger(order.orderId, 6)}|">ORD000001</strong></td>
+                            <td>
+                                <span th:if="${order.user != null}" th:text="${order.user.fullName}">Nguyễn Văn A</span>
+                                <span th:unless="${order.user != null}" class="text-muted">N/A</span>
+                            </td>
+                            <td th:text="${order.receiverName ?: 'N/A'}">Trần Thị B</td>
+                            <td th:text="${order.shippingPhone ?: 'N/A'}">0123456789</td>
+                            <td>
+                                <span th:if="${order.orderDate != null}" th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}">14/01/2026 10:30</span>
+                                <span th:unless="${order.orderDate != null}" class="text-muted">N/A</span>
+                            </td>
+                            <td class="text-end">
+                                <span th:if="${order.totalAmount != null}" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + '₫'">1,000,000₫</span>
+                                <span th:unless="${order.totalAmount != null}" class="text-muted">0₫</span>
+                            </td>
+                            <td>
+                                <small th:if="${order.paymentMethod != null}" th:text="${order.paymentMethod.methodName}">COD</small>
+                                <small th:unless="${order.paymentMethod != null}" class="text-muted">N/A</small>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge" 
+                                      th:classappend="${order.orderStatus == 'PENDING' ? 'bg-warning text-dark' : 
+                                                       order.orderStatus == 'CONFIRMED' ? 'bg-info' :
+                                                       order.orderStatus == 'SHIPPING' ? 'bg-primary' :
+                                                       order.orderStatus == 'DELIVERED' ? 'bg-success' : 'bg-danger'}"
+                                      th:text="${order.orderStatus ?: 'UNKNOWN'}">PENDING</span>
+                            </td>
+                            <td class="text-center">
+                                <a th:href="@{/admin/orders/{id}(id=${order.orderId})}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye"></i> Chi tiết
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
             
-            <nav class="admin-nav">
-                <a href="/admin" class="admin-nav-item">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a href="/admin/watches" class="admin-nav-item">
-                    <i class="fas fa-clock"></i>
-                    <span>Quản Lý Đồng Hồ</span>
-                </a>
-                <a href="/admin/orders" class="admin-nav-item active">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span>Quản Lý Đơn Hàng</span>
-                </a>
-                <a href="/admin/users" class="admin-nav-item">
-                    <i class="fas fa-users"></i>
-                    <span>Quản Lý Users</span>
-                </a>
-                <a href="/admin/payments" class="admin-nav-item">
-                    <i class="fas fa-credit-card"></i>
-                    <span>Thanh Toán</span>
-                </a>
-                
-                <div class="admin-nav-divider"></div>
-                
-                <a href="/" class="admin-nav-item">
-                    <i class="fas fa-home"></i>
-                    <span>Về Trang Chủ</span>
-                </a>
-                <form th:action="@{/logout}" method="post" style="margin: 0;">
-                    <button type="submit" class="admin-nav-item" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer;">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>Đăng Xuất</span>
-                    </button>
-                </form>
+            <!-- Pagination -->
+            <nav th:if="${orders != null and orders.totalPages > 1}" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${orders.first ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/admin/orders(page=${orders.number - 1}, keyword=${keyword}, status=${selectedStatus}, fromDate=${fromDate}, toDate=${toDate})}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    
+                    <li class="page-item" 
+                        th:each="i : ${#numbers.sequence(0, orders.totalPages - 1)}"
+                        th:classappend="${i == orders.number ? 'active' : ''}">
+                        <a class="page-link" th:href="@{/admin/orders(page=${i}, keyword=${keyword}, status=${selectedStatus}, fromDate=${fromDate}, toDate=${toDate})}" 
+                           th:text="${i + 1}">1</a>
+                    </li>
+                    
+                    <li class="page-item" th:classappend="${orders.last ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/admin/orders(page=${orders.number + 1}, keyword=${keyword}, status=${selectedStatus}, fromDate=${fromDate}, toDate=${toDate})}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
             </nav>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="admin-main">
-            <header class="admin-header">
-                <div class="admin-header-left">
-                    <button class="admin-mobile-toggle">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <h1>Quản Lý Đơn Hàng</h1>
-                </div>
-            </header>
-
-            <!-- Status Filter Tabs -->
-            <div class="admin-tabs">
-                <button class="admin-tab active" data-status="all">
-                    Tất Cả <span class="tab-count">0</span>
-                </button>
-                <button class="admin-tab" data-status="pending">
-                    Chờ Xử Lý <span class="tab-count">0</span>
-                </button>
-                <button class="admin-tab" data-status="processing">
-                    Đang Xử Lý <span class="tab-count">0</span>
-                </button>
-                <button class="admin-tab" data-status="shipped">
-                    Đang Giao <span class="tab-count">0</span>
-                </button>
-                <button class="admin-tab" data-status="delivered">
-                    Đã Giao <span class="tab-count">0</span>
-                </button>
-                <button class="admin-tab" data-status="cancelled">
-                    Đã Hủy <span class="tab-count">0</span>
-                </button>
-            </div>
-
-            <!-- Orders Table -->
-            <div class="admin-section">
-                <div class="admin-table-container">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Mã Đơn</th>
-                                <th>Khách Hàng</th>
-                                <th>Email/SĐT</th>
-                                <th>Tổng Tiền</th>
-                                <th>Thanh Toán</th>
-                                <th>Trạng Thái</th>
-                                <th>Ngày Đặt</th>
-                                <th>Thao Tác</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="order : ${orders}">
-                                <td>
-                                    <strong th:text="'#' + ${order.orderId}">#001</strong>
-                                </td>
-                                <td th:text="${order.user.fullName}">Nguyen Van A</td>
-                                <td>
-                                    <div th:text="${order.user.email}">email@example.com</div>
-                                    <div th:text="${order.phone}">0123456789</div>
-                                </td>
-                                <td>
-                                    <strong th:text="${order.totalAmount}">1,000,000 VNĐ</strong>
-                                </td>
-                                <td>
-                                    <span class="badge" 
-                                          th:classappend="${order.paymentMethod.name}"
-                                          th:text="${order.paymentMethod.displayName}">
-                                        COD
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="badge badge-order-status" 
-                                          th:classappend="${order.status}"
-                                          th:text="${order.statusText}">
-                                        Pending
-                                    </span>
-                                </td>
-                                <td th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">
-                                    01/01/2026 10:00
-                                </td>
-                                <td class="table-actions">
-                                    <a th:href="@{/admin/orders/{id}(id=${order.orderId})}" 
-                                       class="btn-action" title="Xem chi tiết">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            <!-- Fallback -->
-                            <tr th:if="${orders == null || orders.isEmpty()}">
-                                <td colspan="8" class="text-center">Chưa có đơn hàng nào</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Pagination -->
-                <div class="admin-pagination">
-                    <button class="btn-page" disabled><i class="fas fa-chevron-left"></i></button>
-                    <button class="btn-page active">1</button>
-                    <button class="btn-page">2</button>
-                    <button class="btn-page">3</button>
-                    <button class="btn-page"><i class="fas fa-chevron-right"></i></button>
-                </div>
-            </div>
-        </main>
+        </div>
     </div>
-
-    <script src="/js/main.js"></script>
-    <script>
-        document.querySelector('.admin-mobile-toggle')?.addEventListener('click', function() {
-            document.querySelector('.admin-sidebar').classList.toggle('active');
-        });
-
-        // Tab filtering
-        document.querySelectorAll('.admin-tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-                // TODO: Filter orders by status
-            });
-        });
-    </script>
+    
+    <th:block th:fragment="scripts">
+        <script>
+            // Auto-dismiss alerts after 5 seconds
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        </script>
+    </th:block>
 </body>
 </html>

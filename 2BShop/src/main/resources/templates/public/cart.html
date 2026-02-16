@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>Giỏ hàng - 2BShop</title>
 
     <!-- CSS -->
@@ -14,6 +16,254 @@
 
     <!-- jQuery (Required for AJAX) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <style>
+        /* Breadcrumb Styles */
+        .breadcrumb-area {
+            background: #f8f9fa;
+            padding: 20px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .breadcrumb-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .breadcrumb-list li {
+            color: #6c757d;
+        }
+        
+        .breadcrumb-list li a {
+            color: #1a365d;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .breadcrumb-list li a:hover {
+            color: #d4af37;
+        }
+        
+        .breadcrumb-list li.active {
+            color: #d4af37;
+            font-weight: 600;
+        }
+        
+        .breadcrumb-list li:not(:last-child)::after {
+            content: "/";
+            margin-left: 10px;
+            color: #6c757d;
+        }
+        
+        /* Cart Page Styles */
+        .cart-main-area {
+            padding: 60px 0;
+            background: #f8f9fa;
+            min-height: 500px;
+        }
+        
+        .cart-header-bar {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            display: grid;
+            grid-template-columns: 50px 3fr 1.5fr 1.5fr 1.5fr 80px;
+            align-items: center;
+            font-weight: 600;
+            color: #1a365d;
+        }
+        
+        .cart-items-list {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 100px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        
+        .cart-item-row {
+            display: grid;
+            grid-template-columns: 50px 3fr 1.5fr 1.5fr 1.5fr 80px;
+            align-items: center;
+            padding: 30px 10px;
+            border-bottom: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        
+        .cart-item-row:last-child {
+            border-bottom: none;
+        }
+        
+        .cart-item-row:hover {
+            background: #f8f9fa;
+        }
+        
+        .product-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .product-title {
+            font-weight: 600;
+            color: #1a365d;
+            font-size: 16px;
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        .product-title:hover {
+            color: #d4af37;
+        }
+        
+        .product-meta {
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .price-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .current-price {
+            font-weight: 700;
+            color: #d4af37;
+            font-size: 18px;
+        }
+        
+        .old-price {
+            text-decoration: line-through;
+            color: #999;
+            font-size: 14px;
+        }
+        
+        .quantity-selector input {
+            width: 70px;
+            padding: 8px;
+            text-align: center;
+            border: 2px solid #d4af37;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        
+        .item-total {
+            font-weight: 700;
+            color: #1a365d;
+            font-size: 18px;
+        }
+        
+        .remove-item-btn {
+            color: #dc3545;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+        
+        .remove-item-btn:hover {
+            color: #c82333;
+            transform: scale(1.2);
+        }
+        
+        /* Sticky Footer */
+        .cart-footer-sticky {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 20px 0;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.08);
+            z-index: 999;
+        }
+        
+        .container-sticky {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .footer-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .footer-right {
+            display: flex;
+            align-items: center;
+        }
+        
+        .total-info {
+            font-size: 16px;
+            color: #1a365d;
+        }
+        
+        .final-price {
+            font-size: 24px;
+            font-weight: 700;
+            color: #d4af37;
+        }
+        
+        .btn-checkout {
+            background: #d4af37;
+            color: white;
+            padding: 14px 40px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 16px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+        }
+        
+        .btn-checkout:hover {
+            background: #c9a961;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
+        }
+        
+        .checkout-btn-wrapper.disabled .btn-checkout {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        
+        .checkout-btn-wrapper.disabled .btn-checkout:hover {
+            transform: none;
+        }
+        
+        .empty-cart-box {
+            padding: 80px 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        
+        .cart-notification {
+            background: #d4af37;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .custom-checkbox .custom-control-input:checked ~ .custom-control-label::before {
+            background-color: #d4af37;
+            border-color: #d4af37;
+        }
+    </style>
 </head>
 
 <body>
@@ -124,7 +374,7 @@
                                         style="margin-right: 10px;">Chọn tất cả (<span
                                             th:text="${cartItems.size()}"></span>)</label>
                                 </div>
-                                <a href="#" onclick="removeAll()" class="text-danger ml-4">Xóa tất cả</a>
+                                <a href="#" onclick="removeSelected(); return false;" class="text-danger ml-4">Xóa đã chọn</a>
                             </div>
                             <div class="footer-right display-flex align-items-center">
                                 <div class="total-info mr-4 text-right" style="margin-right: 30px;">
@@ -153,6 +403,19 @@
     <script th:src="@{/js/main.js}"></script>
 
     <script th:inline="javascript">
+        // Get CSRF token
+        var csrfToken = $('meta[name="_csrf"]').attr('content');
+        var csrfHeader = $('meta[name="_csrf_header"]').attr('content');
+        
+        // Setup AJAX to send CSRF token
+        $.ajaxSetup({
+            beforeSend: function(xhr) {
+                if (csrfToken && csrfHeader) {
+                    xhr.setRequestHeader(csrfHeader, csrfToken);
+                }
+            }
+        });
+        
         // Cart update logic
         $(document).ready(function () {
             updateSelectedCount();
@@ -292,8 +555,36 @@
                     alert('Lỗi: ' + (xhr.responseJSON ? xhr.responseJSON.message : xhr.statusText));
                 }
             });
-        }
-    </script>
+        }        
+        function removeSelected() {
+            var selectedIds = [];
+            $('.item-checkbox:checked').each(function() {
+                selectedIds.push($(this).data('id'));
+            });
+            
+            if (selectedIds.length === 0) {
+                alert('Vui lòng chọn sản phẩm cần xóa');
+                return;
+            }
+            
+            if (confirm('Bạn có chắc muốn xóa ' + selectedIds.length + ' sản phẩm đã chọn?')) {
+                // Remove each selected item
+                var promises = selectedIds.map(function(id) {
+                    return $.ajax({
+                        url: '/cart/remove',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ cartItemId: id })
+                    });
+                });
+                
+                Promise.all(promises).then(function() {
+                    location.reload();
+                }).catch(function(error) {
+                    alert('Có lỗi xảy ra khi xóa sản phẩm');
+                });
+            }
+        }    </script>
 </body>
 
 </html>

@@ -5,6 +5,7 @@ import boiz.shop._2BShop.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -12,18 +13,35 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Integer> {
+        
+        // Override findById với EntityGraph để eager load User và PaymentMethod
+        @Override
+        @EntityGraph(attributePaths = {"user", "paymentMethod", "bankAccount"})
+        Optional<Order> findById(Integer id);
+        
+        // Override findAll với EntityGraph
+        @Override
+        @EntityGraph(attributePaths = {"user", "paymentMethod", "bankAccount"})
+        Page<Order> findAll(Pageable pageable);
+
+        @EntityGraph(attributePaths = {"user", "paymentMethod", "bankAccount"})
         List<Order> findByUserUserIdOrderByOrderDateDesc(Integer userId);
 
+        @EntityGraph(attributePaths = {"user", "paymentMethod", "bankAccount"})
         Page<Order> findByUserUserIdOrderByOrderDateDesc(Integer userId, Pageable pageable);
 
+        @EntityGraph(attributePaths = {"user", "paymentMethod", "bankAccount"})
         Page<Order> findByUserUserIdAndOrderStatusOrderByOrderDateDesc(Integer userId, String status,
                         Pageable pageable);
 
+        @EntityGraph(attributePaths = {"user", "paymentMethod", "bankAccount"})
         List<Order> findByOrderStatusOrderByOrderDateDesc(String status);
 
+        @EntityGraph(attributePaths = {"user", "paymentMethod", "bankAccount"})
         List<Order> findAllByOrderByOrderDateDesc();
 
         @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.orderStatus = :status")
@@ -37,16 +55,21 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
         @Query("SELECT COUNT(o) FROM Order o WHERE o.orderStatus = :status")
         Long countByStatus(@Param("status") String status);
 
+        @EntityGraph(attributePaths = {"user", "paymentMethod", "bankAccount"})
         List<Order> findTop10ByOrderByOrderDateDesc();
 
         // Thêm các method cho OrderService
+        @EntityGraph(attributePaths = {"user", "paymentMethod", "bankAccount"})
         Page<Order> findByOrderStatus(String status, Pageable pageable);
 
+        @EntityGraph(attributePaths = {"user", "paymentMethod", "bankAccount"})
         List<Order> findByUserOrderByOrderDateDesc(User user);
 
         // Method để tìm orders trong khoảng thời gian
+        @EntityGraph(attributePaths = {"user", "paymentMethod", "bankAccount"})
         List<Order> findByOrderDateBetween(LocalDateTime startDate, LocalDateTime endDate);
 
+        @EntityGraph(attributePaths = {"user", "paymentMethod", "bankAccount"})
         Page<Order> findByOrderDateBetween(LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 
         // Methods cho DashboardService và Admin
@@ -68,6 +91,7 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
         /**
          * Tìm orders với status và date range
          */
+        @EntityGraph(attributePaths = {"user", "paymentMethod", "bankAccount"})
         Page<Order> findByOrderStatusAndOrderDateBetween(
                         String status,
                         LocalDateTime startDate,
@@ -77,6 +101,7 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
         /**
          * Search orders by receiver name or phone
          */
+        @EntityGraph(attributePaths = {"user", "paymentMethod", "bankAccount"})
         @Query("SELECT o FROM Order o WHERE o.receiverName LIKE %:keyword% OR o.shippingPhone LIKE %:keyword%")
         Page<Order> searchOrders(@Param("keyword") String keyword, Pageable pageable);
 
@@ -94,5 +119,6 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
         /**
          * Tìm orders của user (cho UserAdminController)
          */
+        @EntityGraph(attributePaths = {"user", "paymentMethod", "bankAccount"})
         List<Order> findByUserUserId(Integer userId);
 }

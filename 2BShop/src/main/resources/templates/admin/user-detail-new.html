@@ -51,7 +51,7 @@
                             </thead>
                             <tbody>
                                 <tr th:each="order : ${orders}">
-                                    <td><strong th:text="'ORD' + ${#strings.padLeft(order.orderId, 6, '0')}">ORD000001</strong></td>
+                                    <td><strong th:text="|ORD${#numbers.formatInteger(order.orderId, 6)}|">ORD000001</strong></td>
                                     <td th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy')}">14/01/2026</td>
                                     <td class="text-end" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + '₫'">1,000,000₫</td>
                                     <td class="text-center">

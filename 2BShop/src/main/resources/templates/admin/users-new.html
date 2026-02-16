@@ -9,7 +9,7 @@
       )}">
 <body>
     <div th:fragment="content">
-        <!-- Filters -->
+        <!-- Filters & Add Button -->
         <div class="table-container mb-4">
             <div class="row align-items-center g-3">
                 <div class="col-md-4">
@@ -30,10 +30,16 @@
                     </select>
                 </div>
                 
-                <div class="col-md-3 text-end ms-auto">
+                <div class="col-md-2 text-end">
                     <span class="badge bg-info fs-6">
                         Tổng: <span th:text="${users.totalElements}">0</span> users
                     </span>
+                </div>
+                
+                <div class="col-md-3 text-end">
+                    <a th:href="@{/admin/users/new}" class="btn" style="background-color: var(--gold); color: white;">
+                        <i class="fas fa-plus me-2"></i>Thêm User Mới
+                    </a>
                 </div>
             </div>
         </div>
@@ -82,8 +88,13 @@
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm">
                                     <a th:href="@{/admin/users/{id}(id=${user.userId})}" 
-                                       class="btn btn-primary" title="Chi tiết">
+                                       class="btn btn-info" title="Chi tiết">
                                         <i class="fas fa-eye"></i>
+                                    </a>
+                                    
+                                    <a th:href="@{/admin/users/{id}/edit(id=${user.userId})}" 
+                                       class="btn btn-primary" title="Chỉnh sửa">
+                                        <i class="fas fa-edit"></i>
                                     </a>
                                     
                                     <form th:if="${user.isEnabled}" 
@@ -91,7 +102,7 @@
                                           method="post" 
                                           style="display: inline;"
                                           onsubmit="return confirm('Xác nhận ban user này?')">
-                                        <button type="submit" class="btn btn-danger" title="Ban">
+                                        <button type="submit" class="btn btn-warning" title="Ban">
                                             <i class="fas fa-ban"></i>
                                         </button>
                                     </form>
@@ -102,6 +113,15 @@
                                           style="display: inline;">
                                         <button type="submit" class="btn btn-success" title="Unban">
                                             <i class="fas fa-check"></i>
+                                        </button>
+                                    </form>
+                                    
+                                    <form th:action="@{/admin/users/{id}/delete(id=${user.userId})}" 
+                                          method="post" 
+                                          style="display: inline;"
+                                          onsubmit="return confirm('CẢNH BÁO: Xóa user sẽ xóa vĩnh viễn! Tiếp tục?')">
+                                        <button type="submit" class="btn btn-danger" title="Xóa">
+                                            <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
                                 </div>

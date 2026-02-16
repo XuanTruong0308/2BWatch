@@ -15,7 +15,15 @@
     <style>
         :root {
             --sidebar-width: 260px;
-            --topbar-height: 60px;
+            --navy: #1a365d;
+            --gold: #d4af37;
+            --gold-hover: #c19b2b;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
         body {
@@ -30,137 +38,215 @@
             left: 0;
             height: 100vh;
             width: var(--sidebar-width);
-            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
+            background: var(--navy);
             color: white;
             overflow-y: auto;
             z-index: 1000;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            box-shadow: 3px 0 15px rgba(0,0,0,0.15);
         }
         
         .sidebar-header {
-            padding: 20px;
+            padding: 25px 20px;
             text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.2);
+            border-bottom: 2px solid var(--gold);
         }
         
         .sidebar-header h4 {
             margin: 0;
-            font-weight: 600;
+            font-weight: 700;
+            color: var(--gold);
+            font-size: 1.4rem;
+        }
+        
+        .sidebar-header i {
+            color: var(--gold);
+            margin-right: 8px;
         }
         
         .sidebar-menu {
-            padding: 15px 0;
+            padding: 20px 0;
         }
         
         .menu-item {
             display: block;
-            padding: 12px 20px;
-            color: rgba(255,255,255,0.8);
+            padding: 14px 20px;
+            color: rgba(255,255,255,0.85);
             text-decoration: none;
-            transition: all 0.3s;
-            border-left: 3px solid transparent;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            margin: 3px 0;
+            font-weight: 500;
         }
         
-        .menu-item:hover, .menu-item.active {
-            background: rgba(255,255,255,0.1);
+        .menu-item:hover {
+            background: rgba(212, 175, 55, 0.15);
             color: white;
-            border-left-color: #60a5fa;
+            border-left-color: var(--gold);
+            padding-left: 25px;
+        }
+        
+        .menu-item.active {
+            background: var(--gold);
+            color: var(--navy);
+            border-left-color: var(--gold);
+            font-weight: 600;
         }
         
         .menu-item i {
             width: 25px;
-            margin-right: 10px;
+            margin-right: 12px;
+            text-align: center;
+        }
+        
+        .menu-divider {
+            border: none;
+            border-top: 1px solid rgba(255,255,255,0.15);
+            margin: 15px 20px;
         }
         
         /* Main Content */
         .main-content {
             margin-left: var(--sidebar-width);
-            padding: 20px;
+            padding: 25px;
             min-height: 100vh;
         }
         
         /* Topbar */
         .topbar {
             background: white;
-            padding: 15px 25px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            margin-bottom: 25px;
+            padding: 18px 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-left: 4px solid var(--gold);
         }
         
         .topbar h2 {
             margin: 0;
-            font-size: 1.8rem;
-            color: #1e3a8a;
+            font-size: 1.9rem;
+            color: var(--navy);
+            font-weight: 700;
+        }
+        
+        .topbar-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #6c757d;
         }
         
         /* Cards */
         .stat-card {
             background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            transition: transform 0.3s;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
         }
         
         .stat-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+        
+        .stat-card.gold {
+            border-left-color: var(--gold);
+        }
+        
+        .stat-card.navy {
+            border-left-color: var(--navy);
+        }
+        
+        .stat-card.success {
+            border-left-color: #28a745;
+        }
+        
+        .stat-card.info {
+            border-left-color: #17a2b8;
         }
         
         .stat-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 10px;
+            width: 65px;
+            height: 65px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.8rem;
+            font-size: 1.9rem;
         }
         
-        .stat-icon.blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .stat-icon.green { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); }
-        .stat-icon.orange { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
-        .stat-icon.purple { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+        .stat-icon.gold { background: var(--gold); color: white; }
+        .stat-icon.navy { background: var(--navy); color: white; }
+        .stat-icon.success { background: #28a745; color: white; }
+        .stat-icon.info { background: #17a2b8; color: white; }
         
         /* Buttons */
         .btn-primary {
-            background: #1e3a8a;
+            background: var(--navy);
             border: none;
+            padding: 10px 24px;
+            font-weight: 600;
         }
         
         .btn-primary:hover {
-            background: #1e40af;
+            background: #0f1e35;
+        }
+        
+        .btn-gold {
+            background: var(--gold);
+            border: none;
+            color: white;
+            padding: 10px 24px;
+            font-weight: 600;
+        }
+        
+        .btn-gold:hover {
+            background: var(--gold-hover);
+            color: white;
         }
         
         /* Tables */
         .table-container {
             background: white;
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-radius: 12px;
+            padding: 28px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
         }
         
         .table th {
-            background: #f8f9fa;
-            color: #1e3a8a;
+            background: var(--navy);
+            color: white;
             font-weight: 600;
             border: none;
+            padding: 14px;
+        }
+        
+        .table td {
+            padding: 12px 14px;
+            vertical-align: middle;
+        }
+        
+        .table tbody tr:hover {
+            background: rgba(212, 175, 55, 0.05);
         }
         
         /* Badges */
         .badge {
-            padding: 6px 12px;
-            font-weight: 500;
+            padding: 7px 14px;
+            font-weight: 600;
+            border-radius: 6px;
         }
         
         /* Alerts */
         .alert {
             border-radius: 10px;
             border: none;
+            border-left: 4px solid;
         }
         
         /* Scrollbar */
@@ -169,8 +255,29 @@
         }
         
         .sidebar::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.2);
+            background: var(--gold);
             border-radius: 10px;
+        }
+        
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        /* Chart Container */
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            height: 100%;
+        }
+        
+        .chart-card h5 {
+            color: var(--navy);
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--gold);
         }
     </style>
     
@@ -180,16 +287,12 @@
     <!-- Sidebar -->
     <aside class="sidebar">
         <div class="sidebar-header">
-            <h4><i class="fas fa-store"></i> 2BShop Admin</h4>
+            <h4><i class="fas fa-crown"></i> 2BShop Admin</h4>
         </div>
         
         <nav class="sidebar-menu">
             <a th:href="@{/admin}" class="menu-item" th:classappend="${activeMenu == 'dashboard' ? 'active' : ''}">
-                <i class="fas fa-tachometer-alt"></i> Dashboard
-            </a>
-            
-            <a th:href="@{/admin/watches}" class="menu-item" th:classappend="${activeMenu == 'watches' ? 'active' : ''}">
-                <i class="fas fa-clock"></i> Quản lý Sản phẩm
+                <i class="fas fa-chart-line"></i> Thống Kê
             </a>
             
             <a th:href="@{/admin/orders}" class="menu-item" th:classappend="${activeMenu == 'orders' ? 'active' : ''}">
@@ -200,26 +303,26 @@
                 <i class="fas fa-users"></i> Quản lý Người dùng
             </a>
             
-            <a th:href="@{/admin/payments/methods}" class="menu-item" th:classappend="${activeMenu == 'payments' ? 'active' : ''}">
-                <i class="fas fa-credit-card"></i> Phương thức TT
+            <a th:href="@{/admin/watches}" class="menu-item" th:classappend="${activeMenu == 'watches' ? 'active' : ''}">
+                <i class="fas fa-clock"></i> Quản lý Sản phẩm
             </a>
             
-            <a th:href="@{/admin/payments/transactions}" class="menu-item" th:classappend="${activeMenu == 'transactions' ? 'active' : ''}">
-                <i class="fas fa-money-bill-wave"></i> Giao dịch
+            <a th:href="@{/admin/brands}" class="menu-item" th:classappend="${activeMenu == 'brands' ? 'active' : ''}">
+                <i class="fas fa-tags"></i> Quản lý Brand
             </a>
             
             <a th:href="@{/admin/bans}" class="menu-item" th:classappend="${activeMenu == 'bans' ? 'active' : ''}">
-                <i class="fas fa-ban"></i> Quản lý Ban
+                <i class="fas fa-user-slash"></i> Quản lý Ban Account
             </a>
             
-            <hr style="border-color: rgba(255,255,255,0.1); margin: 15px 0;">
+            <hr class="menu-divider">
             
             <a th:href="@{/}" class="menu-item">
                 <i class="fas fa-home"></i> Về trang chủ
             </a>
             
             <form th:action="@{/logout}" method="post" style="margin: 0;">
-                <button type="submit" class="menu-item" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer; color: #ecf0f1;">
+                <button type="submit" class="menu-item" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer;">
                     <i class="fas fa-sign-out-alt"></i> Đăng xuất
                 </button>
             </form>
@@ -231,8 +334,13 @@
         <!-- Topbar -->
         <div class="topbar">
             <h2 th:text="${pageTitle}">Dashboard</h2>
-            <div>
-                <span class="text-muted">
+            <div class="topbar-info">
+                <span>
+                    <i class="far fa-user-circle"></i> 
+                    <strong th:text="${#authentication.name}">Admin</strong>
+                </span>
+                <span>|</span>
+                <span>
                     <i class="far fa-calendar"></i> 
                     <span th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy HH:mm')}"></span>
                 </span>

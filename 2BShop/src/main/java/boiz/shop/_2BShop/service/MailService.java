@@ -211,10 +211,6 @@ public class MailService {
 
             productsHtml.append("<tr style='border-bottom: 1px solid #e0e0e0;'>")
                     .append("<td style='padding: 20px 10px;'>")
-                    .append("<div style='display: flex; align-items: center;'>")
-                    .append("<div style='width: 80px; height: 80px; background: #f5f5f5; border: 1px solid #ddd; margin-right: 15px; display: flex; align-items: center; justify-content: center;'>")
-                    .append("<span style='font-size: 10px; color: #999;'>IMAGE</span>")
-                    .append("</div>")
                     .append("<div>")
                     .append("<div style='font-weight: 600; color: #1a1a1a; margin-bottom: 5px;'>")
                     .append(watch.getWatchName()).append("</div>")
@@ -231,7 +227,7 @@ public class MailService {
                         .append(shortDesc).append("</div>");
             }
 
-            productsHtml.append("</div></div></td>")
+            productsHtml.append("</div></td>")
                     .append("<td style='padding: 20px 10px; text-align: center; color: #333;'>")
                     .append(detail.getQuantity()).append("</td>")
                     .append("<td style='padding: 20px 10px; text-align: right;'>")
@@ -306,7 +302,8 @@ public class MailService {
                 "<div class='content'>" +
                 "<p style='font-size: 15px; color: #333; margin-bottom: 20px;'>Xin chào <strong>" + customerName
                 + "</strong>,</p>" +
-                "<p style='font-size: 14px; color: #666; line-height: 1.6;'>Cảm ơn bạn đã tin tưởng và đặt hàng tại <strong>BOIZ SHOP</strong>. Đơn hàng của bạn đã được tiếp nhận và đang được xử lý.</p>"
+                "<p style='font-size: 14px; color: #666; line-height: 1.6;'>Cảm ơn bạn đã tin tưởng và đặt hàng tại <strong>BOIZ SHOP</strong>.</p>" +
+                "<p style='font-size: 14px; color: #666; line-height: 1.6;'>Đơn hàng của bạn đã được <strong style='color: #28a745;'>tiếp nhận thành công</strong>. Nhân viên của chúng tôi sẽ liên hệ trong vòng 24 giờ để xác nhận và sắp xếp giao hàng.</p>"
                 +
 
                 // Order Info Box
@@ -386,6 +383,20 @@ public class MailService {
                 "Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ hotline <strong style='color: #e74c3c;'>1900 8888</strong> để được hỗ trợ."
                 +
                 "</p>" +
+
+                // Download VAT Invoice section
+                "<div style='background: #f8f9fa; border: 2px dashed #d4af37; border-radius: 10px; padding: 20px; margin: 30px 0; text-align: center;'>" +
+                "<h4 style='color: #1a365d; margin-bottom: 15px;'>📄 TẢI HÓA ĐƠN VAT</h4>" +
+                "<p style='font-size: 14px; color: #666; margin-bottom: 20px;'>Bạn có thể tải hóa đơn VAT của đơn hàng dưới định dạng Word hoặc PDF</p>" +
+                "<div style='display: inline-block;'>" +
+                "<a href='http://localhost:8080/invoice/" + order.getOrderId() + "/word' style='display: inline-block; padding: 12px 30px; background: #d4af37; color: #fff; text-decoration: none; border-radius: 5px; margin: 0 5px; font-weight: 600; font-size: 14px;'>" +
+                "<span style='margin-right: 5px;'>📝</span> Tải Word (.docx)" +
+                "</a>" +
+                "<a href='http://localhost:8080/invoice/" + order.getOrderId() + "/pdf' style='display: inline-block; padding: 12px 30px; background: #dc3545; color: #fff; text-decoration: none; border-radius: 5px; margin: 0 5px; font-weight: 600; font-size: 14px;'>" +
+                "<span style='margin-right: 5px;'>📕</span> Tải PDF (.pdf)" +
+                "</a>" +
+                "</div>" +
+                "</div>" +
 
                 "<center>" +
                 "<a href='http://localhost:8080/account/orders' class='btn'>XEM CHI TIẾT ĐƠN HÀNG</a>" +

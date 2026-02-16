@@ -71,6 +71,7 @@ public class CheckoutController {
             @RequestParam(required = false) String notes,
             @RequestParam(required = false) String couponCode,
             @RequestParam(required = false) Integer bankAccountId,
+            Model model,
             RedirectAttributes redirectAttributes) {
         try {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -79,7 +80,13 @@ public class CheckoutController {
             Order order = checkoutService.placeOrder(user, receiverName, phone, address, notes, paymentMethod,
                     couponCode, bankAccountId);
 
-            return "redirect:/checkout/confirmation/" + order.getOrderId();
+            // Show success modal on checkout page (no redirect)
+            model.addAttribute("orderSuccess", true);
+            model.addAttribute("orderId", order.getOrderId());
+            model.addAttribute("orderCode", "ORD" + String.format("%06d", order.getOrderId()));
+            model.addAttribute("customerEmail", user.getEmail());
+            
+            return "public/checkout";
 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -88,10 +95,28 @@ public class CheckoutController {
     }
 
     @GetMapping("/confirmation/{orderId}")
-    public String orderConfirmation(@PathVariable Integer orderId, Model model) {
-        // TODO: Implement confirmation page logic & security check
-        // For now just basic view
-        model.addAttribute("orderId", orderId);
-        return "public/order-confirmation";
+    public String orderConfirmation(@PathVariable Integer orderId, Model model, RedirectAttributes redirectAttributes) {
+        try {
+            // Get current user
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            User user = userRepository.findByEmail(email).orElseThrow(() -> 
+                new RuntimeException("Không tìm thấy thông tin người dùng!"));
+
+            // Get order and verify ownership
+            Order order = checkoutService.getOrderById(orderId);
+            if (!order.getUser().getUserId().equals(user.getUserId())) {
+                redirectAttributes.addFlashAttribute("error", "Bạn không có quyền xem đơn hàng này!");
+                return "redirect:/";
+            }
+
+            model.addAttribute("orderId", orderId);
+            model.addAttribute("order", order);
+            return "public/order-confirmation";
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Không thể tải trang xác nhận: " + e.getMessage());
+            return "redirect:/";
+        }
     }
 }

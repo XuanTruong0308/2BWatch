@@ -59,7 +59,7 @@
                             <td><strong th:text="${transaction.transactionCode}">TXN123456</strong></td>
                             <td>
                                 <a th:href="@{/admin/orders/{id}(id=${transaction.order.orderId})}" class="text-decoration-none">
-                                    <strong th:text="'ORD' + ${#strings.padLeft(transaction.order.orderId, 6, '0')}">ORD000001</strong>
+                                    <strong th:text="|ORD${#numbers.formatInteger(transaction.order.orderId, 6)}|">ORD000001</strong>
                                 </a>
                             </td>
                             <td th:text="${transaction.paymentMethod.methodName}">COD</td>

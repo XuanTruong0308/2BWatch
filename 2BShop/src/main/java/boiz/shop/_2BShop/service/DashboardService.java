@@ -40,100 +40,151 @@ public class DashboardService {
 
     // Doanh thu theo khoảng thời gian
     public BigDecimal getRevenue(String period) {
-        LocalDateTime startDate = getStartDate(period);
-        LocalDateTime endDate = LocalDateTime.now();
+        try {
+            LocalDateTime startDate = getStartDate(period);
+            LocalDateTime endDate = LocalDateTime.now();
 
-        List<String> validStatuses = Arrays.asList("DELIVERED", "COMPLETED");
+            List<String> validStatuses = Arrays.asList("DELIVERED", "COMPLETED");
 
-        BigDecimal revenue = orderRepo.sumTotalAmountByStatus(
-                startDate, endDate, validStatuses);
+            BigDecimal revenue = orderRepo.sumTotalAmountByStatus(
+                    startDate, endDate, validStatuses);
 
-        return revenue != null ? revenue : BigDecimal.ZERO;
+            return revenue != null ? revenue : BigDecimal.ZERO;
+        } catch (Exception e) {
+            System.err.println("Error in getRevenue: " + e.getMessage());
+            return BigDecimal.ZERO;
+        }
     }
 
     // Đếm số đơn hàng theo khoảng thời gian
     public Long getOrderCount(String period) {
-        LocalDateTime startDate = getStartDate(period);
-        LocalDateTime endDate = LocalDateTime.now();
+        try {
+            LocalDateTime startDate = getStartDate(period);
+            LocalDateTime endDate = LocalDateTime.now();
 
-        List<Order> orders = orderRepo.findByOrderDateBetween(startDate, endDate);
-        return (long) orders.size();
+            List<Order> orders = orderRepo.findByOrderDateBetween(startDate, endDate);
+            return (long) orders.size();
+        } catch (Exception e) {
+            System.err.println("Error in getOrderCount: " + e.getMessage());
+            return 0L;
+        }
     }
 
     // lấy sản phẩm được active
     public Long getProductCount() {
-        return watchRepo.countByIsActiveTrue();
+        try {
+            return watchRepo.countByIsActiveTrue();
+        } catch (Exception e) {
+            System.err.println("Error in getProductCount: " + e.getMessage());
+            return 0L;
+        }
     }
 
     // Lấy số lượng user
     public Long getUserCount() {
-        long totalUsers = userRepo.count();
-
-        long adminCount = userRepo.countByRoleName("ADMIN");
-
-        return totalUsers - adminCount;
+        try {
+            long totalUsers = userRepo.count();
+            long adminCount = userRepo.countByRoleName("ADMIN");
+            return totalUsers - adminCount;
+        } catch (Exception e) {
+            System.err.println("Error in getUserCount: " + e.getMessage());
+            return 0L;
+        }
     }
 
     // thống kê trạng thái đơn
     public List<Order> getRecentOrders() {
-        return orderRepo.findTop10ByOrderByOrderDateDesc();
+        try {
+            List<Order> orders = orderRepo.findTop10ByOrderByOrderDateDesc();
+            return orders != null ? orders : new ArrayList<>();
+        } catch (Exception e) {
+            System.err.println("Error in getRecentOrders: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
     public Map<String, Long> getOrderStatsByStatus() {
         Map<String, Long> stats = new HashMap<>();
 
-        stats.put("PENDING", orderRepo.countByOrderStatus("PENDING"));
-        stats.put("CONFIRMED", orderRepo.countByOrderStatus("CONFIRMED"));
-        stats.put("SHIPPING", orderRepo.countByOrderStatus("SHIPPING"));
-        stats.put("DELIVERED", orderRepo.countByOrderStatus("DELIVERED"));
-        stats.put("CANCELLED", orderRepo.countByOrderStatus("CANCELLED"));
+        try {
+            stats.put("PENDING", orderRepo.countByOrderStatus("PENDING"));
+            stats.put("CONFIRMED", orderRepo.countByOrderStatus("CONFIRMED"));
+            stats.put("SHIPPING", orderRepo.countByOrderStatus("SHIPPING"));
+            stats.put("DELIVERED", orderRepo.countByOrderStatus("DELIVERED"));
+            stats.put("CANCELLED", orderRepo.countByOrderStatus("CANCELLED"));
+        } catch (Exception e) {
+            System.err.println("Error in getOrderStatsByStatus: " + e.getMessage());
+            stats.put("PENDING", 0L);
+            stats.put("CONFIRMED", 0L);
+            stats.put("SHIPPING", 0L);
+            stats.put("DELIVERED", 0L);
+            stats.put("CANCELLED", 0L);
+        }
 
         return stats;
     }
 
     // Thống kế lượt order theo brand
-    private Map<String, Long> getOrderStatsByBrand() {
+    public Map<String, Long> getOrderStatsByBrand() {
         Map<String, Long> stats = new LinkedHashMap<>();
 
-        List<OrderDetail> allDetails = orderDetailRepository.findAll();
+        try {
+            List<OrderDetail> allDetails = orderDetailRepository.findAll();
 
-        for (OrderDetail detail : allDetails) {
-            String brandName = detail.getWatch().getBrand().getBrandName();
-            stats.put(brandName, stats.getOrDefault(brandName, 0L) + 1);
+            for (OrderDetail detail : allDetails) {
+                // Null checks to prevent NullPointerException
+                if (detail != null && detail.getWatch() != null 
+                    && detail.getWatch().getBrand() != null 
+                    && detail.getWatch().getBrand().getBrandName() != null) {
+                    
+                    String brandName = detail.getWatch().getBrand().getBrandName();
+                    stats.put(brandName, stats.getOrDefault(brandName, 0L) + 1);
+                }
+            }
+
+            return stats.entrySet().stream()
+                    .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+                    .collect(LinkedHashMap::new,
+                            (map, entry) -> map.put(entry.getKey(), entry.getValue()),
+                            LinkedHashMap::putAll);
+        } catch (Exception e) {
+            System.err.println("Error in getOrderStatsByBrand: " + e.getMessage());
+            e.printStackTrace();
+            return new LinkedHashMap<>(); // Return empty map on error
         }
-
-        return stats.entrySet().stream()
-                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
-                .collect(LinkedHashMap::new,
-                        (map, entry) -> map.put(entry.getKey(), entry.getValue()),
-                        LinkedHashMap::putAll);
     }
 
     public Map<String, Object> getRevenueChartData() {
         Map<String, Object> chartData = new HashMap<>();
-
         List<String> labels = new ArrayList<>();
         List<BigDecimal> data = new ArrayList<>();
 
-        LocalDate now = LocalDate.now();
+        try {
+            LocalDate now = LocalDate.now();
 
-        // 12 tháng gần nhất
-        for (int i = 11; i >= 0; i--) {
-            LocalDate monthDate = now.minusMonths(i);
-            LocalDate monthStart = monthDate.withDayOfMonth(1);
-            LocalDate monthEnd = monthDate.with(TemporalAdjusters.lastDayOfMonth());
+            // 12 tháng gần nhất
+            for (int i = 11; i >= 0; i--) {
+                LocalDate monthDate = now.minusMonths(i);
+                LocalDate monthStart = monthDate.withDayOfMonth(1);
+                LocalDate monthEnd = monthDate.with(TemporalAdjusters.lastDayOfMonth());
 
-            // Label: "Jan 2026"
-            String label = monthDate.getMonth().toString().substring(0, 3) + " " + monthDate.getYear();
-            labels.add(label);
+                // Label: "Jan 2026"
+                String label = monthDate.getMonth().toString().substring(0, 3) + " " + monthDate.getYear();
+                labels.add(label);
 
-            // Renvue tháng đó
-            BigDecimal revenue = orderRepo.sumTotalAmountByDateRangeAndStatus(
-                    monthStart.atStartOfDay(),
-                    monthEnd.atTime(23, 59, 59),
-                    Arrays.asList("DELIVERED", "COMPLETED"));
+                // Renvue tháng đó
+                BigDecimal revenue = orderRepo.sumTotalAmountByDateRangeAndStatus(
+                        monthStart.atStartOfDay(),
+                        monthEnd.atTime(23, 59, 59),
+                        Arrays.asList("DELIVERED", "COMPLETED"));
 
-            data.add(revenue != null ? revenue : BigDecimal.ZERO);
+                data.add(revenue != null ? revenue : BigDecimal.ZERO);
+            }
+        } catch (Exception e) {
+            System.err.println("Error in getRevenueChartData: " + e.getMessage());
+            // Return empty data if error
+            labels.clear();
+            data.clear();
         }
 
         chartData.put("labels", labels);
@@ -143,11 +194,17 @@ public class DashboardService {
     }
 
     public Map<String, Object> getBrandChartData() {
-        Map<String, Long> brandStats = getOrderStatsByBrand();
-
         Map<String, Object> chartData = new HashMap<>();
-        chartData.put("labels", new ArrayList<>(brandStats.keySet()));
-        chartData.put("data", new ArrayList<>(brandStats.values()));
+        
+        try {
+            Map<String, Long> brandStats = getOrderStatsByBrand();
+            chartData.put("labels", new ArrayList<>(brandStats.keySet()));
+            chartData.put("data", new ArrayList<>(brandStats.values()));
+        } catch (Exception e) {
+            System.err.println("Error in getBrandChartData: " + e.getMessage());
+            chartData.put("labels", new ArrayList<>());
+            chartData.put("data", new ArrayList<>());
+        }
 
         return chartData;
     }
@@ -174,25 +231,30 @@ public class DashboardService {
     }
 
     public Double getOrderGrowthPercentage() {
-        LocalDate now = LocalDate.now();
-        LocalDate lastMonthStart = now.minusMonths(1).withDayOfMonth(1);
-        LocalDate lastMonthEnd = now.minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
+        try {
+            LocalDate now = LocalDate.now();
+            LocalDate lastMonthStart = now.minusMonths(1).withDayOfMonth(1);
+            LocalDate lastMonthEnd = now.minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
 
-        LocalDate thisMonthStart = now.withDayOfMonth(1);
-        LocalDate thisMonthEnd = now;
+            LocalDate thisMonthStart = now.withDayOfMonth(1);
+            LocalDate thisMonthEnd = now;
 
-        long lastMonthCount = orderRepo.findByOrderDateBetween(
-                lastMonthStart.atStartOfDay(),
-                lastMonthEnd.atTime(LocalTime.MAX)).size();
+            long lastMonthCount = orderRepo.findByOrderDateBetween(
+                    lastMonthStart.atStartOfDay(),
+                    lastMonthEnd.atTime(LocalTime.MAX)).size();
 
-        long thisMonthCount = orderRepo.findByOrderDateBetween(
-                thisMonthStart.atStartOfDay(),
-                thisMonthEnd.atTime(LocalTime.MAX)).size();
+            long thisMonthCount = orderRepo.findByOrderDateBetween(
+                    thisMonthStart.atStartOfDay(),
+                    thisMonthEnd.atTime(LocalTime.MAX)).size();
 
-        if (lastMonthCount == 0) {
-            return thisMonthCount > 0 ? 100.0 : 0.0;
+            if (lastMonthCount == 0) {
+                return thisMonthCount > 0 ? 100.0 : 0.0;
+            }
+
+            return ((double) (thisMonthCount - lastMonthCount) / lastMonthCount) * 100;
+        } catch (Exception e) {
+            System.err.println("Error in getOrderGrowthPercentage: " + e.getMessage());
+            return 0.0;
         }
-
-        return ((double) (thisMonthCount - lastMonthCount) / lastMonthCount) * 100;
     }
 }

@@ -117,14 +117,159 @@ public class FileUploadService {
     }
 
     /**
+     * Upload watch main image - GHI ĐÈ nếu đã tồn tại
+     * Path: C:/uploads/bshop/watches/{watch_id}/main-{watch_id}.{ext}
+     * 
+     * @param file         MultipartFile
+     * @param watchId      ID của đồng hồ
+     * @return Relative path: /uploads/bshop/watches/{watch_id}/main-{watch_id}.{ext}
+     */
+    public String uploadWatchMainImage(MultipartFile file, Integer watchId) throws IOException {
+        // Validate file
+        if (file.isEmpty()) {
+            throw new IOException("File rỗng!");
+        }
+
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new IOException("File không phải là ảnh!");
+        }
+
+        // Get extension
+        String originalFilename = file.getOriginalFilename();
+        String extension = ".jpg"; // default
+        if (originalFilename != null && originalFilename.contains(".")) {
+            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+
+        // Create directory: C:/uploads/bshop/watches/{watch_id}/
+        String watchDir = uploadDir + File.separator + "watches" + File.separator + watchId;
+        File watchDirFile = new File(watchDir);
+        if (!watchDirFile.exists()) {
+            watchDirFile.mkdirs();
+        }
+
+        // Filename: main-{watch_id}.{ext}
+        String newFilename = "main-" + watchId + extension;
+
+        // Read and resize image
+        BufferedImage originalImage = ImageIO.read(file.getInputStream());
+        if (originalImage == null) {
+            throw new IOException("Không thể đọc file ảnh!");
+        }
+
+        BufferedImage resizedImage = resizeImage(originalImage, TARGET_SIZE, TARGET_SIZE);
+
+        // Delete old main image if exists (any extension)
+        deleteOldMainImage(watchDir, watchId);
+
+        // Save to disk (GHI ĐÈ)
+        File outputFile = new File(watchDir + File.separator + newFilename);
+        String formatName = extension.substring(1).toLowerCase();
+        if (formatName.equals("jpg")) {
+            formatName = "jpeg";
+        }
+        ImageIO.write(resizedImage, formatName, outputFile);
+
+        // Return relative path for database
+        return "/uploads/watches/" + watchId + "/" + newFilename;
+    }
+
+    /**
+     * Upload watch gallery images - BỔ SUNG mới
+     * Path: C:/uploads/bshop/watches/{watch_id}/gallery-{watch_id}-{timestamp}-{seq}.{ext}
+     * 
+     * @param file         MultipartFile
+     * @param watchId      ID của đồng hồ
+     * @return Relative path: /uploads/bshop/watches/{watch_id}/gallery-{watch_id}-{timestamp}-{seq}.{ext}
+     */
+    public String uploadWatchGalleryImage(MultipartFile file, Integer watchId) throws IOException {
+        // Validate file
+        if (file.isEmpty()) {
+            throw new IOException("File rỗng!");
+        }
+
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new IOException("File không phải là ảnh!");
+        }
+
+        // Get extension
+        String originalFilename = file.getOriginalFilename();
+        String extension = ".jpg"; // default
+        if (originalFilename != null && originalFilename.contains(".")) {
+            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+
+        // Create directory: C:/uploads/bshop/watches/{watch_id}/
+        String watchDir = uploadDir + File.separator + "watches" + File.separator + watchId;
+        File watchDirFile = new File(watchDir);
+        if (!watchDirFile.exists()) {
+            watchDirFile.mkdirs();
+        }
+
+        // Get next sequence number
+        int nextSeq = getNextGallerySequence(watchDir, watchId);
+
+        // Filename: gallery-{watch_id}-{timestamp}-{seq}.{ext}
+        long timestamp = System.currentTimeMillis();
+        String newFilename = "gallery-" + watchId + "-" + timestamp + "-" + nextSeq + extension;
+
+        // Read and resize image
+        BufferedImage originalImage = ImageIO.read(file.getInputStream());
+        if (originalImage == null) {
+            throw new IOException("Không thể đọc file ảnh!");
+        }
+
+        BufferedImage resizedImage = resizeImage(originalImage, TARGET_SIZE, TARGET_SIZE);
+
+        // Save to disk (BỔ SUNG)
+        File outputFile = new File(watchDir + File.separator + newFilename);
+        String formatName = extension.substring(1).toLowerCase();
+        if (formatName.equals("jpg")) {
+            formatName = "jpeg";
+        }
+        ImageIO.write(resizedImage, formatName, outputFile);
+
+        // Return relative path for database
+        return "/uploads/watches/" + watchId + "/" + newFilename;
+    }
+
+    /**
+     * Delete old main image (any extension)
+     */
+    private void deleteOldMainImage(String watchDir, Integer watchId) {
+        File dir = new File(watchDir);
+        if (!dir.exists()) return;
+
+        File[] files = dir.listFiles((d, name) -> name.startsWith("main-" + watchId + "."));
+        if (files != null) {
+            for (File file : files) {
+                file.delete();
+            }
+        }
+    }
+
+    /**
+     * Get next sequence number for gallery images
+     */
+    private int getNextGallerySequence(String watchDir, Integer watchId) {
+        File dir = new File(watchDir);
+        if (!dir.exists()) return 1;
+
+        File[] files = dir.listFiles((d, name) -> name.startsWith("gallery-" + watchId + "-"));
+        return files == null ? 1 : files.length + 1;
+    }
+
+    /**
      * Upload watch image (tất cả vào chung folder watches/)
+     * DEPRECATED - use uploadWatchMainImage or uploadWatchGalleryImage instead
      * 
      * @param file      MultipartFile
-     * @param subfolder "main" hoặc "gallery" (chỉ để phân biệt logic, không tạo
-     *                  subfolder)
-     * @return Filename only: uuid.jpg (will be accessed via
-     *         /uploads/watches/uuid.jpg)
+     * @param subfolder "main" hoặc "gallery"
+     * @return Filename only
      */
+    @Deprecated
     public String uploadWatchImage(MultipartFile file, String subfolder) throws IOException {
         // Validate file
         if (file.isEmpty()) {

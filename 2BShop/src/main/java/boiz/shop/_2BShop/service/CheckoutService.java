@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -37,6 +38,17 @@ public class CheckoutService {
 
     @Autowired
     private PaymentMethodRepository paymentMethodRepository;
+
+    @Autowired
+    private MailService mailService;
+
+    /**
+     * Get order by ID
+     */
+    public Order getOrderById(Integer orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với ID: " + orderId));
+    }
 
     /**
      * DTO for checkout summary calculation
@@ -172,6 +184,7 @@ public class CheckoutService {
         order = orderRepository.save(order);
 
         // 5. Create OrderDetails & Update Stock
+        List<OrderDetail> orderDetailsList = new ArrayList<>();
         for (CartItem item : cartItems) {
             Watch watch = item.getWatch();
 
@@ -194,6 +207,7 @@ public class CheckoutService {
             detail.setSubtotal(priceAfterDiscount.multiply(new BigDecimal(item.getQuantity())));
 
             orderDetailRepository.save(detail);
+            orderDetailsList.add(detail); // Add to list for email
 
             // Update stock
             watch.setStockQuantity(watch.getStockQuantity() - item.getQuantity());
@@ -206,7 +220,16 @@ public class CheckoutService {
             couponService.markCouponUsed(summary.getCouponCode());
         }
 
-        // 7. Clear Cart
+        // 7. Send Order Confirmation Email
+        try {
+            mailService.sendOrderConfirmation(order, orderDetailsList);
+        } catch (Exception e) {
+            // Log error but don't fail order placement
+            System.err.println("Failed to send order confirmation email: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // 8. Clear Cart
         cartService.clearCart();
 
         return order;

@@ -64,6 +64,13 @@ public class CartController {
             int count = cartService.getCartItemCount();
             return ResponseEntity.ok()
                     .body(Map.of("success", true, "message", "Đã thêm vào giỏ hàng", "cartItemCount", count));
+        } catch (RuntimeException e) {
+            // Kiểm tra nếu là lỗi yêu cầu đăng nhập
+            if (e.getMessage() != null && e.getMessage().contains("đăng nhập")) {
+                return ResponseEntity.status(401)
+                        .body(Map.of("success", false, "message", e.getMessage(), "needLogin", true));
+            }
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         }

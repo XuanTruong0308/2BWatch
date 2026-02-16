@@ -154,15 +154,17 @@ public class WatchAdminController {
             // Save watch first to get ID
             Watch savedWatch = watchRepo.save(watch);
 
-            // Upload main image
+            // Upload main image - GHI ĐÈ
             if (mainImage != null && !mainImage.isEmpty()) {
-                String imagePath = fileUploadService.uploadWatchImage(mainImage, "main");
+                String imagePath = fileUploadService.uploadWatchMainImage(mainImage, savedWatch.getWatchId());
 
-                // Create or update main image
-                WatchImage mainImg = savedWatch.getImages().stream()
+                // Create or update main image record
+                WatchImage mainImg = savedWatch.getImages() != null 
+                    ? savedWatch.getImages().stream()
                         .filter(img -> img.getIsPrimary())
                         .findFirst()
-                        .orElse(new WatchImage());
+                        .orElse(new WatchImage())
+                    : new WatchImage();
 
                 mainImg.setWatch(savedWatch);
                 mainImg.setImageUrl(imagePath);
@@ -170,11 +172,11 @@ public class WatchAdminController {
                 watchImageRepo.save(mainImg);
             }
 
-            // Upload gallery images
+            // Upload gallery images - BỔ SUNG
             if (galleryImages != null && !galleryImages.isEmpty()) {
                 for (MultipartFile file : galleryImages) {
                     if (!file.isEmpty()) {
-                        String imagePath = fileUploadService.uploadWatchImage(file, "gallery");
+                        String imagePath = fileUploadService.uploadWatchGalleryImage(file, savedWatch.getWatchId());
 
                         WatchImage galleryImg = new WatchImage();
                         galleryImg.setWatch(savedWatch);

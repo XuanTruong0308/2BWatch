@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout/admin-layout :: layout(
+        pageTitle='Quản lý Brand',
+        activeMenu='brands',
+        content=~{::content},
+        customStyles=~{::styles},
+        customScripts=~{::scripts}
+      )}">
+<head>
+    <th:block th:fragment="styles">
+        <style>
+            .brand-logo-img {
+                width: 50px;
+                height: 50px;
+                object-fit: contain;
+                border-radius: 8px;
+                border: 2px solid #e9ecef;
+            }
+            
+            .action-buttons {
+                display: flex;
+                gap: 8px;
+            }
+            
+            .brand-status-badge {
+                padding: 6px 12px;
+                border-radius: 6px;
+                font-weight: 600;
+                font-size: 0.85rem;
+            }
+            
+            .brand-status-badge.active {
+                background: #d4f4dd;
+                color: #155724;
+            }
+            
+            .brand-status-badge.inactive {
+                background: #f8d7da;
+                color: #721c24;
+            }
+            
+            .product-count {
+                color: var(--navy);
+                font-weight: 600;
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+    <div th:fragment="content">
+        <!-- Header with Add Button -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0" style="color: var(--navy); font-weight: 700;">
+                <i class="fas fa-tags"></i> Danh Sách Brand
+            </h4>
+            <a th:href="@{/admin/brands/new}" class="btn btn-gold">
+                <i class="fas fa-plus"></i> Thêm Brand Mới
+            </a>
+        </div>
+        
+        <!-- Brands Table -->
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px;">ID</th>
+                            <th style="width: 100px;">LOGO</th>
+                            <th>TÊN BRAND</th>
+                            <th>MÔ TẢ</th>
+                            <th style="width: 120px;">SỐ SẢN PHẨM</th>
+                            <th style="width: 120px;">TRẠNG THÁI</th>
+                            <th style="width: 200px;">THAO TÁC</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="brand : ${brands}">
+                            <td>
+                                <strong style="color: var(--navy);" th:text="${brand.brandId}">1</strong>
+                            </td>
+                            <td>
+                                <img th:if="${brand.logoUrl != null && !brand.logoUrl.isEmpty()}" 
+                                     th:src="${brand.logoUrl}" 
+                                     alt="Logo" 
+                                     class="brand-logo-img">
+                                <div th:if="${brand.logoUrl == null || brand.logoUrl.isEmpty()}"
+                                     style="width: 50px; height: 50px; background: #e9ecef; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-image" style="color: #adb5bd;"></i>
+                                </div>
+                            </td>
+                            <td>
+                                <strong th:text="${brand.brandName}">Rolex</strong>
+                            </td>
+                            <td>
+                                <span th:text="${brand.description != null && !brand.description.isEmpty() ? brand.description : 'Chưa có mô tả'}">
+                                    Brand description
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span class="product-count" th:text="${brand.watches != null ? brand.watches.size() : 0}">0</span>
+                            </td>
+                            <td>
+                                <span th:if="${brand.isActive}" class="brand-status-badge active">
+                                    <i class="fas fa-check-circle"></i> Hoạt động
+                                </span>
+                                <span th:if="${!brand.isActive}" class="brand-status-badge inactive">
+                                    <i class="fas fa-times-circle"></i> Đã ẩn
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a th:href="@{/admin/brands/{id}/edit(id=${brand.brandId})}" 
+                                       class="btn btn-sm btn-primary">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    
+                                    <form th:if="${brand.isActive}" 
+                                          th:action="@{/admin/brands/{id}/delete(id=${brand.brandId})}" 
+                                          method="post" 
+                                          style="display: inline;"
+                                          onsubmit="return confirm('Bạn có chắc muốn xóa/ẩn brand này?');">
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                    
+                                    <form th:if="${!brand.isActive}" 
+                                          th:action="@{/admin/brands/{id}/activate(id=${brand.brandId})}" 
+                                          method="post" 
+                                          style="display: inline;">
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            <i class="fas fa-check"></i> Kích hoạt
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${brands == null || brands.isEmpty()}">
+                            <td colspan="7" class="text-center text-muted py-4">
+                                <i class="fas fa-inbox" style="font-size: 2.5rem; opacity: 0.3;"></i>
+                                <p class="mb-0 mt-2">Chưa có brand nào</p>
+                                <a th:href="@{/admin/brands/new}" class="btn btn-sm btn-gold mt-3">
+                                    <i class="fas fa-plus"></i> Thêm Brand Đầu Tiên
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Statistics Card -->
+        <div class="row g-4 mt-3">
+            <div class="col-md-4">
+                <div class="stat-card gold">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-2"><strong>Tổng Brand</strong></p>
+                            <h3 class="mb-0" style="color: var(--gold);" th:text="${brands != null ? brands.size() : 0}">0</h3>
+                        </div>
+                        <div class="stat-icon gold">
+                            <i class="fas fa-tags"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card success">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-2"><strong>Đang Hoạt Động</strong></p>
+                            <h3 class="mb-0" style="color: #28a745;" 
+                                th:text="${brands != null ? brands.stream().filter(b -> b.isActive).count() : 0}">0</h3>
+                        </div>
+                        <div class="stat-icon success">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card info">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-2"><strong>Đã Ẩn</strong></p>
+                            <h3 class="mb-0" style="color: #dc3545;" 
+                                th:text="${brands != null ? brands.stream().filter(b -> !b.isActive).count() : 0}">0</h3>
+                        </div>
+                        <div class="stat-icon info">
+                            <i class="fas fa-eye-slash"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <th:block th:fragment="scripts">
+        <script>
+            // Auto dismiss alerts after 3 seconds
+            setTimeout(function() {
+                $('.alert').fadeOut('slow');
+            }, 3000);
+        </script>
+    </th:block>
+</body>
+</html>

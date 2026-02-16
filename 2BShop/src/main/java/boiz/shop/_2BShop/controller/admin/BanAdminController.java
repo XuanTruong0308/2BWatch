@@ -61,24 +61,30 @@ public class BanAdminController {
 
         // Count currently banned users (isEnabled = false)
         long bannedCount = userRepo.findByIsEnabled(false, PageRequest.of(0, 1)).getTotalElements();
+        
+        // Count active ban logs
+        long activeBanCount = banLogRepo.findByIsActive(true, PageRequest.of(0, 1)).getTotalElements();
 
         model.addAttribute("banLogs", banLogs);
         model.addAttribute("bannedCount", bannedCount);
+        model.addAttribute("activeBanCount", activeBanCount);
         model.addAttribute("selectedIsActive", isActive);
 
         return "admin/ban-logs";
     }
 
     /**
-     * List all banned users
+     * List all banned users (users with active ban logs)
      * URL: /admin/bans/banned-users
      */
     @GetMapping("/banned-users")
     public String listBannedUsers(
             @RequestParam(defaultValue = "0") int page,
             Model model) {
-        Pageable pageable = PageRequest.of(page, 20, Sort.by("updatedDate").descending());
-        Page<User> bannedUsers = userRepo.findByIsEnabled(false, pageable);
+        Pageable pageable = PageRequest.of(page, 20, Sort.by("banStartDate").descending());
+        
+        // Get active ban logs (users currently banned)
+        Page<BanLog> bannedUsers = banLogRepo.findByIsActive(true, pageable);
 
         model.addAttribute("bannedUsers", bannedUsers);
 

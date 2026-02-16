@@ -86,6 +86,9 @@ public interface WatchRepository extends JpaRepository<Watch, Integer> {
 
     List<Watch> findTop4ByBrandBrandNameOrCategoryCategoryNameAndWatchIdNot(String brand, String category,
             Integer watchId);
+    
+    // Find by same brand only (for related products)
+    List<Watch> findTop4ByBrandBrandIdAndWatchIdNotAndIsActiveTrue(Integer brandId, Integer watchId);
 
     // Count methods
     Long countByIsActiveTrue();

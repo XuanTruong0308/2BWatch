@@ -30,9 +30,26 @@ public class CartService {
     private UserRepository userRepository;
 
     /**
+     * Kiểm tra user đã đăng nhập chưa
+     */
+    private boolean isUserAuthenticated() {
+        try {
+            org.springframework.security.core.Authentication auth = 
+                SecurityContextHolder.getContext().getAuthentication();
+            return auth != null && auth.isAuthenticated() && !auth.getName().equals("anonymousUser");
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
      * Lấy giỏ hàng của user hiện tại
      */
     private Cart getCurrentUserCart() {
+        if (!isUserAuthenticated()) {
+            throw new RuntimeException("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!");
+        }
+        
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
         User user = userRepository.findByEmail(email)
@@ -130,7 +147,14 @@ public class CartService {
      * Đếm số lượng items trong giỏ
      */
     public int getCartItemCount() {
-        return getCurrentUserCartItems().size();
+        try {
+            if (!isUserAuthenticated()) {
+                return 0;
+            }
+            return getCurrentUserCartItems().size();
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     /**

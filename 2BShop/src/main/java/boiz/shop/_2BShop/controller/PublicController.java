@@ -246,7 +246,7 @@ public class PublicController {
             Watch watch = watchService.findById(id)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + id));
 
-            // Sản phẩm liên quan (cùng brand hoặc category)
+            // Sản phẩm liên quan (cùng brand)
             List<Watch> relatedWatches = watchService.findRelatedProducts(watch, 4);
 
             model.addAttribute("watch", watch);

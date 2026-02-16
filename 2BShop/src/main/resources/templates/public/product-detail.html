@@ -7,6 +7,275 @@
 
 <body>
     <div th:fragment="content">
+        <!-- Owl Carousel CSS -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css">
+        
+        <style>
+        /* Product Images Container */
+        .product-images-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* Gallery Styles */
+        .product-gallery {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #f8f9fa;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            width: 100%;
+        }
+        
+        .product-gallery .owl-carousel {
+            width: 100%;
+        }
+        
+        .product-gallery .owl-stage-outer {
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        .product-gallery .owl-stage {
+            display: flex;
+            transition: all 0.8s ease;
+        }
+        
+        .product-gallery .owl-item {
+            width: 100%;
+            flex-shrink: 0;
+        }
+        
+        .product-gallery .gallery-item {
+            position: relative;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 500px;
+            width: 100%;
+        }
+        
+        .product-gallery .gallery-image {
+            width: 100%;
+            height: 500px;
+            object-fit: contain;
+            transition: transform 0.4s ease;
+        }
+        
+        .product-gallery .gallery-item:hover .gallery-image {
+            transform: scale(1.05);
+        }
+        
+        /* Owl Carousel Navigation Arrows - Main Gallery */
+        .product-gallery .owl-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10px;
+            pointer-events: none;
+        }
+        
+        .product-gallery .owl-nav button {
+            pointer-events: all;
+            width: 50px;
+            height: 50px;
+            background: rgba(26, 54, 93, 0.9) !important;
+            color: white !important;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .product-gallery .owl-nav button:hover {
+            background: #d4af37 !important;
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+        }
+        
+        .product-gallery .owl-nav button.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        .product-gallery .owl-nav button i {
+            font-size: 18px;
+        }
+        
+        /* Thumbnails Carousel */
+        .product-thumbnails {
+            margin-top: 20px;
+            padding: 0 10px;
+        }
+        
+        .product-thumbnails .thumbnail-item {
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .product-thumbnails .thumbnail-image {
+            width: 100%;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 3px solid #e2e8f0;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .product-thumbnails .thumbnail-item:hover .thumbnail-image {
+            border-color: #d4af37;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+        }
+        
+        .product-thumbnails .owl-item.center .thumbnail-image,
+        .product-thumbnails .owl-item.active-thumbnail .thumbnail-image {
+            border-color: #1a365d;
+            box-shadow: 0 4px 16px rgba(26, 54, 93, 0.4);
+            transform: scale(1.05);
+        }
+        
+        /* Thumbnail Navigation Arrows */
+        .product-thumbnails .owl-nav {
+            display: flex;
+            justify-content: space-between;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
+            left: 0;
+            pointer-events: none;
+        }
+        
+        .product-thumbnails .owl-nav button {
+            pointer-events: all;
+            width: 36px;
+            height: 36px;
+            background: rgba(26, 54, 93, 0.85) !important;
+            color: white !important;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            margin: 0 -5px;
+        }
+        
+        .product-thumbnails .owl-nav button:hover {
+            background: #d4af37 !important;
+            transform: scale(1.15);
+        }
+        
+        .product-thumbnails .owl-nav button.disabled {
+            opacity: 0.2;
+            cursor: not-allowed;
+        }
+        
+        /* Discount Badge */
+        .discount-badge {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 18px;
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(255, 68, 68, 0.4);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+        
+        .product-gallery .owl-item img {
+            display: block;
+            width: 100%;
+        }
+        
+        /* Thumbnails - show all items in view */
+        .product-thumbnails .owl-item {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Loading placeholder */
+        .product-gallery .gallery-item::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e2e8f0;
+            border-top-color: #1a365d;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .product-gallery .gallery-item.loading::before {
+            opacity: 1;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .product-gallery .gallery-item {
+                min-height: 350px;
+            }
+            
+            .product-gallery .gallery-image {
+                height: 350px;
+            }
+            
+            .product-gallery .owl-nav button {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+            
+            .product-thumbnails .thumbnail-image {
+                height: 70px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div th:fragment="content">
         <!-- Breadcrumb -->
         <section class="breadcrumb-section">
             <div class="container">
@@ -24,25 +293,29 @@
         <section class="product-detail-section">
             <div class="container">
                 <div class="product-detail-grid">
-                    <!-- Product Images -->
-                    <div class="product-images">
-                        <div class="main-image">
-                            <img th:src="${watch.images != null and !watch.images.isEmpty() ? watch.images[0].imageUrl : '/images/watches/default.jpg'}"
-                                th:alt="${watch.watchName}" id="mainProductImage">
-
-                            <!-- Discount Badge -->
-                            <div class="discount-badge"
-                                th:if="${watch.discountPercent != null and watch.discountPercent > 0}">
-                                <span th:text="'-' + ${watch.discountPercent} + '%'">-20%</span>
+                    <!-- Product Images with Owl Carousel -->
+                    <div class="product-images-container">
+                        <!-- Main Image Gallery (Owl Carousel) -->
+                        <div class="owl-carousel owl-theme product-gallery" id="productMainGallery">
+                            <div class="gallery-item" th:each="image : ${watch.images}">
+                                <img th:src="${image.imageUrl}" 
+                                     th:alt="${watch.watchName}"
+                                     class="gallery-image">
+                                
+                                <!-- Discount Badge on first image -->
+                                <div class="discount-badge"
+                                    th:if="${image.isPrimary && watch.discountPercent != null and watch.discountPercent > 0}">
+                                    <span th:text="'-' + ${watch.discountPercent} + '%'">-20%</span>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Thumbnail Images -->
-                        <div class="thumbnail-images" th:if="${watch.images != null and watch.images.size() > 1}">
-                            <div class="thumbnail" th:each="image, iter : ${watch.images}"
-                                th:classappend="${iter.index == 0 ? 'active' : ''}"
-                                th:onclick="'changeMainImage(\'' + ${image.imageUrl} + '\')'">
-                                <img th:src="${image.imageUrl}" th:alt="${watch.watchName}">
+                        <!-- Thumbnail Navigation (Owl Carousel) -->
+                        <div class="owl-carousel owl-theme product-thumbnails" id="productThumbnails" th:if="${watch.images != null and watch.images.size() > 1}">
+                            <div class="thumbnail-item" th:each="image : ${watch.images}">
+                                <img th:src="${image.imageUrl}" 
+                                     th:alt="${watch.watchName}"
+                                     class="thumbnail-image">
                             </div>
                         </div>
                     </div>
@@ -194,7 +467,7 @@
                 </div>
 
                 <div class="products-grid">
-                    <div class="product-card" th:each="product : ${relatedProducts}">
+                    <div class="product-card" th:each="product : ${relatedWatches}">
                         <a th:href="@{/watches/{id}(id=${product.watchId})}">
                             <div class="product-image-wrapper">
                                 <img th:src="${product.images != null and !product.images.isEmpty() ? product.images[0].imageUrl : '/images/watches/default.jpg'}"
@@ -228,34 +501,355 @@
                 </div>
             </div>
         </section>
+
+        <!-- Scripts must be inside content fragment -->
+        <script th:inline="javascript">
+            function changeMainImage(imageUrl) {
+                document.getElementById('mainProductImage').src = imageUrl;
+
+                // Update active thumbnail
+                document.querySelectorAll('.thumbnail').forEach(thumb => thumb.classList.remove('active'));
+                event.currentTarget.classList.add('active');
+            }
+
+            function increaseQuantity() {
+                const input = document.getElementById('quantity');
+                const max = parseInt(input.max);
+                const current = parseInt(input.value);
+                if (current < max) {
+                    input.value = current + 1;
+                }
+            }
+
+            function decreaseQuantity() {
+                const input = document.getElementById('quantity');
+                const current = parseInt(input.value);
+                if (current > 1) {
+                    input.value = current - 1;
+                }
+            }
+        </script>
+        
+        <!-- jQuery (Load first) -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <!-- Owl Carousel JS -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+        
+        <script>
+            $(document).ready(function() {
+                console.log('jQuery loaded:', typeof jQuery !== 'undefined');
+                console.log('Owl Carousel loaded:', typeof $.fn.owlCarousel !== 'undefined');
+                
+                // Main gallery carousel
+                var mainGallery = $('#productMainGallery');
+                var thumbnails = $('#productThumbnails');
+                
+                console.log('Main gallery found:', mainGallery.length);
+                console.log('Thumbnails found:', thumbnails.length);
+                
+                // Check if elements exist
+                if (mainGallery.length === 0) {
+                    console.warn('Main gallery not found');
+                    return;
+                }
+                
+                // Initialize main gallery
+                mainGallery.owlCarousel({
+                    items: 1,
+                    loop: false,
+                    margin: 0,
+                    nav: true,
+                    dots: false,
+                    navText: [
+                        '<i class="fas fa-chevron-left"></i>', 
+                        '<i class="fas fa-chevron-right"></i>'
+                    ],
+                    autoplay: false,
+                    smartSpeed: 600,
+                    onInitialized: function(event) {
+                        console.log('Main gallery initialized with ' + event.item.count + ' items');
+                    }
+                });
+                
+                // Initialize thumbnails carousel if exists
+                if (thumbnails.length > 0) {
+                    thumbnails.owlCarousel({
+                        items: 4,
+                        loop: false,
+                        margin: 10,
+                        nav: true,
+                        dots: false,
+                        navText: [
+                            '<i class="fas fa-chevron-left"></i>', 
+                            '<i class="fas fa-chevron-right"></i>'
+                        ],
+                        smartSpeed: 400,
+                        responsive: {
+                            0: {
+                                items: 3,
+                                margin: 8
+                            },
+                            480: {
+                                items: 4,
+                                margin: 10
+                            },
+                            768: {
+                                items: 5,
+                                margin: 12
+                            }
+                        },
+                        onInitialized: function(event) {
+                            // Mark first thumbnail as active
+                            thumbnails.find('.owl-item').eq(0).addClass('active-thumbnail');
+                        }
+                    });
+                    
+                    // Click thumbnail to change main image
+                    thumbnails.on('click', '.thumbnail-item', function(e) {
+                        e.preventDefault();
+                        var index = $(this).parents('.owl-item').index();
+                        
+                        // Change main gallery
+                        mainGallery.trigger('to.owl.carousel', [index, 600, true]);
+                        
+                        // Update active thumbnail
+                        thumbnails.find('.owl-item').removeClass('active-thumbnail');
+                        $(this).parents('.owl-item').addClass('active-thumbnail');
+                    });
+                    
+                    // Sync thumbnails when main gallery changes
+                    mainGallery.on('changed.owl.carousel', function(event) {
+                        var index = event.item.index;
+                        
+                        // Update active thumbnail
+                        thumbnails.find('.owl-item').removeClass('active-thumbnail');
+                        thumbnails.find('.owl-item').eq(index).addClass('active-thumbnail');
+                        
+                        // Center thumbnail in view
+                        thumbnails.trigger('to.owl.carousel', [index, 400, true]);
+                    });
+                }
+                
+                // Keyboard navigation
+                $(document).on('keydown', function(e) {
+                    if (e.keyCode === 37) { // Left arrow
+                        mainGallery.trigger('prev.owl.carousel');
+                    } else if (e.keyCode === 39) { // Right arrow
+                        mainGallery.trigger('next.owl.carousel');
+                    }
+                });
+                
+                // Lazy load images
+                mainGallery.find('img').on('load', function() {
+                    $(this).parent('.gallery-item').removeClass('loading');
+                }).each(function() {
+                    if (this.complete) {
+                        $(this).trigger('load');
+                    } else {
+                        $(this).parent('.gallery-item').addClass('loading');
+                    }
+                });
+                
+                console.log('Owl Carousel initialized successfully');
+            });
+        </script>
+
+        <!-- Product Actions Script -->
+        <script th:inline="javascript">
+            // Increase quantity
+            function increaseQuantity() {
+                var input = document.getElementById('quantity');
+                var currentValue = parseInt(input.value);
+                var maxValue = parseInt(input.max);
+                
+                if (currentValue < maxValue) {
+                    input.value = currentValue + 1;
+                }
+            }
+
+            // Decrease quantity
+            function decreaseQuantity() {
+                var input = document.getElementById('quantity');
+                var currentValue = parseInt(input.value);
+                var minValue = parseInt(input.min);
+                
+                if (currentValue > minValue) {
+                    input.value = currentValue - 1;
+                }
+            }
+
+            // Add to cart
+            function addToCart(watchId) {
+                var quantity = parseInt(document.getElementById('quantity').value);
+                
+                // Validate quantity
+                if (isNaN(quantity) || quantity < 1) {
+                    showNotification('Vui lòng nhập số lượng hợp lệ', 'error');
+                    return;
+                }
+
+                // Show loading
+                var btn = $('.btn-add-to-cart');
+                var originalText = btn.html();
+                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Đang thêm...');
+
+                // Get CSRF token
+                var token = $('meta[name="_csrf"]').attr('content');
+                var header = $('meta[name="_csrf_header"]').attr('content');
+
+                // Send request
+                var headers = {
+                    'Content-Type': 'application/json'
+                };
+                if (token && header) {
+                    headers[header] = token;
+                }
+
+                fetch('/cart/add', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({
+                        watchId: watchId,
+                        quantity: quantity
+                    })
+                })
+                .then(response => {
+                    // Check if need login (403 Forbidden hoặc 401 Unauthorized)
+                    if (response.status === 401 || response.status === 403) {
+                        btn.prop('disabled', false).html(originalText);
+                        showNotification('Vui lòng đăng nhập để thêm vào giỏ hàng', 'error');
+                        setTimeout(function() {
+                            window.location.href = '/login?continue=' + encodeURIComponent(window.location.pathname);
+                        }, 1500);
+                        throw new Error('Need login');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    btn.prop('disabled', false).html(originalText);
+                    
+                    if (data.success) {
+                        showNotification(data.message, 'success');
+                        updateCartBadge(data.cartItemCount);
+                        
+                        // Reset quantity to 1
+                        document.getElementById('quantity').value = 1;
+                    } else {
+                        // Nếu cần đăng nhập, redirect đến trang login
+                        if (data.needLogin) {
+                            showNotification(data.message, 'error');
+                            setTimeout(function() {
+                                window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+                            }, 1500);
+                        } else {
+                            showNotification(data.message || 'Không thể thêm vào giỏ hàng', 'error');
+                        }
+                    }
+                })
+                .catch(error => {
+                    // Don't show error if redirecting to login
+                    if (error.message === 'Need login') {
+                        return;
+                    }
+                    console.error('Error:', error);
+                    btn.prop('disabled', false).html(originalText);
+                    showNotification('Có lỗi xảy ra! Vui lòng thử lại', 'error');
+                });
+            }
+
+            // Show notification
+            function showNotification(message, type) {
+                // Remove existing notifications
+                $('.product-notification').remove();
+                
+                // Create notification element
+                var icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+                var bgColor = type === 'success' ? '#d4af37' : '#dc3545';
+                
+                var notification = $('<div class="product-notification">')
+                    .css({
+                        'position': 'fixed',
+                        'top': '80px',
+                        'right': '20px',
+                        'background': bgColor,
+                        'color': 'white',
+                        'padding': '16px 24px',
+                        'border-radius': '8px',
+                        'box-shadow': '0 4px 12px rgba(0,0,0,0.15)',
+                        'z-index': 9999,
+                        'display': 'flex',
+                        'align-items': 'center',
+                        'gap': '12px',
+                        'animation': 'slideInRight 0.3s ease',
+                        'min-width': '300px',
+                        'max-width': '400px'
+                    })
+                    .html('<i class="fas ' + icon + '" style="font-size: 20px;"></i><span style="font-weight: 500;">' + message + '</span>');
+                
+                $('body').append(notification);
+                
+                // Auto hide after 3 seconds
+                setTimeout(function() {
+                    notification.fadeOut(300, function() {
+                        $(this).remove();
+                    });
+                }, 3000);
+            }
+
+            // Update cart badge
+            function updateCartBadge(count) {
+                var cartLink = $('a[href="/cart"].nav-icon');
+                var badge = cartLink.find('.cart-badge, .cart-count');
+                
+                // Nếu badge chưa tồn tại, tạo mới
+                if (badge.length === 0) {
+                    badge = $('<span class="cart-badge">0</span>');
+                    cartLink.append(badge);
+                }
+                
+                if (count !== undefined && count !== null) {
+                    if (count > 0) {
+                        badge.text(count).show();
+                    } else {
+                        badge.hide();
+                    }
+                } else {
+                    // Fetch current count if not provided
+                    fetch('/cart/count')
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.count > 0) {
+                                badge.text(data.count).show();
+                            } else {
+                                badge.hide();
+                            }
+                        })
+                        .catch(error => console.error('Error fetching cart count:', error));
+                }
+            }
+
+            // Add CSS animation
+            $('<style>')
+                .text(`
+                    @keyframes slideInRight {
+                        from {
+                            transform: translateX(400px);
+                            opacity: 0;
+                        }
+                        to {
+                            transform: translateX(0);
+                            opacity: 1;
+                        }
+                    }
+                `)
+                .appendTo('head');
+
+            // Load cart count on page load
+            $(document).ready(function() {
+                updateCartBadge();
+            });
+        </script>
     </div>
-
-    <script th:inline="javascript">
-        function changeMainImage(imageUrl) {
-            document.getElementById('mainProductImage').src = imageUrl;
-
-            // Update active thumbnail
-            document.querySelectorAll('.thumbnail').forEach(thumb => thumb.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-        }
-
-        function increaseQuantity() {
-            const input = document.getElementById('quantity');
-            const max = parseInt(input.max);
-            const current = parseInt(input.value);
-            if (current < max) {
-                input.value = current + 1;
-            }
-        }
-
-        function decreaseQuantity() {
-            const input = document.getElementById('quantity');
-            const current = parseInt(input.value);
-            if (current > 1) {
-                input.value = current - 1;
-            }
-        }
-    </script>
 </body>
 
 </html>
