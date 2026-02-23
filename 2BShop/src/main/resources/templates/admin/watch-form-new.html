@@ -39,25 +39,6 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        <!-- Alert Messages -->
-                        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <i class="fas fa-exclamation-circle me-2"></i>
-                            <span th:text="${error}">Error message</span>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                        
-                        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
-                            <i class="fas fa-check-circle me-2"></i>
-                            <span th:text="${success}">Success message</span>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                        
-                        <div th:if="${warning}" class="alert alert-warning alert-dismissible fade show" role="alert">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            <span th:text="${warning}">Warning message</span>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-
                         <!-- Product Form -->
                         <form th:action="@{/admin/watches/save}" method="post" enctype="multipart/form-data" th:object="${watch}">
                             <input type="hidden" th:field="*{watchId}" />
@@ -127,41 +108,37 @@
                                             <label for="price" class="form-label">
                                                 Giá gốc (₫) <span class="text-danger">*</span>
                                             </label>
-                                            <input type="number" 
+                                            <input type="text" 
                                                    class="form-control" 
                                                    id="price" 
                                                    th:field="*{price}" 
-                                                   min="0" 
-                                                   step="1000"
-                                                   required
                                                    placeholder="0">
+                                            <div class="invalid-feedback"></div>
                                         </div>
                                         
                                         <div class="col-md-4 mb-3">
                                             <label for="discountPercent" class="form-label">
                                                 Giảm giá (%)
                                             </label>
-                                            <input type="number" 
+                                            <input type="text" 
                                                    class="form-control" 
                                                    id="discountPercent" 
                                                    th:field="*{discountPercent}" 
-                                                   min="0" 
-                                                   max="100"
                                                    placeholder="0">
                                             <small class="text-muted">0-100%</small>
+                                            <div class="invalid-feedback"></div>
                                         </div>
                                         
                                         <div class="col-md-4 mb-3">
                                             <label for="stockQuantity" class="form-label">
                                                 Tồn kho <span class="text-danger">*</span>
                                             </label>
-                                            <input type="number" 
+                                            <input type="text" 
                                                    class="form-control" 
                                                    id="stockQuantity" 
                                                    th:field="*{stockQuantity}" 
-                                                   min="0" 
-                                                   required
                                                    placeholder="0">
+                                            <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -283,6 +260,75 @@
                     reader.readAsDataURL(input.files[0]);
                 } else {
                     preview.style.display = 'none';
+                }
+            }
+
+            // Form validation
+            document.querySelector('form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                let isValid = true;
+                
+                // Clear previous errors
+                document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+                
+                // Validate price
+                const priceInput = document.getElementById('price');
+                const priceValue = priceInput.value.trim();
+                if (!priceValue) {
+                    showError(priceInput, 'Vui lòng nhập giá gốc');
+                    isValid = false;
+                } else if (!/^\d+$/.test(priceValue)) {
+                    showError(priceInput, 'Giá gốc phải là số nguyên dương');
+                    isValid = false;
+                } else if (priceValue.length > 15) {
+                    showError(priceInput, 'Giá gốc không được vượt quá 15 chữ số');
+                    isValid = false;
+                } else if (parseInt(priceValue) <= 0) {
+                    showError(priceInput, 'Giá gốc phải lớn hơn 0');
+                    isValid = false;
+                }
+                
+                // Validate discount percent
+                const discountInput = document.getElementById('discountPercent');
+                const discountValue = discountInput.value.trim();
+                if (discountValue && !/^\d+$/.test(discountValue)) {
+                    showError(discountInput, 'Giảm giá phải là số nguyên');
+                    isValid = false;
+                } else if (discountValue && (parseInt(discountValue) < 0 || parseInt(discountValue) > 100)) {
+                    showError(discountInput, 'Giảm giá phải từ 0-100%');
+                    isValid = false;
+                }
+                
+                // Validate stock quantity
+                const stockInput = document.getElementById('stockQuantity');
+                const stockValue = stockInput.value.trim();
+                if (!stockValue) {
+                    showError(stockInput, 'Vui lòng nhập tồn kho');
+                    isValid = false;
+                } else if (!/^\d+$/.test(stockValue)) {
+                    showError(stockInput, 'Tồn kho phải là số nguyên dương');
+                    isValid = false;
+                } else if (parseInt(stockValue) < 0) {
+                    showError(stockInput, 'Tồn kho không được âm');
+                    isValid = false;
+                }
+                
+                if (isValid) {
+                    this.submit();
+                }
+            });
+            
+            function showError(input, message) {
+                input.classList.add('is-invalid');
+                const feedback = input.nextElementSibling;
+                if (feedback && feedback.classList.contains('invalid-feedback')) {
+                    feedback.textContent = message;
+                } else if (feedback && feedback.classList.contains('text-muted')) {
+                    const errorDiv = feedback.nextElementSibling;
+                    if (errorDiv && errorDiv.classList.contains('invalid-feedback')) {
+                        errorDiv.textContent = message;
+                    }
                 }
             }
 

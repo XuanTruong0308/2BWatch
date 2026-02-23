@@ -492,4 +492,14 @@ public class PublicController {
     public String faqPage() {
         return "public/faq";
     }
+
+    /**
+     * Handler cho .well-known requests (Safari/iOS auto-requests)
+     * Trả về 204 No Content để tránh spam log 404
+     */
+    @GetMapping("/.well-known/**")
+    @ResponseBody
+    public org.springframework.http.ResponseEntity<Void> handleWellKnown() {
+        return org.springframework.http.ResponseEntity.noContent().build();
+    }
 }

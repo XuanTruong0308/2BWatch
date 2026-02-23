@@ -20,6 +20,7 @@ public class WatchImage {
     @Column(name = "is_primary")
     private Boolean isPrimary = false;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "watch_id", nullable = false)
     private Watch watch;

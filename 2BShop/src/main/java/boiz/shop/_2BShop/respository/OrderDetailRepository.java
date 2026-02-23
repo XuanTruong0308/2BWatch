@@ -9,11 +9,11 @@ import java.util.List;
 
 @Repository
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, Integer> {
-    @EntityGraph(attributePaths = {"watch"})
+    @EntityGraph(attributePaths = {"watch", "watch.images"})
     List<OrderDetail> findByOrderOrderId(Integer orderId);
     
     // Thêm method cho OrderService
-    @EntityGraph(attributePaths = {"watch"})
+    @EntityGraph(attributePaths = {"watch", "watch.images"})
     List<OrderDetail> findByOrder(Order order);
     
     // Admin methods

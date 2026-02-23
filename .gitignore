@@ -7,6 +7,19 @@ target/
 ### Documentation (Private) ###
 ../*.md
 !../README.md
+../knowledged/
+knowledged/
+**/knowledged/
+
+### Sensitive Configuration ###
+**/src/main/resources/application.properties
+**/src/main/resources/application-*.properties
+!**/src/main/resources/application.properties.example
+
+### Uploads & User Data ###
+uploads/
+C:/uploads/
+**/uploads/
 
 ### STS ###
 .apt_generated

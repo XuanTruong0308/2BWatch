@@ -1,228 +1,237 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Users - Admin</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body class="admin-body">
-    <div class="admin-container">
-        <!-- Sidebar -->
-        <aside class="admin-sidebar">
-            <div class="admin-logo">
-                <i class="fas fa-crown"></i>
-                <h2>2BShop Admin</h2>
-            </div>
-            
-            <nav class="admin-nav">
-                <a href="/admin" class="admin-nav-item">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a href="/admin/watches" class="admin-nav-item">
-                    <i class="fas fa-clock"></i>
-                    <span>Quản Lý Đồng Hồ</span>
-                </a>
-                <a href="/admin/orders" class="admin-nav-item">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span>Quản Lý Đơn Hàng</span>
-                </a>
-                <a href="/admin/users" class="admin-nav-item active">
-                    <i class="fas fa-users"></i>
-                    <span>Quản Lý Users</span>
-                </a>
-                <a href="/admin/payments" class="admin-nav-item">
-                    <i class="fas fa-credit-card"></i>
-                    <span>Thanh Toán</span>
-                </a>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout/admin-layout :: layout(
+        pageTitle='Quản Lý Người Dùng',
+        activeMenu='users',
+        content=~{::content},
+        customStyles=~{},
+        customScripts=~{::customScripts}
+      )}">
+<body>
+    <div th:fragment="content">
+        <!-- Filters & Search -->
+        <div class="table-container mb-4">
+            <div class="row align-items-center g-3">
+                <div class="col-md-4">
+                    <form method="get" class="input-group">
+                        <input type="text" name="keyword" class="form-control" placeholder="Tìm theo tên, email..."
+                               th:value="${keyword}">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                </div>
                 
-                <div class="admin-nav-divider"></div>
-                
-                <a href="/" class="admin-nav-item">
-                    <i class="fas fa-home"></i>
-                    <span>Về Trang Chủ</span>
-                </a>
-                <form th:action="@{/logout}" method="post" style="margin: 0;">
-                    <button type="submit" class="admin-nav-item" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer;">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>Đăng Xuất</span>
-                    </button>
-                </form>
-            </nav>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="admin-main">
-            <header class="admin-header">
-                <div class="admin-header-left">
-                    <button class="admin-mobile-toggle">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <h1>Quản Lý Users</h1>
-                </div>
-            </header>
-
-            <!-- Filters -->
-            <div class="admin-filters">
-                <div class="filter-group">
-                    <input type="text" placeholder="Tìm kiếm theo tên, email..." class="filter-input">
-                </div>
-                <div class="filter-group">
-                    <select class="filter-select">
-                        <option value="">Tất cả vai trò</option>
-                        <option>USER</option>
-                        <option>ADMIN</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <select class="filter-select">
+                <div class="col-md-3">
+                    <select class="form-select" onchange="window.location.href='/admin/users?isActive=' + this.value">
                         <option value="">Tất cả trạng thái</option>
-                        <option>Active</option>
-                        <option>Banned</option>
+                        <option value="true" th:selected="${selectedIsActive == true}">Active</option>
+                        <option value="false" th:selected="${selectedIsActive == false}">Banned</option>
                     </select>
                 </div>
+                
+                <div class="col-md-5 text-end">
+                    <span class="badge bg-info fs-6 me-2">
+                        Tổng: <span th:text="${users.totalElements}">0</span> users
+                    </span>
+                </div>
             </div>
-
-            <!-- Users Table -->
-            <div class="admin-section">
-                <div class="admin-table-container">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Họ Tên</th>
-                                <th>Email</th>
-                                <th>SĐT</th>
-                                <th>Vai Trò</th>
-                                <th>Trạng Thái</th>
-                                <th>Ngày Đăng Ký</th>
-                                <th>Thao Tác</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="user : ${users}">
-                                <td th:text="${user.userId}">1</td>
-                                <td th:text="${user.fullName}">Nguyen Van A</td>
-                                <td th:text="${user.email}">user@example.com</td>
-                                <td th:text="${user.phone}">0123456789</td>
-                                <td>
-                                    <span class="badge info" 
-                                          th:each="role : ${user.roles}"
-                                          th:text="${role.name}">
-                                        USER
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="badge" 
-                                          th:classappend="${user.banStatus != null ? 'danger' : 'success'}"
-                                          th:text="${user.banStatus != null ? 'Banned' : 'Active'}">
-                                        Active
-                                    </span>
-                                </td>
-                                <td th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy')}">
-                                    01/01/2026
-                                </td>
-                                <td class="table-actions">
+        </div>
+        
+        <!-- Users Table -->
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Họ Tên</th>
+                            <th>Email</th>
+                            <th>SĐT</th>
+                            <th>Vai Trò</th>
+                            <th class="text-center">Trạng Thái</th>
+                            <th>Ngày Đăng Ký</th>
+                            <th class="text-center">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="user : ${users}">
+                            <td><strong th:text="${user.userId}">1</strong></td>
+                            <td>
+                                <div>
+                                    <strong th:text="${user.fullName}">Nguyen Van A</strong><br>
+                                    <small class="text-muted" th:text="'@' + ${user.username}">@username</small>
+                                </div>
+                            </td>
+                            <td th:text="${user.email}">user@example.com</td>
+                            <td th:text="${user.phone}">0123456789</td>
+                            <td>
+                                <span th:each="userRole : ${user.userRoles}" 
+                                      class="badge bg-secondary me-1" 
+                                      th:text="${userRole.role.roleName}">
+                                    USER
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge" 
+                                      th:classappend="${user.isEnabled ? 'bg-success' : 'bg-danger'}"
+                                      th:text="${user.isEnabled ? 'Active' : 'Banned'}">
+                                    Active
+                                </span>
+                            </td>
+                            <td th:text="${#temporals.format(user.createdDate, 'dd/MM/yyyy')}">
+                                01/01/2026
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
                                     <a th:href="@{/admin/users/{id}(id=${user.userId})}" 
-                                       class="btn-action" title="Xem chi tiết">
+                                       class="btn btn-info" title="Xem chi tiết">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <button th:if="${user.banStatus == null}" 
-                                            class="btn-action danger" 
+                                    <button th:if="${user.isEnabled}" 
+                                            class="btn btn-warning" 
                                             onclick="showBanModal(this)" 
                                             th:data-user-id="${user.userId}"
                                             title="Ban user">
                                         <i class="fas fa-ban"></i>
                                     </button>
-                                    <form th:if="${user.banStatus != null}"
-                                          th:action="@{/admin/users/{id}/unban(id=${user.userId})}" 
+                                    <form th:if="${!user.isEnabled}"
+                                          th:action="@{/admin/users/unban/{id}(id=${user.userId})}" 
                                           method="post" style="display: inline;">
-                                        <button type="submit" class="btn-action success" title="Unban">
+                                        <button type="submit" class="btn btn-success" title="Unban">
                                             <i class="fas fa-check-circle"></i>
                                         </button>
                                     </form>
-                                </td>
-                            </tr>
-                            <!-- Fallback -->
-                            <tr th:if="${users == null || users.isEmpty()}">
-                                <td colspan="8" class="text-center">Chưa có user nào</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Pagination -->
-                <div class="admin-pagination">
-                    <button class="btn-page" disabled><i class="fas fa-chevron-left"></i></button>
-                    <button class="btn-page active">1</button>
-                    <button class="btn-page">2</button>
-                    <button class="btn-page">3</button>
-                    <button class="btn-page"><i class="fas fa-chevron-right"></i></button>
-                </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- Fallback -->
+                        <tr th:if="${users == null || users.content.isEmpty()}">
+                            <td colspan="8" class="text-center">Chưa có user nào</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-        </main>
-    </div>
-
-    <!-- Ban User Modal -->
-    <div id="banModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Ban User</h2>
-                <button class="modal-close" onclick="closeBanModal()">&times;</button>
-            </div>
-            <form id="banForm" method="post">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label>Lý do ban <span class="required">*</span></label>
-                        <textarea name="reason" required rows="4" 
-                                  placeholder="Nhập lý do ban user..."></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Loại vi phạm <span class="required">*</span></label>
-                        <select name="violationTypeId" required>
-                            <option value="">Chọn loại vi phạm</option>
-                            <option th:each="violation : ${violationTypes}" 
-                                    th:value="${violation.violationTypeId}"
-                                    th:text="${violation.typeName}">
-                                Spam
-                            </option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline" onclick="closeBanModal()">Hủy</button>
-                    <button type="submit" class="btn btn-primary">Xác Nhận Ban</button>
-                </div>
-            </form>
+            
+            <!-- Pagination -->
+            <nav th:if="${users.totalPages > 1}" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${users.first ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/admin/users(page=${users.number - 1}, keyword=${keyword}, isActive=${selectedIsActive})}">Trước</a>
+                    </li>
+                    
+                    <li class="page-item" 
+                        th:each="i : ${#numbers.sequence(0, users.totalPages - 1)}"
+                        th:classappend="${i == users.number ? 'active' : ''}">
+                        <a class="page-link" th:href="@{/admin/users(page=${i}, keyword=${keyword}, isActive=${selectedIsActive})}" 
+                           th:text="${i + 1}">1</a>
+                    </li>
+                    
+                    <li class="page-item" th:classappend="${users.last ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/admin/users(page=${users.number + 1}, keyword=${keyword}, isActive=${selectedIsActive})}">Sau</a>
+                    </li>
+                </ul>
+            </nav>
         </div>
     </div>
 
-    <script src="/js/main.js"></script>
-    <script>
-        document.querySelector('.admin-mobile-toggle')?.addEventListener('click', function() {
-            document.querySelector('.admin-sidebar').classList.toggle('active');
-        });
+    <!-- Ban User Modal -->
+    <div th:fragment="customScripts">
+        <!-- Modal HTML -->
+        <div class="modal fade" id="banModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Ban User</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form id="banForm">
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Lý do ban <span class="text-danger">*</span></label>
+                                <textarea name="reason" class="form-control" required rows="4" 
+                                          placeholder="Nhập lý do ban user..."></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-danger">Xác Nhận Ban</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
 
-        function showBanModal(button) {
-            const userId = button.getAttribute('data-user-id');
-            const form = document.getElementById('banForm');
-            form.action = `/admin/users/${userId}/ban`;
-            document.getElementById('banModal').style.display = 'flex';
-        }
-
-        function closeBanModal() {
-            document.getElementById('banModal').style.display = 'none';
-        }
-
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('banModal');
-            if (event.target === modal) {
-                closeBanModal();
+        <!-- Scripts -->
+        <script th:inline="javascript">
+            let currentUserId = null;
+            const banModal = new bootstrap.Modal(document.getElementById('banModal'));
+            
+            function showBanModal(button) {
+                currentUserId = button.getAttribute('data-user-id');
+                document.getElementById('banForm').reset();
+                banModal.show();
             }
-        }
-    </script>
+
+            document.getElementById('banForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const reason = this.querySelector('[name="reason"]').value;
+                const csrfToken = /*[[${_csrf.token}]]*/ '';
+                const csrfHeader = /*[[${_csrf.headerName}]]*/ '';
+                
+                fetch(`/admin/users/ban/${currentUserId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        [csrfHeader]: csrfToken
+                    },
+                    body: new URLSearchParams({ reason: reason })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    banModal.hide();
+                    
+                    if (data.success) {
+                        // Show success alert
+                        const alertDiv = document.createElement('div');
+                        alertDiv.className = 'alert alert-success alert-dismissible fade show';
+                        alertDiv.innerHTML = `
+                            ${data.message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        `;
+                        document.querySelector('.table-container').insertAdjacentElement('beforebegin', alertDiv);
+                        
+                        // Update status badge in table
+                        const userRow = document.querySelector(`button[data-user-id="${currentUserId}"]`).closest('tr');
+                        const statusCell = userRow.querySelector('.text-center .badge');
+                        statusCell.className = 'badge bg-danger';
+                        statusCell.textContent = 'Banned';
+                        
+                        // Replace ban button with unban button
+                        const actionCell = userRow.querySelector('.btn-group');
+                        const banButton = actionCell.querySelector('.btn-warning');
+                        banButton.outerHTML = `
+                            <form action="/admin/users/unban/${currentUserId}" method="post" style="display: inline;">
+                                <input type="hidden" name="${csrfHeader}" value="${csrfToken}" />
+                                <button type="submit" class="btn btn-success" title="Unban">
+                                    <i class="fas fa-check-circle"></i>
+                                </button>
+                            </form>
+                        `;
+                        
+                        // Auto-dismiss alert after 3 seconds
+                        setTimeout(() => alertDiv.remove(), 3000);
+                    } else {
+                        alert('Lỗi: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    banModal.hide();
+                    alert('Có lỗi xảy ra: ' + error);
+                });
+            });
+        </script>
+    </div>
 </body>
 </html>

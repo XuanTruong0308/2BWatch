@@ -25,6 +25,7 @@ public class WatchCategory {
     private Boolean isActive = true;
     
     // Relationships
+    @ToString.Exclude
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
     private List<Watch> watches;
 }

@@ -9,25 +9,6 @@
       )}">
 <body>
     <div th:fragment="content">
-        <!-- Alert Messages -->
-        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-circle me-2"></i>
-            <span th:text="${error}">Error message</span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        
-        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle me-2"></i>
-            <span th:text="${success}">Success message</span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        
-        <div th:if="${warning}" class="alert alert-warning alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            <span th:text="${warning}">Warning message</span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-
         <div th:if="${order == null}" class="alert alert-danger">
             <i class="fas fa-exclamation-circle me-2"></i>
             Không tìm thấy thông tin đơn hàng. 
@@ -52,14 +33,27 @@
                     <table class="table">
                         <thead>
                             <tr>
+                                <th style="width: 80px;">Ảnh</th>
                                 <th>Sản phẩm</th>
-                                <th class="text-center">SL</th>
-                                <th class="text-end">Đơn giá</th>
-                                <th class="text-end">Thành tiền</th>
+                                <th class="text-center" style="width: 80px;">SL</th>
+                                <th class="text-end" style="width: 150px;">Đơn giá</th>
+                                <th class="text-end" style="width: 150px;">Thành tiền</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:each="detail : ${orderDetails}">
+                                <td>
+                                    <img th:if="${detail.watch != null and !detail.watch.images.isEmpty()}" 
+                                         th:src="${detail.watch.images[0].imageUrl}" 
+                                         th:alt="${detail.watch.watchName}"
+                                         class="img-thumbnail" 
+                                         style="width: 60px; height: 60px; object-fit: cover;">
+                                    <div th:unless="${detail.watch != null and !detail.watch.images.isEmpty()}" 
+                                         class="bg-light d-flex align-items-center justify-content-center" 
+                                         style="width: 60px; height: 60px;">
+                                        <i class="fas fa-image text-muted"></i>
+                                    </div>
+                                </td>
                                 <td>
                                     <strong th:text="${detail.watch?.watchName ?: 'Sản phẩm'}">Product Name</strong>
                                 </td>
@@ -70,12 +64,12 @@
                                 </td>
                             </tr>
                             <tr th:if="${orderDetails.isEmpty()}">
-                                <td colspan="4" class="text-center text-muted py-4">Không có sản phẩm</td>
+                                <td colspan="5" class="text-center text-muted py-4">Không có sản phẩm</td>
                             </tr>
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td colspan="3" class="text-end"><strong>Tổng cộng:</strong></td>
+                                <td colspan="4" class="text-end"><strong>Tổng cộng:</strong></td>
                                 <td class="text-end">
                                     <h5 class="mb-0 text-primary" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + '₫'">1,000,000₫</h5>
                                 </td>

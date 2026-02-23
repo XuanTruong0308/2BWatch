@@ -16,6 +16,7 @@ public class Cart {
     @Column(name = "cart_id")
     private Integer cartId;
     
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -27,6 +28,7 @@ public class Cart {
     private LocalDateTime updatedDate = LocalDateTime.now();
     
     // Relationships
+    @ToString.Exclude
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CartItem> cartItems;
 }

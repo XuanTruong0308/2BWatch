@@ -20,7 +20,7 @@ public class User {
     @Column(unique = true, nullable = false, length = 50)
     private String username;
 
-    @Column(nullable = false)
+    @Column
     private String password;
 
     @Column(unique = true, nullable = false, length = 100)
@@ -38,6 +38,18 @@ public class User {
     @Column(name = "avatar_url", length = 255)
     private String avatarUrl;
 
+    @Column(length = 20)
+    private String provider = "LOCAL";
+
+    @Column(name = "provider_id", length = 100)
+    private String providerId;
+
+    @Column(name = "email_verified")
+    private Boolean emailVerified = false;
+    
+    @Column(name = "phone_verified")
+    private Boolean phoneVerified = false;
+
     @Column(name = "is_enabled")
     private Boolean isEnabled = false;
 
@@ -51,18 +63,23 @@ public class User {
     private LocalDateTime updatedDate = LocalDateTime.now();
 
     // Relationships
+    @ToString.Exclude
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<UserRole> userRoles = new ArrayList<>();
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Cart> carts;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Order> orders;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<BanLog> banLogs;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<VerificationToken> verificationTokens;
 }

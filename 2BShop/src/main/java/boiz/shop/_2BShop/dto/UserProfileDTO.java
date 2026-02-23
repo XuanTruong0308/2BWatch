@@ -28,4 +28,8 @@ public class UserProfileDTO {
     private String avatarUrl;
 
     private String username;
+    
+    // OAuth2 fields
+    private String provider;  // LOCAL, GOOGLE, FACEBOOK
+    private Boolean phoneVerified;  // Phone verification status
 }

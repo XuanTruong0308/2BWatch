@@ -23,7 +23,12 @@ public class BrandAdminController {
     @GetMapping
     public String listBrands(Model model) {
         List<WatchBrand> brands = brandRepository.findAll();
+        long activeBrandCount = brands.stream().filter(b -> b.getIsActive() != null && b.getIsActive()).count();
+        long inactiveBrandCount = brands.stream().filter(b -> b.getIsActive() == null || !b.getIsActive()).count();
+        
         model.addAttribute("brands", brands);
+        model.addAttribute("activeBrandCount", activeBrandCount);
+        model.addAttribute("inactiveBrandCount", inactiveBrandCount);
         return "admin/brands";
     }
 

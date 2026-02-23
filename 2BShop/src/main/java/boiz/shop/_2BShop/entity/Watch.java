@@ -53,12 +53,15 @@ public class Watch {
     @JoinColumn(name = "category_id", nullable = false)
     private WatchCategory category;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "watch", cascade = CascadeType.ALL)
     private List<WatchImage> images;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "watch", cascade = CascadeType.ALL)
     private List<CartItem> cartItems;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "watch", cascade = CascadeType.ALL)
     private List<OrderDetail> orderDetails;
 

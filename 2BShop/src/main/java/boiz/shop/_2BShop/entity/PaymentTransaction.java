@@ -16,6 +16,7 @@ public class PaymentTransaction {
     @Column(name = "transaction_id")
     private Integer transactionId;
     
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;

@@ -15,6 +15,7 @@ public class BanLog {
     @Column(name = "ban_log_id")
     private Integer banLogId;
     
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

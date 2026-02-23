@@ -110,6 +110,8 @@ public class UserProfileService {
         dto.setPhone(user.getPhone());
         dto.setAddress(user.getAddress());
         dto.setAvatarUrl(user.getAvatarUrl());
+        dto.setProvider(user.getProvider());  // OAuth2 provider
+        dto.setPhoneVerified(user.getPhoneVerified());  // Phone verification status
         return dto;
     }
 }

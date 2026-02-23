@@ -8,6 +8,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+
 @Controller
 @RequestMapping("/admin/bank-accounts")
 public class BankAdminController {
@@ -15,15 +19,83 @@ public class BankAdminController {
     @Autowired
     private BankAccountService bankAccountService;
 
+    /**
+     * Hiển thị trang quản lý ngân hàng
+     */
     @GetMapping
     public String listBankAccounts(Model model) {
         model.addAttribute("bankAccounts", bankAccountService.getAllBankAccounts());
+        model.addAttribute("activeMenu", "bank-accounts");
         return "admin/bank-accounts";
     }
 
+    /**
+     * API: Lấy thông tin bank theo ID
+     */
+    @GetMapping("/api/{id}")
+    @ResponseBody
+    public BankAccount getBankAccountById(@PathVariable Integer id) {
+        return bankAccountService.getBankAccount(id);
+    }
+
+    /**
+     * API: Lưu bank account (Add/Edit)
+     */
+    @PostMapping("/api/save")
+    @ResponseBody
+    public Map<String, Object> saveBankAccount(@RequestBody BankAccount bankAccount) {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            // Set timestamps
+            if (bankAccount.getBankAccountId() == null) {
+                bankAccount.setCreatedAt(LocalDateTime.now());
+            }
+            bankAccount.setUpdatedAt(LocalDateTime.now());
+
+            // Save first to get ID
+            BankAccount saved = bankAccountService.save(bankAccount);
+
+            // Generate QR Code
+            bankAccountService.generateAndSaveQrCode(saved);
+
+            response.put("success", true);
+            response.put("message", "Lưu thành công!");
+            response.put("data", saved);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+        }
+        
+        return response;
+    }
+
+    /**
+     * API: Xóa bank account
+     */
+    @DeleteMapping("/api/delete/{id}")
+    @ResponseBody
+    public Map<String, Object> deleteBankAccount(@PathVariable Integer id) {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            bankAccountService.delete(id);
+            response.put("success", true);
+            response.put("message", "Xóa thành công!");
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+        }
+        
+        return response;
+    }
+
+    // ===== OLD ROUTES (Keep for compatibility, but can be removed later) =====
+    
     @GetMapping("/add")
     public String showAddForm(Model model) {
         model.addAttribute("bankAccount", new BankAccount());
+        model.addAttribute("activeMenu", "bank-accounts");
         return "admin/bank-account-form";
     }
 
@@ -49,6 +121,7 @@ public class BankAdminController {
         try {
             BankAccount bankAccount = bankAccountService.getBankAccount(id);
             model.addAttribute("bankAccount", bankAccount);
+            model.addAttribute("activeMenu", "bank-accounts");
             return "admin/bank-account-form";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Không tìm thấy tài khoản!");

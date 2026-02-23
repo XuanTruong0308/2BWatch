@@ -9,19 +9,6 @@
       )}">
 <body>
     <div th:fragment="content">
-        <!-- Alert Messages -->
-        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-circle me-2"></i>
-            <span th:text="${error}">Error message</span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        
-        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle me-2"></i>
-            <span th:text="${success}">Success message</span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        
         <!-- User Info -->
         <div class="table-container mb-4">
             <div class="row align-items-center">

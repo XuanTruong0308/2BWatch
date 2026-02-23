@@ -64,11 +64,19 @@ public class BanAdminController {
         
         // Count active ban logs
         long activeBanCount = banLogRepo.findByIsActive(true, PageRequest.of(0, 1)).getTotalElements();
+        
+        // Get active users (for ban modal)
+        List<User> activeUsers = userRepo.findByIsEnabled(true, Pageable.unpaged()).getContent();
+        
+        // Get violation types
+        List<ViolationType> violationTypes = violationTypeRepo.findAll();
 
         model.addAttribute("banLogs", banLogs);
         model.addAttribute("bannedCount", bannedCount);
         model.addAttribute("activeBanCount", activeBanCount);
         model.addAttribute("selectedIsActive", isActive);
+        model.addAttribute("activeUsers", activeUsers);
+        model.addAttribute("violationTypes", violationTypes);
 
         return "admin/ban-logs";
     }
@@ -85,8 +93,16 @@ public class BanAdminController {
         
         // Get active ban logs (users currently banned)
         Page<BanLog> bannedUsers = banLogRepo.findByIsActive(true, pageable);
+        
+        // Get active users (for ban modal)
+        List<User> activeUsers = userRepo.findByIsEnabled(true, Pageable.unpaged()).getContent();
+        
+        // Get violation types
+        List<ViolationType> violationTypes = violationTypeRepo.findAll();
 
         model.addAttribute("bannedUsers", bannedUsers);
+        model.addAttribute("activeUsers", activeUsers);
+        model.addAttribute("violationTypes", violationTypes);
 
         return "admin/banned-users";
     }
@@ -101,6 +117,7 @@ public class BanAdminController {
             @RequestParam(required = false) String reason,
             @RequestParam(required = false) Integer violationTypeId,
             @RequestParam(defaultValue = "0") Integer durationMinutes,
+            @RequestParam(required = false, defaultValue = "users") String redirectTo,
             RedirectAttributes redirectAttributes) {
         try {
             User user = userRepo.findById(userId)
@@ -156,6 +173,12 @@ public class BanAdminController {
             e.printStackTrace();
         }
 
+        // Redirect based on source page
+        if ("banned-users".equals(redirectTo)) {
+            return "redirect:/admin/bans/banned-users";
+        } else if ("ban-logs".equals(redirectTo)) {
+            return "redirect:/admin/bans";
+        }
         return "redirect:/admin/users";
     }
 
@@ -166,6 +189,7 @@ public class BanAdminController {
     @PostMapping("/unban/{userId}")
     public String unbanUser(
             @PathVariable Integer userId,
+            @RequestParam(required = false, defaultValue = "users") String redirectTo,
             RedirectAttributes redirectAttributes) {
         try {
             User user = userRepo.findById(userId)
@@ -190,6 +214,12 @@ public class BanAdminController {
             e.printStackTrace();
         }
 
+        // Redirect based on source page
+        if ("banned-users".equals(redirectTo)) {
+            return "redirect:/admin/bans/banned-users";
+        } else if ("ban-logs".equals(redirectTo)) {
+            return "redirect:/admin/bans";
+        }
         return "redirect:/admin/users";
     }
 

@@ -49,18 +49,6 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        <!-- Alert Messages -->
-                        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <i class="fas fa-exclamation-circle me-2"></i>
-                            <span th:text="${error}">Error message</span>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                        
-                        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
-                            <i class="fas fa-check-circle me-2"></i>
-                            <span th:text="${success}">Success message</span>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
 
                         <!-- User Form -->
                         <form th:action="@{/admin/users/save}" method="post" th:object="${user}" id="userForm">

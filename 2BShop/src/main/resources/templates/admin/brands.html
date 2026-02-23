@@ -70,7 +70,7 @@
                             <th>TÊN BRAND</th>
                             <th>MÔ TẢ</th>
                             <th style="width: 120px;">SỐ SẢN PHẨM</th>
-                            <th style="width: 120px;">TRẠNG THÁI</th>
+                            <th style="width: 150px;">TRẠNG THÁI</th>
                             <th style="width: 200px;">THAO TÁC</th>
                         </tr>
                     </thead>
@@ -171,7 +171,7 @@
                         <div>
                             <p class="text-muted mb-2"><strong>Đang Hoạt Động</strong></p>
                             <h3 class="mb-0" style="color: #28a745;" 
-                                th:text="${brands != null ? brands.stream().filter(b -> b.isActive).count() : 0}">0</h3>
+                                th:text="${activeBrandCount}">0</h3>
                         </div>
                         <div class="stat-icon success">
                             <i class="fas fa-check-circle"></i>
@@ -185,7 +185,7 @@
                         <div>
                             <p class="text-muted mb-2"><strong>Đã Ẩn</strong></p>
                             <h3 class="mb-0" style="color: #dc3545;" 
-                                th:text="${brands != null ? brands.stream().filter(b -> !b.isActive).count() : 0}">0</h3>
+                                th:text="${inactiveBrandCount}">0</h3>
                         </div>
                         <div class="stat-icon info">
                             <i class="fas fa-eye-slash"></i>

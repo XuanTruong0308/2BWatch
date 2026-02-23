@@ -22,6 +22,18 @@
                 <p>Vui lòng nhập email để hoàn tất kích hoạt tài khoản</p>
             </div>
             
+            <!-- Success Message -->
+            <div th:if="${success}" class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                <span th:text="${success}"></span>
+            </div>
+            
+            <!-- Error Message -->
+            <div th:if="${error}" class="alert alert-danger">
+                <i class="fas fa-exclamation-circle"></i>
+                <span th:text="${error}"></span>
+            </div>
+            
             <form th:action="@{/confirm-register}" method="post" class="auth-form">
                 <input type="hidden" name="token" th:value="${token}">
                 

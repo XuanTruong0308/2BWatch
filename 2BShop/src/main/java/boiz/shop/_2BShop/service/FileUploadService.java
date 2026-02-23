@@ -364,7 +364,8 @@ public class FileUploadService {
         }
         ImageIO.write(resizedImage, formatName, outputFile);
 
-        return newFilename;
+        // Return URL path that matches WebConfig resource handler
+        return "/uploads/avatars/" + newFilename;
     }
 
     /**

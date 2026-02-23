@@ -25,10 +25,10 @@
                     Email hoặc mật khẩu không đúng!
                 </div>
                 
-                <!-- Success Message -->
-                <div th:if="${param.logout}" class="alert alert-success">
+                <!-- Success Message from Flash Attributes -->
+                <div th:if="${success}" class="alert alert-success">
                     <i class="fas fa-check-circle"></i>
-                    Đăng xuất thành công!
+                    <span th:text="${success}"></span>
                 </div>
                 
                 <form th:action="@{/perform-login}" method="post" class="auth-form">
@@ -75,14 +75,10 @@
                 </div>
                 
                 <div class="social-buttons-row">
-                    <button class="btn btn-social btn-google">
+                    <a th:href="@{/oauth2/authorization/google}" class="btn btn-social btn-google">
                         <i class="fab fa-google"></i>
                         <span>Google</span>
-                    </button>
-                    <button class="btn btn-social btn-facebook">
-                        <i class="fab fa-facebook-f"></i>
-                        <span>Facebook</span>
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>

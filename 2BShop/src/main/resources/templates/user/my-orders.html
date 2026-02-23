@@ -224,10 +224,71 @@
             color: var(--primary-blue);
             margin-bottom: 10px;
         }
+        
+        /* Flash Alert Styles */
+        .flash-alert {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 15px 50px 15px 20px;
+            border-radius: 8px;
+            font-size: 15px;
+            position: relative;
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .flash-alert.alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 5px solid #28a745;
+        }
+        
+        .flash-alert.alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 5px solid #dc3545;
+        }
+        
+        .flash-alert i {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        
+        .flash-alert .close-btn {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: inherit;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        
+        .flash-alert .close-btn:hover {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
     <header th:replace="~{fragments/header :: header}"></header>
+    
+    <!-- Flash Messages -->
+    <div th:if="${success}" class="flash-alert alert-success">
+        <i class="fas fa-check-circle"></i><span th:text="${success}"></span>
+        <button class="close-btn" onclick="this.parentElement.remove()">&times;</button>
+    </div>
+    <div th:if="${error}" class="flash-alert alert-danger">
+        <i class="fas fa-exclamation-circle"></i><span th:text="${error}"></span>
+        <button class="close-btn" onclick="this.parentElement.remove()">&times;</button>
+    </div>
     
     <div class="orders-container">
         <div class="orders-header">
@@ -236,25 +297,25 @@
         
         <!-- Status Filters -->
         <div class="status-filters">
-            <a th:href="@{/my-orders}" class="filter-btn" th:classappend="${selectedStatus == null ? 'active' : ''}">
+            <a th:href="@{/user/orders}" class="filter-btn" th:classappend="${selectedStatus == null ? 'active' : ''}">
                 <i class="fas fa-list"></i> Tất cả
             </a>
-            <a th:href="@{/my-orders(status='PENDING')}" class="filter-btn" th:classappend="${selectedStatus == 'PENDING' ? 'active' : ''}">
+            <a th:href="@{/user/orders(status='PENDING')}" class="filter-btn" th:classappend="${selectedStatus == 'PENDING' ? 'active' : ''}">
                 <i class="fas fa-clock"></i> Chờ xử lý
             </a>
-            <a th:href="@{/my-orders(status='CONFIRMED')}" class="filter-btn" th:classappend="${selectedStatus == 'CONFIRMED' ? 'active' : ''}">
+            <a th:href="@{/user/orders(status='CONFIRMED')}" class="filter-btn" th:classappend="${selectedStatus == 'CONFIRMED' ? 'active' : ''}">
                 <i class="fas fa-check"></i> Đã xác nhận
             </a>
-            <a th:href="@{/my-orders(status='SHIPPING')}" class="filter-btn" th:classappend="${selectedStatus == 'SHIPPING' ? 'active' : ''}">
+            <a th:href="@{/user/orders(status='SHIPPING')}" class="filter-btn" th:classappend="${selectedStatus == 'SHIPPING' ? 'active' : ''}">
                 <i class="fas fa-truck"></i> Đang giao
             </a>
-            <a th:href="@{/my-orders(status='DELIVERED')}" class="filter-btn" th:classappend="${selectedStatus == 'DELIVERED' ? 'active' : ''}">
+            <a th:href="@{/user/orders(status='DELIVERED')}" class="filter-btn" th:classappend="${selectedStatus == 'DELIVERED' ? 'active' : ''}">
                 <i class="fas fa-box-open"></i> Đã giao
             </a>
-            <a th:href="@{/my-orders(status='COMPLETED')}" class="filter-btn" th:classappend="${selectedStatus == 'COMPLETED' ? 'active' : ''}">
+            <a th:href="@{/user/orders(status='COMPLETED')}" class="filter-btn" th:classappend="${selectedStatus == 'COMPLETED' ? 'active' : ''}">
                 <i class="fas fa-check-double"></i> Hoàn thành
             </a>
-            <a th:href="@{/my-orders(status='CANCELLED')}" class="filter-btn" th:classappend="${selectedStatus == 'CANCELLED' ? 'active' : ''}">
+            <a th:href="@{/user/orders(status='CANCELLED')}" class="filter-btn" th:classappend="${selectedStatus == 'CANCELLED' ? 'active' : ''}">
                 <i class="fas fa-times"></i> Đã hủy
             </a>
         </div>
@@ -265,7 +326,7 @@
                 <div class="order-header">
                     <div class="order-code">
                         <i class="fas fa-receipt"></i> 
-                        Đơn hàng #<span th:text="${'ORD' + #strings.substring('00000' + order.orderId, -6)}"></span>
+                        Đơn hàng #<span th:text="${'ORD' + #strings.substring('00000' + order.orderId, #strings.length('00000' + order.orderId) - 6)}"></span>
                     </div>
                     <div class="order-status" 
                          th:classappend="${'status-' + #strings.toLowerCase(order.orderStatus)}">
@@ -298,7 +359,7 @@
                 </div>
                 
                 <div class="order-actions">
-                    <a th:href="@{/my-orders/{id}(id=${order.orderId})}" class="btn btn-primary">
+                    <a th:href="@{/user/orders/{id}(id=${order.orderId})}" class="btn btn-primary">
                         <i class="fas fa-eye"></i> Xem chi tiết
                     </a>
                 </div>
@@ -318,20 +379,20 @@
         <!-- Pagination -->
         <div th:if="${totalPages > 1}" class="pagination">
             <a th:if="${currentPage > 0}" 
-               th:href="@{/my-orders(page=${currentPage - 1}, status=${selectedStatus})}" 
+               th:href="@{/user/orders(page=${currentPage - 1}, status=${selectedStatus})}" 
                class="page-btn">
                 <i class="fas fa-chevron-left"></i> Trước
             </a>
             
             <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
-                <a th:href="@{/my-orders(page=${i}, status=${selectedStatus})}" 
+                <a th:href="@{/user/orders(page=${i}, status=${selectedStatus})}" 
                    class="page-btn"
                    th:classappend="${i == currentPage ? 'active' : ''}"
                    th:text="${i + 1}"></a>
             </span>
             
             <a th:if="${currentPage < totalPages - 1}" 
-               th:href="@{/my-orders(page=${currentPage + 1}, status=${selectedStatus})}" 
+               th:href="@{/user/orders(page=${currentPage + 1}, status=${selectedStatus})}" 
                class="page-btn">
                 Sau <i class="fas fa-chevron-right"></i>
             </a>
@@ -339,5 +400,18 @@
     </div>
     
     <footer th:replace="~{fragments/footer :: footer}"></footer>
+    
+    <script>
+        // Auto-dismiss flash alerts after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.flash-alert');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    alert.style.animation = 'slideDown 0.3s ease reverse';
+                    setTimeout(() => alert.remove(), 300);
+                }, 5000);
+            });
+        });
+    </script>
 </body>
 </html>

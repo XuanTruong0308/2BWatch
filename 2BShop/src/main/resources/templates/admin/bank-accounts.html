@@ -1,67 +1,280 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-    layout:decorate="~{layout/base-layout}">
-
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout/admin-layout :: layout(
+        pageTitle='Quản lý Tài khoản Ngân hàng',
+        activeMenu='bank-accounts',
+        content=~{::content},
+        customStyles=~{::styles},
+        customScripts=~{::scripts}
+      )}">
 <head>
-    <title>Quản lý Tài khoản Ngân hàng</title>
+    <th:block th:fragment="styles">
+        <style>
+            .bank-card {
+                border: 2px solid #e0e0e0;
+                border-radius: 12px;
+                padding: 20px;
+                margin-bottom: 20px;
+                transition: all 0.3s;
+            }
+            
+            .bank-card:hover {
+                border-color: var(--gold);
+                box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
+            }
+            
+            .bank-qr {
+                width: 200px;
+                height: 200px;
+                object-fit: contain;
+                border: 2px solid #f0f0f0;
+                border-radius: 8px;
+                padding: 10px;
+            }
+            
+            .badge-active {
+                background: #28a745;
+                color: white;
+                padding: 5px 12px;
+                border-radius: 20px;
+            }
+            
+            .badge-inactive {
+                background: #6c757d;
+                color: white;
+                padding: 5px 12px;
+                border-radius: 20px;
+            }
+            
+            .modal-backdrop {
+                background-color: rgba(0,0,0,0.6);
+            }
+        </style>
+    </th:block>
 </head>
-
 <body>
-    <div layout:fragment="content">
-        <div class="container mt-4">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2>Quản lý Tài khoản Ngân hàng</h2>
-                <a th:href="@{/admin/bank-accounts/add}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Thêm Tài khoản
-                </a>
+    <div th:fragment="content">
+        <div class="container-fluid">
+            <!-- Success Message -->
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle"></i> <span th:text="${success}"></span>
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
             </div>
 
-            <div th:if="${success}" class="alert alert-success" role="alert" th:text="${success}"></div>
-            <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+            <!-- Error Message -->
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span>
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
 
-            <table class="table table-bordered table-hover">
-                <thead class="thead-light">
-                    <tr>
-                        <th>ID</th>
-                        <th>Tên Ngân hàng</th>
-                        <th>Mã NH (Code)</th>
-                        <th>Số Tài khoản</th>
-                        <th>Chủ Tài khoản</th>
-                        <th>QR Code</th>
-                        <th>Trạng thái</th>
-                        <th>Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="bank : ${bankAccounts}">
-                        <td th:text="${bank.bankAccountId}"></td>
-                        <td th:text="${bank.bankName}"></td>
-                        <td th:text="${bank.bankCode}"></td>
-                        <td th:text="${bank.accountNumber}"></td>
-                        <td th:text="${bank.accountHolder}"></td>
-                        <td>
-                            <img th:if="${bank.qrImageUrl}" th:src="${bank.qrImageUrl}" style="height: 50px;" alt="QR">
-                            <span th:unless="${bank.qrImageUrl}" class="text-muted">Chưa có QR</span>
-                        </td>
-                        <td>
-                            <span th:if="${bank.isActive}" class="badge badge-success">Hoạt động</span>
-                            <span th:unless="${bank.isActive}" class="badge badge-secondary">Tạm khóa</span>
-                        </td>
-                        <td>
-                            <a th:href="@{/admin/bank-accounts/edit/{id}(id=${bank.bankAccountId})}"
-                                class="btn btn-sm btn-warning">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <a th:href="@{/admin/bank-accounts/delete/{id}(id=${bank.bankAccountId})}"
-                                class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa?');">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-university"></i> Quản lý Tài khoản Ngân hàng</h2>
+                <button class="btn btn-primary" onclick="openAddModal()">
+                    <i class="fas fa-plus"></i> Thêm Ngân hàng
+                </button>
+            </div>
+
+            <!-- Bank Cards Grid -->
+            <div class="row">
+                <div th:each="bank : ${bankAccounts}" class="col-md-6 col-lg-4">
+                    <div class="bank-card">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 th:text="${bank.bankName}" class="mb-0">MB Bank</h5>
+                            <span th:class="${bank.isActive ? 'badge-active' : 'badge-inactive'}" 
+                                  th:text="${bank.isActive ? 'Hoạt động' : 'Tạm khóa'}">Hoạt động</span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <strong>Mã NH:</strong> <span th:text="${bank.bankCode}">MB</span><br>
+                            <strong>Số TK:</strong> <span th:text="${bank.accountNumber}">0123456789</span><br>
+                            <strong>Chủ TK:</strong> <span th:text="${bank.accountHolder}">NGUYEN VAN A</span>
+                        </div>
+                        
+                        <div class="text-center mb-3" th:if="${bank.qrImageUrl}">
+                            <img th:src="${bank.qrImageUrl}" class="bank-qr" alt="QR Code">
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-warning flex-fill" 
+                                    th:onclick="|openEditModal(${bank.bankAccountId})|">
+                                <i class="fas fa-edit"></i> Sửa
+                            </button>
+                            <button class="btn btn-sm btn-danger" 
+                                    th:onclick="|deleteBank(${bank.bankAccountId})|">
                                 <i class="fas fa-trash"></i>
-                            </a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Empty State -->
+                <div th:if="${#lists.isEmpty(bankAccounts)}" class="col-12 text-center py-5">
+                    <i class="fas fa-university fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">Chưa có tài khoản ngân hàng</h4>
+                    <p class="text-muted">Thêm ngân hàng để khách hàng có thể thanh toán</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal Add/Edit -->
+        <div class="modal fade" id="bankModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalTitle">Thêm Ngân hàng</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form id="bankForm" onsubmit="saveBankAccount(event)">
+                        <div class="modal-body">
+                            <input type="hidden" id="bankId" name="bankId">
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Tên Ngân hàng *</label>
+                                <input type="text" class="form-control" id="bankName" name="bankName" 
+                                       placeholder="VD: MB Bank, Vietcombank" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Mã Ngân hàng (VietQR) *</label>
+                                <input type="text" class="form-control" id="bankCode" name="bankCode" 
+                                       placeholder="VD: MB, VCB, TECHCOMBANK" required>
+                                <small class="text-muted">Tra cứu tại vietqr.io</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Số Tài khoản *</label>
+                                <input type="text" class="form-control" id="accountNumber" name="accountNumber" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Chủ Tài khoản *</label>
+                                <input type="text" class="form-control" id="accountHolder" name="accountHolder" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Thứ tự hiển thị</label>
+                                <input type="number" class="form-control" id="displayOrder" name="displayOrder" value="0">
+                            </div>
+                            
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="isActive" name="isActive" checked>
+                                <label class="form-check-label" for="isActive">Kích hoạt</label>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Lưu & Sinh QR
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
+    
+    <th:block th:fragment="scripts">
+        <script>
+            let bankModal;
+            let currentBankData = {};
+            
+            // CSRF Token
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.content || '';
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content || 'X-CSRF-TOKEN';
+            
+            document.addEventListener('DOMContentLoaded', function() {
+                bankModal = new bootstrap.Modal(document.getElementById('bankModal'));
+            });
+            
+            function openAddModal() {
+                document.getElementById('modalTitle').textContent = 'Thêm Ngân hàng';
+                document.getElementById('bankForm').reset();
+                document.getElementById('bankId').value = '';
+                document.getElementById('isActive').checked = true;
+                bankModal.show();
+            }
+            
+            async function openEditModal(id) {
+                try {
+                    const response = await fetch(`/admin/bank-accounts/api/${id}`);
+                    const bank = await response.json();
+                    
+                    document.getElementById('modalTitle').textContent = 'Sửa Ngân hàng';
+                    document.getElementById('bankId').value = bank.bankAccountId;
+                    document.getElementById('bankName').value = bank.bankName;
+                    document.getElementById('bankCode').value = bank.bankCode;
+                    document.getElementById('accountNumber').value = bank.accountNumber;
+                    document.getElementById('accountHolder').value = bank.accountHolder;
+                    document.getElementById('displayOrder').value = bank.displayOrder || 0;
+                    document.getElementById('isActive').checked = bank.isActive;
+                    
+                    bankModal.show();
+                } catch (error) {
+                    alert('Lỗi khi tải dữ liệu: ' + error.message);
+                }
+            }
+            
+            async function saveBankAccount(event) {
+                event.preventDefault();
+                
+                const formData = {
+                    bankAccountId: document.getElementById('bankId').value || null,
+                    bankName: document.getElementById('bankName').value,
+                    bankCode: document.getElementById('bankCode').value,
+                    accountNumber: document.getElementById('accountNumber').value,
+                    accountHolder: document.getElementById('accountHolder').value,
+                    displayOrder: parseInt(document.getElementById('displayOrder').value) || 0,
+                    isActive: document.getElementById('isActive').checked
+                };
+                
+                try {
+                    const response = await fetch('/admin/bank-accounts/api/save', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            [csrfHeader]: csrfToken
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        bankModal.hide();
+                        location.reload();
+                    } else {
+                        alert('Lỗi: ' + result.message);
+                    }
+                } catch (error) {
+                    alert('Lỗi khi lưu: ' + error.message);
+                }
+            }
+            
+            async function deleteBank(id) {
+                if (!confirm('Bạn có chắc chắn muốn xóa ngân hàng này?')) {
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`/admin/bank-accounts/api/delete/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            [csrfHeader]: csrfToken
+                        }
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        location.reload();
+                    } else {
+                        alert('Lỗi: ' + result.message);
+                    }
+                } catch (error) {
+                    alert('Lỗi khi xóa: ' + error.message);
+                }
+            }
+        </script>
+    </th:block>
 </body>
-
 </html>

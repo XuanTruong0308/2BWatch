@@ -109,10 +109,11 @@ public class UserAdminController {
     }
 
     @PostMapping("/ban/{id}")
-    public String banUser(
+    @org.springframework.web.bind.annotation.ResponseBody
+    public Map<String, Object> banUser(
             @PathVariable Integer id,
-            @RequestParam(required = false) String reason,
-            RedirectAttributes redirectAttributes) {
+            @RequestParam(required = false) String reason) {
+        Map<String, Object> response = new HashMap<>();
         try {
             User user = userRepo.findById(id)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy user với id"));
@@ -127,11 +128,13 @@ public class UserAdminController {
             user.setIsEnabled(false);
             userRepo.save(user);
 
-            redirectAttributes.addFlashAttribute("success", "Đã ban user thành công!");
+            response.put("success", true);
+            response.put("message", "Đã ban user thành công!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
+            response.put("success", false);
+            response.put("message", "Lỗi: " + e.getMessage());
         }
-        return "redirect:/admin/users";
+        return response;
     }
 
     @PostMapping("/unban/{id}")

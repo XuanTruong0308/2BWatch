@@ -10,9 +10,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 
 @Controller
 @RequestMapping("/my-orders")
@@ -25,6 +28,23 @@ public class OrderTrackingController {
     private UserRepository userRepository;
 
     /**
+     * Helper method to extract email from Principal
+     */
+    private String getEmailFromPrincipal(Principal principal) {
+        if (principal instanceof UserDetails) {
+            return ((UserDetails) principal).getUsername();
+        } else if (principal instanceof OAuth2User) {
+            OAuth2User oauth2User = (OAuth2User) principal;
+            Object emailAttr = oauth2User.getAttribute("email");
+            if (emailAttr != null) {
+                return emailAttr.toString();
+            }
+            return oauth2User.getName();
+        }
+        return principal.getName();
+    }
+
+    /**
      * List user's orders with pagination
      */
     @GetMapping
@@ -32,10 +52,11 @@ public class OrderTrackingController {
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "status", required = false) String status,
-            @AuthenticationPrincipal UserDetails userDetails,
+            Principal principal,
             Model model) {
 
-        User user = userRepository.findByEmail(userDetails.getUsername())
+        String email = getEmailFromPrincipal(principal);
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
 
         Pageable pageable = PageRequest.of(page, size);
@@ -61,10 +82,11 @@ public class OrderTrackingController {
     @GetMapping("/{orderId}")
     public String viewOrderDetails(
             @PathVariable Integer orderId,
-            @AuthenticationPrincipal UserDetails userDetails,
+            Principal principal,
             Model model) {
 
-        User user = userRepository.findByEmail(userDetails.getUsername())
+        String email = getEmailFromPrincipal(principal);
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
 
         try {

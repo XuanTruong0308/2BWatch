@@ -68,14 +68,14 @@
             }
             
             .col-lg-7 {
-                flex: 0 0 58.333%;
-                max-width: 58.333%;
+                flex: 0 0 55%;
+                max-width: 55%;
                 padding: 0 15px;
             }
             
             .col-lg-5 {
-                flex: 0 0 41.667%;
-                max-width: 41.667%;
+                flex: 0 0 45%;
+                max-width: 45%;
                 padding: 0 15px;
             }
             
@@ -99,19 +99,19 @@
             
             .checkout-box, .order-summary-box {
                 background: white;
-                padding: 30px;
+                padding: 35px;
                 border-radius: 12px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+                box-shadow: 0 2px 12px rgba(0,0,0,0.08);
                 margin-bottom: 30px;
             }
             
             .cart-page-title {
-                font-size: 24px;
+                font-size: 26px;
                 font-weight: 700;
                 color: #1a365d;
                 margin-bottom: 30px;
                 padding-bottom: 15px;
-                border-bottom: 2px solid #d4af37;
+                border-bottom: 3px solid #d4af37;
             }
             
             .single-input-item {
@@ -376,16 +376,16 @@
             /* Bank Selection Grid */
             .bank-selection-grid {
                 display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-                gap: 12px;
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 15px;
                 margin: 15px 0;
             }
             
             .bank-option-card {
                 background: white;
                 border: 2px solid #e9ecef;
-                border-radius: 8px;
-                padding: 15px;
+                border-radius: 10px;
+                padding: 18px;
                 text-align: center;
                 cursor: pointer;
                 transition: all 0.3s ease;
@@ -393,24 +393,26 @@
             
             .bank-option-card:hover {
                 border-color: #d4af37;
-                box-shadow: 0 2px 8px rgba(212, 175, 55, 0.15);
+                box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
+                transform: translateY(-2px);
             }
             
             .bank-option-card.selected {
                 border-color: #d4af37;
                 background: #fffdf5;
+                box-shadow: 0 4px 12px rgba(212, 175, 55, 0.25);
             }
             
             .bank-logo-small {
-                width: 50px;
-                height: 50px;
-                margin: 0 auto 10px;
+                width: 60px;
+                height: 60px;
+                margin: 0 auto 12px;
                 border-radius: 50%;
                 background: #f8f9fa;
             }
             
             .bank-name-small {
-                font-size: 13px;
+                font-size: 14px;
                 font-weight: 600;
                 color: #1a365d;
             }
@@ -418,62 +420,99 @@
             .bank-detail-card {
                 background: white;
                 border: 2px solid #d4af37;
-                border-radius: 8px;
-                padding: 20px;
+                border-radius: 12px;
+                padding: 25px;
                 margin-top: 15px;
-                display: grid;
-                grid-template-columns: 200px 1fr;
+                display: flex;
+                flex-direction: column;
                 gap: 20px;
+                overflow: hidden;
             }
             
             .bank-qr-col {
                 text-align: center;
+                margin-bottom: 10px;
             }
             
             .bank-text-col {
                 display: flex;
                 flex-direction: column;
-                justify-content: center;
+                min-width: 0; /* Allow text to wrap */
+            }
+            
+            .bank-text-col h4 {
+                font-size: 22px !important;
+                margin-bottom: 12px !important;
+            }
+            
+            .bank-text-col p {
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                font-size: 16px;
+                margin-bottom: 8px;
+            }
+            
+            .bank-text-col p strong {
+                font-size: 20px;
             }
             
             .qr-image-large {
                 width: 100%;
-                max-width: 200px;
-                border-radius: 8px;
-                border: 1px solid #e9ecef;
+                max-width: 280px;
+                border-radius: 12px;
+                border: 2px solid #e9ecef;
+                padding: 10px;
+                background: white;
             }
             
             .fake-payment-box {
                 background: #f8f9fa;
-                padding: 15px;
-                border-radius: 8px;
+                padding: 18px;
+                border-radius: 10px;
                 margin-top: 15px;
+            }
+            
+            .fake-payment-box p {
+                font-size: 14px;
             }
             
             .fake-payment-box .input-group {
                 display: flex;
-                gap: 8px;
+                gap: 10px;
+                flex-wrap: wrap;
             }
             
             .fake-payment-box input {
                 flex: 1;
-                padding: 8px 12px;
-                border: 1px solid #ced4da;
-                border-radius: 4px;
+                min-width: 150px;
+                padding: 10px 14px;
+                border: 2px solid #ced4da;
+                border-radius: 6px;
+                font-size: 15px;
+            }
+            
+            .fake-payment-box input:focus {
+                border-color: #d4af37;
+                outline: none;
             }
             
             .fake-payment-box button {
-                padding: 8px 16px;
+                padding: 10px 18px;
                 background: #d4af37;
                 color: white;
                 border: none;
-                border-radius: 4px;
+                border-radius: 6px;
                 cursor: pointer;
                 white-space: nowrap;
+                font-size: 15px;
+                font-weight: 600;
+                transition: all 0.3s ease;
             }
             
             .fake-payment-box button:hover {
                 background: #c9a961;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 8px rgba(212, 175, 55, 0.3);
             }
             
             /* Utility Classes */
@@ -562,17 +601,70 @@
                 }
                 
                 .bank-detail-card {
-                    grid-template-columns: 1fr;
                     text-align: center;
+                    padding: 20px;
+                    gap: 15px;
+                }
+                
+                .bank-text-col {
+                    align-items: center;
+                }
+                
+                .bank-text-col h4 {
+                    font-size: 18px !important;
+                }
+                
+                .bank-text-col p {
+                    font-size: 14px;
+                }
+                
+                .bank-text-col p strong {
+                    font-size: 16px;
                 }
                 
                 .qr-image-large {
-                    max-width: 150px;
+                    max-width: 220px;
+                }
+                
+                .fake-payment-box {
+                    padding: 12px;
+                }
+                
+                .fake-payment-box input {
+                    width: 100%;
+                    min-width: unset;
+                }
+                
+                .fake-payment-box button {
+                    width: 100%;
                 }
             }
             
             @media (max-width: 576px) {
                 .bank-selection-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+                
+                .bank-detail-card {
+                    padding: 15px;
+                }
+                
+                .bank-text-col h4 {
+                    font-size: 16px !important;
+                }
+                
+                .bank-text-col p {
+                    font-size: 13px;
+                }
+                
+                .bank-text-col p strong {
+                    font-size: 15px;
+                }
+                
+                .qr-image-large {
+                    max-width: 180px;
+                }
+            }
                     grid-template-columns: repeat(2, 1fr);
                 }
             }
@@ -745,10 +837,10 @@
                                     </div>
 
                                     <!-- BANKING -->
-                                    <div class="payment-method-item" onclick="selectPayment('BANKING')">
+                                    <div class="payment-method-item" onclick="selectPayment('BANK_TRANSFER')">
                                         <div class="custom-control custom-radio">
                                             <input type="radio" id="payment_banking" name="paymentMethod"
-                                                value="BANKING" class="custom-control-input">
+                                                value="BANK_TRANSFER" class="custom-control-input">
                                             <label class="custom-control-label" for="payment_banking">Chuyển khoản ngân
                                                 hàng</label>
                                         </div>
@@ -784,7 +876,7 @@
                                                 <div class="bank-detail-card">
                                                     <div class="bank-qr-col">
                                                         <img id="display-qr" src="" class="qr-image-large" alt="QR Code"
-                                                            onerror="this.onerror=null;this.src='/images/default_product_placeholder.png'">
+                                                            onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27200%27 height=%27200%27%3E%3Crect fill=%27%23f0f0f0%27 width=%27200%27 height=%27200%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Arial%27 font-size=%2716%27 fill=%27%23999%27%3EQR Code%3C/text%3E%3C/svg%3E'">
                                                     </div>
                                                     <div class="bank-text-col">
                                                         <h4 id="display-bank-name"
@@ -799,14 +891,16 @@
                                                         <div class="fake-payment-box">
                                                             <p
                                                                 style="font-size: 12px; margin-bottom: 5px; color: #666;">
-                                                                <i class="fas fa-info-circle"></i> DEMO: Nhập mã giao
-                                                                dịch
+                                                                <i class="fas fa-info-circle"></i> <strong>Mã giao dịch</strong>: Sau khi chuyển khoản, ngân hàng sẽ gửi về mã giao dịch (Transaction ID)
+                                                            </p>
+                                                            <p style="font-size: 11px; color: #999; margin-bottom: 10px;">
+                                                                💡 Chức năng DEMO: Nhập bất kỳ mã nào để giả lập thanh toán thành công
                                                             </p>
                                                             <div class="input-group">
                                                                 <input type="text" name="transactionCodeInput"
                                                                     id="transactionCode"
                                                                     class="form-control form-control-sm"
-                                                                    placeholder="Mã giao dịch..." required disabled>
+                                                                    placeholder="VD: 08M0711281" required disabled>
                                                                 <div class="input-group-append">
                                                                     <button type="button" class="btn btn-primary btn-sm"
                                                                         onclick="simulatePayment(this)">
@@ -816,7 +910,7 @@
                                                             </div>
                                                             <small class="text-success mt-1" id="payment-status"
                                                                 style="display:none; font-weight: bold;">
-                                                                <i class="fas fa-check-circle"></i> Đã nhận mã: <span
+                                                                <i class="fas fa-check-circle"></i> Đã xác nhận thanh toán với mã: <span
                                                                     id="filled-code"></span>
                                                             </small>
                                                         </div>
@@ -887,7 +981,7 @@
                     if (qr && qr !== 'null') {
                         $('#display-qr').attr('src', qr);
                     } else {
-                        $('#display-qr').attr('src', '/images/default_product_placeholder.png');
+                        $('#display-qr').attr('src', 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27200%27 height=%27200%27%3E%3Crect fill=%27%23f0f0f0%27 width=%27200%27 height=%27200%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Arial%27 font-size=%2716%27 fill=%27%23999%27%3EQR Code%3C/text%3E%3C/svg%3E');
                     }
 
                     // Show details
@@ -962,7 +1056,7 @@
                         return false;
                     }
                     
-                    if ($('input[name="paymentMethod"]:checked').val() === 'BANKING') {
+                    if ($('input[name="paymentMethod"]:checked').val() === 'BANK_TRANSFER') {
                         if ($('input[name="bankAccountId"]:checked').length === 0) {
                             alert('Vui lòng chọn ngân hàng chuyển khoản');
                             return false;

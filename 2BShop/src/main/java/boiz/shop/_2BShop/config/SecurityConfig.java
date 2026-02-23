@@ -1,7 +1,9 @@
 package boiz.shop._2BShop.config;
 
+import boiz.shop._2BShop.service.CustomOAuth2UserService;
 import boiz.shop._2BShop.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,6 +13,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 @Configuration
 @EnableWebSecurity
@@ -21,6 +24,13 @@ public class SecurityConfig {
     
     @Autowired
     private CustomLoginSuccessHandler loginSuccessHandler;
+
+    @Autowired
+    private CustomOAuth2UserService customOAuth2UserService;
+
+    @Autowired
+    @Qualifier("customOAuth2LoginSuccessHandler")
+    private AuthenticationSuccessHandler oAuth2LoginSuccessHandler;
 
     @Bean
     public static PasswordEncoder passwordEncoder() {
@@ -53,7 +63,7 @@ public class SecurityConfig {
                 .requestMatchers("/cart", "/cart/update", "/cart/remove", "/cart/select", "/cart/select-all").authenticated()
                 
                 // Checkout and orders - Chỉ cần đăng nhập
-                .requestMatchers("/checkout/**", "/payment/**", "/orders/**").authenticated()
+                .requestMatchers("/checkout/**", "/payment/**", "/orders/**", "/user/**").authenticated()
                 
                 // Invoice downloads - Chỉ cần đăng nhập
                 .requestMatchers("/invoice/**").authenticated()
@@ -82,6 +92,14 @@ public class SecurityConfig {
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
                 .permitAll()
+            )
+            .oauth2Login(oauth2 -> oauth2
+                .loginPage("/login")
+                .userInfoEndpoint(userInfo -> userInfo
+                    .userService(customOAuth2UserService)
+                )
+                .successHandler(oAuth2LoginSuccessHandler)
+                .failureUrl("/login?error=oauth2")
             );
         
         return http.build();

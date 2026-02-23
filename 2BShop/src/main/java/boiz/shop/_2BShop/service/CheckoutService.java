@@ -174,7 +174,7 @@ public class CheckoutService {
         order.setDiscountAmount(summary.getDiscountAmount());
 
         // Bank account ref
-        if ("BANKING".equals(paymentMethod) && bankAccountId != null) {
+        if ("BANK_TRANSFER".equals(paymentMethod) && bankAccountId != null) {
             BankAccount bankAccount = bankAccountRepository.findById(bankAccountId)
                     .orElse(null);
             order.setBankAccount(bankAccount);

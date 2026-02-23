@@ -24,6 +24,7 @@ public class VerificationToken {
     @Column(name = "created_date")
     private LocalDateTime createdDate = LocalDateTime.now();
     
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

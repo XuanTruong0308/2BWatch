@@ -9,6 +9,7 @@ import boiz.shop._2BShop.service.BankAccountService;
 import boiz.shop._2BShop.service.CartService;
 import boiz.shop._2BShop.service.CheckoutService;
 import boiz.shop._2BShop.service.CheckoutService.CheckoutSummary;
+import boiz.shop._2BShop.service.PhoneVerificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,13 +35,25 @@ public class CheckoutController {
 
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private PhoneVerificationService phoneVerificationService;
 
     @GetMapping
     public String checkoutPage(Model model,
-            @RequestParam(required = false) String couponCode) {
+            @RequestParam(required = false) String couponCode,
+            RedirectAttributes redirectAttributes) {
         // 1. Get current user
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(email).orElse(null);
+        
+        // 1.1. Check phone verification for OAuth2 users
+        if (user != null && phoneVerificationService.needsPhoneVerification(user)) {
+            redirectAttributes.addFlashAttribute("error", 
+                "Vui lòng cập nhật số điện thoại để tiếp tục đặt hàng");
+            redirectAttributes.addFlashAttribute("requirePhone", true);
+            return "redirect:/profile";
+        }
 
         // 2. Check cart
         List<CartItem> cartItems = cartService.getSelectedCartItems();
@@ -80,16 +93,14 @@ public class CheckoutController {
             Order order = checkoutService.placeOrder(user, receiverName, phone, address, notes, paymentMethod,
                     couponCode, bankAccountId);
 
-            // Show success modal on checkout page (no redirect)
-            model.addAttribute("orderSuccess", true);
-            model.addAttribute("orderId", order.getOrderId());
-            model.addAttribute("orderCode", "ORD" + String.format("%06d", order.getOrderId()));
-            model.addAttribute("customerEmail", user.getEmail());
-            
-            return "public/checkout";
+            // Redirect to user's order list page
+            String orderCode = "ORD" + String.format("%06d", order.getOrderId());
+            redirectAttributes.addFlashAttribute("success", "Đặt hàng thành công! Mã đơn hàng: " + orderCode);
+            return "redirect:/user/orders";
 
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            e.printStackTrace(); // Log full stack trace
+            redirectAttributes.addFlashAttribute("error", "Lỗi đặt hàng: " + e.getMessage());
             return "redirect:/checkout";
         }
     }

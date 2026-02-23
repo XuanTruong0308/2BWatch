@@ -289,22 +289,51 @@ public class UserController {
      * Danh sách đơn hàng của user
      */
     @GetMapping("/orders")
-    public String myOrders(Model model, Principal principal) {
+    public String myOrders(
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") int page,
+            Model model, 
+            Principal principal) {
         try {
             if (principal == null) {
                 return "redirect:/login";
             }
 
             String email = principal.getName();
-            List<Order> orders = orderService.findByUserEmail(email);
-
-            model.addAttribute("orders", orders);
+            List<Order> allOrders = orderService.findByUserEmail(email);
+            
+            // Filter by status if provided
+            if (status != null && !status.isEmpty()) {
+                allOrders = allOrders.stream()
+                    .filter(o -> status.equals(o.getOrderStatus()))
+                    .toList();
+            }
+            
+            // Manual pagination (10 items per page)
+            int pageSize = 10;
+            int totalOrders = allOrders.size();
+            int totalPages = (int) Math.ceil((double) totalOrders / pageSize);
+            int start = page * pageSize;
+            int end = Math.min(start + pageSize, totalOrders);
+            
+            List<Order> pageOrders = allOrders.subList(start, end);
+            
+            // Create wrapper object to mimic Page<Order>
+            model.addAttribute("orders", new org.springframework.data.domain.PageImpl<>(
+                pageOrders, 
+                org.springframework.data.domain.PageRequest.of(page, pageSize), 
+                totalOrders
+            ));
+            model.addAttribute("totalPages", totalPages);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("selectedStatus", status);
 
         } catch (Exception e) {
             model.addAttribute("error", "Lỗi khi tải danh sách đơn hàng: " + e.getMessage());
+            model.addAttribute("orders", new org.springframework.data.domain.PageImpl<>(new java.util.ArrayList<>()));
         }
 
-        return "user/orders";
+        return "user/my-orders";
     }
 
     /**
@@ -434,38 +463,46 @@ public class UserController {
     }
 
     /**
-     * Đổi mật khẩu
+     * Đổi mật khẩu (AJAX endpoint)
      */
     @PostMapping("/profile/change-password")
-    public String changePassword(
-            @RequestParam String currentPassword,
-            @RequestParam String newPassword,
-            @RequestParam String confirmPassword,
-            Principal principal,
-            RedirectAttributes redirectAttributes) {
+    @ResponseBody
+    public Map<String, Object> changePassword(
+            @RequestBody Map<String, String> request,
+            Principal principal) {
+        Map<String, Object> response = new HashMap<>();
+        
         try {
             if (principal == null) {
-                return "redirect:/login";
+                response.put("success", false);
+                response.put("message", "Bạn cần đăng nhập!");
+                return response;
             }
 
-            // Validate
+            String currentPassword = request.get("currentPassword");
+            String newPassword = request.get("newPassword");
+            String confirmPassword = request.get("confirmPassword");
+
+            // Validate - Chỉ check 2 điều đơn giản
+            if (newPassword == null || newPassword.trim().isEmpty()) {
+                throw new RuntimeException("Vui lòng nhập mật khẩu mới!");
+            }
+
             if (!newPassword.equals(confirmPassword)) {
                 throw new RuntimeException("Mật khẩu xác nhận không khớp!");
-            }
-
-            if (newPassword.length() < 6) {
-                throw new RuntimeException("Mật khẩu mới phải có ít nhất 6 ký tự!");
             }
 
             String email = principal.getName();
             userService.changePassword(email, currentPassword, newPassword);
 
-            redirectAttributes.addFlashAttribute("success", "Đổi mật khẩu thành công!");
-            return "redirect:/user/profile";
+            response.put("success", true);
+            response.put("message", "Đổi mật khẩu thành công!");
+            return response;
 
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
-            return "redirect:/user/profile";
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return response;
         }
     }
 }

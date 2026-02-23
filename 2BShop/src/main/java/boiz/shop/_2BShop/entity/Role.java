@@ -19,6 +19,7 @@ public class Role {
     private String roleName;
     
     // Relationships
+    @ToString.Exclude
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL)
     private List<UserRole> userRoles;
 }

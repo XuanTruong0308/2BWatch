@@ -18,6 +18,7 @@ public class Order {
     @Column(name = "order_id")
     private Integer orderId;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -70,9 +71,11 @@ public class Order {
     private String notes;
 
     // Relationships
+    @ToString.Exclude
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderDetail> orderDetails;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<PaymentTransaction> paymentTransactions = new ArrayList<>();
 

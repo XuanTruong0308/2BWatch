@@ -16,6 +16,7 @@ public class CartItem {
     @Column(name = "cart_item_id")
     private Integer cartItemId;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "cart_id", nullable = false)
     private Cart cart;

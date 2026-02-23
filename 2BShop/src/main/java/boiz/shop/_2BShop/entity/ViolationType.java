@@ -22,6 +22,7 @@ public class ViolationType {
     private String description;
     
     // Relationships
+    @ToString.Exclude
     @OneToMany(mappedBy = "violationType", cascade = CascadeType.ALL)
     private List<BanLog> banLogs;
 }

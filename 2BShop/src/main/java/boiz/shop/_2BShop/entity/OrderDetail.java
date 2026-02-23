@@ -15,6 +15,7 @@ public class OrderDetail {
     @Column(name = "order_detail_id")
     private Integer orderDetailId;
     
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;

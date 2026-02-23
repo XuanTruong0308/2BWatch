@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title th:text="${pageTitle != null ? pageTitle + ' - Admin' : 'Admin Panel'}">Admin Panel</title>
     
     <!-- Bootstrap CSS -->
@@ -311,8 +313,8 @@
                 <i class="fas fa-tags"></i> Quản lý Brand
             </a>
             
-            <a th:href="@{/admin/bans}" class="menu-item" th:classappend="${activeMenu == 'bans' ? 'active' : ''}">
-                <i class="fas fa-user-slash"></i> Quản lý Ban Account
+            <a th:href="@{/admin/bank-accounts}" class="menu-item" th:classappend="${activeMenu == 'bank-accounts' ? 'active' : ''}">
+                <i class="fas fa-university"></i> Quản lý Ngân hàng
             </a>
             
             <hr class="menu-divider">

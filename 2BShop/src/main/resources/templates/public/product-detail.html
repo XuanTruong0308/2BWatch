@@ -530,19 +530,38 @@
             }
         </script>
         
-        <!-- jQuery (Load first) -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-        <!-- Owl Carousel JS -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
-        
+        <!-- Owl Carousel JS - Load after page ready -->
         <script>
-            $(document).ready(function() {
-                console.log('jQuery loaded:', typeof jQuery !== 'undefined');
-                console.log('Owl Carousel loaded:', typeof $.fn.owlCarousel !== 'undefined');
+            // Wait for jQuery to be available
+            function initializeCarousel() {
+                if (typeof jQuery === 'undefined') {
+                    console.log('Waiting for jQuery...');
+                    setTimeout(initializeCarousel, 50);
+                    return;
+                }
                 
-                // Main gallery carousel
-                var mainGallery = $('#productMainGallery');
-                var thumbnails = $('#productThumbnails');
+                // Load Owl Carousel
+                if (typeof $.fn.owlCarousel === 'undefined') {
+                    var script = document.createElement('script');
+                    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js';
+                    script.onload = function() {
+                        console.log('Owl Carousel loaded');
+                        initCarousels();
+                    };
+                    document.head.appendChild(script);
+                } else {
+                    initCarousels();
+                }
+            }
+            
+            function initCarousels() {
+                $(document).ready(function() {
+                    console.log('jQuery loaded:', typeof jQuery !== 'undefined');
+                    console.log('Owl Carousel loaded:', typeof $.fn.owlCarousel !== 'undefined');
+                    
+                    // Main gallery carousel
+                    var mainGallery = $('#productMainGallery');
+                    var thumbnails = $('#productThumbnails');
                 
                 console.log('Main gallery found:', mainGallery.length);
                 console.log('Thumbnails found:', thumbnails.length);
@@ -652,6 +671,10 @@
                 
                 console.log('Owl Carousel initialized successfully');
             });
+            }
+            
+            // Start initialization
+            initializeCarousel();
         </script>
 
         <!-- Product Actions Script -->
