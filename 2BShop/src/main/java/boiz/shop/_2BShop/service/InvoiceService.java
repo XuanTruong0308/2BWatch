@@ -17,6 +17,7 @@ import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import org.apache.poi.xwpf.usermodel.*;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STBorder;
 import org.apache.poi.util.Units;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -68,7 +69,7 @@ public class InvoiceService {
             try {
                 ClassPathResource logoResource = new ClassPathResource(LOGO_PATH);
                 InputStream logoStream = logoResource.getInputStream();
-                
+
                 XWPFParagraph logoParagraph = document.createParagraph();
                 logoParagraph.setAlignment(ParagraphAlignment.CENTER);
                 XWPFRun logoRun = logoParagraph.createRun();
@@ -95,9 +96,9 @@ public class InvoiceService {
             companyRun.setText("2BSHOP - LUXURY WATCHES");
             companyRun.setBold(true);
             companyRun.addBreak();
-            companyRun.setText("Địa chỉ: 123 Đường Minh Khai, Hai Bà Trưng, Hà Nội");
+            companyRun.setText("Địa chỉ: 12 Văn Tân, Ngũ Hành Sơn, Đà Nẵng");
             companyRun.addBreak();
-            companyRun.setText("Hotline: 0123.456.789 | Email: contact@2bshop.com");
+            companyRun.setText("Hotline: 0399.760.075 | Email: boiznews.fpoly@gmail.com");
             companyRun.addBreak();
             companyRun.setText("Website: www.2bshop.com");
 
@@ -181,7 +182,7 @@ public class InvoiceService {
             }
             totalRun.addBreak();
             totalRun.addBreak();
-            
+
             // Signature section
             XWPFParagraph signature = document.createParagraph();
             XWPFRun sigRun = signature.createRun();
@@ -189,15 +190,41 @@ public class InvoiceService {
             sigRun.setText("═══════════════════════════════════════════════");
             sigRun.addBreak();
             sigRun.addBreak();
-            
+
             XWPFTable signTable = document.createTable(1, 2);
             signTable.setWidth("100%");
             XWPFTableRow signRow = signTable.getRow(0);
             signRow.getCell(0).setText("Người mua hàng\n\n\n(Ký, ghi rõ họ tên)");
             signRow.getCell(0).setColor("FFFFFF");
-            signRow.getCell(1).setText("Người bán hàng\n\n\n(Ký, đóng dấu)");
+            // Tạo đoạn văn bản cho ô Người bán hàng
+            XWPFParagraph sellerPara = signRow.getCell(1).addParagraph();
+            sellerPara.setAlignment(ParagraphAlignment.CENTER);
+            XWPFRun sellerRun = sellerPara.createRun();
+            sellerRun.setText("Người bán hàng\n\n\n(Ký, đóng dấu)");
+            sellerRun.addBreak();
+            // Thêm hình ảnh chữ ký, tăng kích thước và căn giữa
+            try {
+                ClassPathResource signatureResource = new ClassPathResource("static/img/signature.png");
+                InputStream signatureStream = signatureResource.getInputStream();
+                // Tăng kích thước ảnh
+                sellerRun.addPicture(signatureStream, XWPFDocument.PICTURE_TYPE_PNG, "signature.png", Units.toEMU(220), Units.toEMU(90));
+                signatureStream.close();
+            } catch (Exception e) {
+                System.err.println("Failed to add signature to Word invoice: " + e.getMessage());
+            }
             signRow.getCell(1).setColor("FFFFFF");
-            
+            // Remove borders for signature table
+            for (int c = 0; c < signRow.getTableCells().size(); c++) {
+                // Remove borders for signature table
+                signTable.getCTTbl().getTblPr().addNewTblBorders();
+                signTable.getCTTbl().getTblPr().getTblBorders().addNewTop().setVal(STBorder.NONE);
+                signTable.getCTTbl().getTblPr().getTblBorders().addNewBottom().setVal(STBorder.NONE);
+                signTable.getCTTbl().getTblPr().getTblBorders().addNewLeft().setVal(STBorder.NONE);
+                signTable.getCTTbl().getTblPr().getTblBorders().addNewRight().setVal(STBorder.NONE);
+                signTable.getCTTbl().getTblPr().getTblBorders().addNewInsideH().setVal(STBorder.NONE);
+                signTable.getCTTbl().getTblPr().getTblBorders().addNewInsideV().setVal(STBorder.NONE);
+            }
+
             XWPFParagraph footer = document.createParagraph();
             footer.setAlignment(ParagraphAlignment.CENTER);
             XWPFRun footerRun = footer.createRun();
@@ -249,8 +276,8 @@ public class InvoiceService {
             // Company Info
             Paragraph company = new Paragraph();
             company.add(new Phrase("2BSHOP - LUXURY WATCHES\n", fontHeader));
-            company.add(new Phrase("Địa chỉ: 123 Đường Minh Khai, Hai Bà Trưng, Hà Nội\n", fontSmall));
-            company.add(new Phrase("Hotline: 0123.456.789 | Email: contact@2bshop.com\n", fontSmall));
+            company.add(new Phrase("Địa chỉ: 12 Văn Tân, Ngũ Hành Sơn, Đà Nẵng\n", fontSmall));
+            company.add(new Phrase("Hotline: 0399.760.075 | Email: boiznews.fpoly@gmail.com\n", fontSmall));
             company.add(new Phrase("Website: www.2bshop.com", fontSmall));
             company.setAlignment(Element.ALIGN_CENTER);
             company.setSpacingAfter(15);
@@ -266,7 +293,7 @@ public class InvoiceService {
             document.add(new Paragraph("Mã đơn hàng: ORD" + String.format("%06d", order.getOrderId()), fontHeader));
             document.add(new Paragraph("Ngày đặt: " + formatTime(order.getOrderDate()), fontNormal));
             document.add(new Paragraph("Trạng thái: " + getOrderStatusText(order.getOrderStatus()), fontNormal));
-            
+
             document.add(new Paragraph("\n"));
             document.add(new Paragraph("THÔNG TIN KHÁCH HÀNG", fontHeader));
             document.add(new Paragraph("Họ tên: " + order.getReceiverName(), fontNormal));
@@ -312,7 +339,8 @@ public class InvoiceService {
             document.add(sep2);
 
             // Totals
-            Paragraph subtotal = new Paragraph("Tổng tiền hàng (chưa VAT): " + formatCurrency(subtotalBeforeVAT), fontNormal);
+            Paragraph subtotal = new Paragraph("Tổng tiền hàng (chưa VAT): " + formatCurrency(subtotalBeforeVAT),
+                    fontNormal);
             subtotal.setAlignment(Element.ALIGN_RIGHT);
             document.add(subtotal);
 
@@ -325,11 +353,13 @@ public class InvoiceService {
             document.add(total);
 
             if (order.getDepositAmount() != null && order.getDepositAmount().compareTo(BigDecimal.ZERO) > 0) {
-                Paragraph deposit = new Paragraph("Đã thanh toán: " + formatCurrency(order.getDepositAmount()), fontNormal);
+                Paragraph deposit = new Paragraph("Đã thanh toán: " + formatCurrency(order.getDepositAmount()),
+                        fontNormal);
                 deposit.setAlignment(Element.ALIGN_RIGHT);
                 document.add(deposit);
 
-                Paragraph remaining = new Paragraph("Còn lại: " + formatCurrency(order.getRemainingAmount()), fontHeader);
+                Paragraph remaining = new Paragraph("Còn lại: " + formatCurrency(order.getRemainingAmount()),
+                        fontHeader);
                 remaining.setAlignment(Element.ALIGN_RIGHT);
                 document.add(remaining);
             }
@@ -343,7 +373,7 @@ public class InvoiceService {
 
             PdfPTable signTable = new PdfPTable(2);
             signTable.setWidthPercentage(100);
-            signTable.setWidths(new float[]{1, 1});
+            signTable.setWidths(new float[] { 1, 1 });
 
             PdfPCell buyerCell = new PdfPCell();
             buyerCell.setBorder(0);
@@ -382,13 +412,20 @@ public class InvoiceService {
 
     private String getOrderStatusText(String status) {
         switch (status) {
-            case "PENDING": return "Chờ xác nhận";
-            case "CONFIRMED": return "Đã xác nhận";
-            case "SHIPPING": return "Đang vận chuyển";
-            case "DELIVERED": return "Đã giao hàng";
-            case "COMPLETED": return "Hoàn thành";
-            case "CANCELED": return "Đã hủy";
-            default: return status;
+            case "PENDING":
+                return "Chờ xác nhận";
+            case "CONFIRMED":
+                return "Đã xác nhận";
+            case "SHIPPING":
+                return "Đang vận chuyển";
+            case "DELIVERED":
+                return "Đã giao hàng";
+            case "COMPLETED":
+                return "Hoàn thành";
+            case "CANCELED":
+                return "Đã hủy";
+            default:
+                return status;
         }
     }
 }
