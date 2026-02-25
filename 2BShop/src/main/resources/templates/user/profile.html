@@ -270,7 +270,7 @@
 
             <!-- Avatar Upload Section -->
             <div class="avatar-upload"
-                style="margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, #1a3a52 0%, #0f2537 100%); border-radius: 12px;">
+                style="margin-bottom: 30px; padding: 20px; background: #0f2537; border-radius: 12px;">
                 <img th:src="${profile.avatarUrl != null ? profile.avatarUrl : '/images/default-avatar.png'}"
                     alt="Avatar" class="avatar-preview" id="avatarPreview"
                     style="width: 120px; height: 120px; border-radius: 50%; border: 4px solid #ffc107; object-fit: cover; background: #f0f0f0;">
@@ -296,7 +296,7 @@
             
             <!-- Phone Update Section (for OAuth2 users) -->
             <div th:if="${profile.provider != null && (profile.provider == 'GOOGLE' || profile.provider == 'FACEBOOK')}" 
-                 style="margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px;">
+                 style="margin-bottom: 30px; padding: 20px; background:  #0f2537; border-radius: 12px;">
                 <h4 style="color: white; margin: 0 0 10px 0;">
                     <i class="fas fa-phone"></i> Số điện thoại
                 </h4>

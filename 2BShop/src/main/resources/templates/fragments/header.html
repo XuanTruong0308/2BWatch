@@ -39,8 +39,15 @@
                     </nav>
                     
                     <div class="nav-icons">
-                        <!-- User dropdown when authenticated -->
-                        <div th:if="${#authorization.expression('isAuthenticated()')}" class="user-dropdown">
+                        <!-- Nếu là admin -->
+                        <div th:if="${#authorization.expression('isAuthenticated()') and #authorization.expression('hasRole(''ADMIN'')')}">
+                            <a href="/admin/dashboard" class="nav-icon" title="Trang quản trị">
+                                <i class="fas fa-user-shield"></i>
+                                <span class="user-name">Quản trị viên</span>
+                            </a>
+                        </div>
+                        <!-- Nếu không phải admin -->
+                        <div th:if="${#authorization.expression('isAuthenticated()') and !#authorization.expression('hasRole(''ADMIN'')')}", class="user-dropdown">
                             <a href="#" class="nav-icon user-menu-toggle" title="Tài khoản">
                                 <i class="fas fa-user"></i>
                                 <span class="user-name">
@@ -49,7 +56,7 @@
                                 <i class="fas fa-chevron-down"></i>
                             </a>
                             <div class="dropdown-menu">
-                                <a href="/account" class="dropdown-item">
+                                <a href="/profile" class="dropdown-item">
                                     <i class="fas fa-user-circle"></i> Thông tin tài khoản
                                 </a>
                                 <a href="/user/orders" class="dropdown-item">
@@ -76,7 +83,8 @@
                             <span class="nav-text">Đăng nhập</span>
                         </a>
                         
-                        <a href="/cart" class="nav-icon" title="Giỏ hàng">
+                        <!-- Ẩn giỏ hàng nếu là admin -->
+                        <a th:if="${#authorization.expression('isAuthenticated()') and !#authorization.expression('hasRole(''ADMIN'')')}" href="/cart" class="nav-icon" title="Giỏ hàng">
                             <i class="fas fa-shopping-cart"></i>
                             <span class="cart-badge" th:if="${cartItemCount != null and cartItemCount > 0}" th:text="${cartItemCount}">0</span>
                         </a>

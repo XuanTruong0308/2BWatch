@@ -47,8 +47,10 @@ public class CheckoutController {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(email).orElse(null);
         
-        // 1.1. Check phone verification for OAuth2 users
-        if (user != null && phoneVerificationService.needsPhoneVerification(user)) {
+        // 1.1. Chỉ check phone verification cho user OAUTH2
+        if (user != null 
+            && "GOOGLE".equalsIgnoreCase(user.getProvider())
+            && phoneVerificationService.needsPhoneVerification(user)) {
             redirectAttributes.addFlashAttribute("error", 
                 "Vui lòng cập nhật số điện thoại để tiếp tục đặt hàng");
             redirectAttributes.addFlashAttribute("requirePhone", true);
