@@ -43,10 +43,7 @@ public class PublicController {
     @Autowired
     private MailService mailService;
 
-    // ========================================
     // 1. HOME PAGE - TRANG CHỦ
-    // ========================================
-
     /**
      * Trang chủ - Hiển thị sản phẩm nổi bật
      */
@@ -72,10 +69,7 @@ public class PublicController {
         return "public/index";
     }
 
-    // ========================================
     // 2. PRODUCT LISTING & DETAIL
-    // ========================================
-
     /**
      * Danh sách tất cả sản phẩm với search, filter
      */

@@ -68,7 +68,7 @@ public class SecurityConfig {
                 // Invoice downloads - Chỉ cần đăng nhập
                 .requestMatchers("/invoice/**").authenticated()
                 
-                // User account pages - CẦN đăng nhập (USER role)
+                // User account pages - Cần đăng nhập (USER role)
                 .requestMatchers("/profile/**", "/account/**").hasRole("USER")
                 
                 // Admin pages - CẦN đăng nhập (ADMIN role)

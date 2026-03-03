@@ -25,9 +25,7 @@ public class FileUploadService {
 
     private static final int TARGET_SIZE = 800; // 800x800px
 
-    /**
-     * Upload và resize ảnh
-     */
+    //Upload resize ảnh
     public String uploadImage(MultipartFile file) throws IOException {
         // Validate file
         if (file.isEmpty()) {
