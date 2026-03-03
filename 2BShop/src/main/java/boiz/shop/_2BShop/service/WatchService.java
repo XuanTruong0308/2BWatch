@@ -126,11 +126,10 @@ public class WatchService {
     }
 
     /**
-     * Sản phẩm mới nhất với pagination (trong vòng 3 ngày gần đây)
+     * Sản phẩm mới nhất với pagination (tất cả sản phẩm active, sắp xếp mới nhất)
      */
     public Page<Watch> findNewestProducts(Pageable pageable) {
-        LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
-        return watchRepository.findByIsActiveTrueAndCreatedDateAfterOrderByCreatedDateDesc(threeDaysAgo, pageable);
+        return watchRepository.findByIsActiveTrueOrderByCreatedDateDesc(pageable);
     }
 
     /**

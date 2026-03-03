@@ -35,9 +35,6 @@ public class UserProfileController {
     @Autowired
     private PhoneVerificationService phoneVerificationService;
 
-    /**
-     * Helper method to extract email from Principal (supports both UserDetails and OAuth2User)
-     */
     private String getEmailFromPrincipal(Principal principal) {
         if (principal instanceof UserDetails) {
             return ((UserDetails) principal).getUsername();

@@ -42,7 +42,7 @@ public class InvoiceService {
     @Autowired
     private OrderDetailRepository orderDetailRepository;
 
-    private static final String FONT_PATH = "C:/Windows/Fonts/arial.ttf"; // Adjust based on OS/Server
+    private static final String FONT_PATH = "C:/Windows/Fonts/arial.ttf";
     private static final String LOGO_PATH = "static/img/logo.png";
 
     // Format currency
@@ -194,24 +194,28 @@ public class InvoiceService {
             XWPFTable signTable = document.createTable(1, 2);
             signTable.setWidth("100%");
             XWPFTableRow signRow = signTable.getRow(0);
-            signRow.getCell(0).setText("Người mua hàng\n\n\n(Ký, ghi rõ họ tên)");
+            // Người mua hàng - căn giữa
+            XWPFParagraph buyerSignPara = signRow.getCell(0).addParagraph();
+            buyerSignPara.setAlignment(ParagraphAlignment.CENTER);
+            XWPFRun buyerSignRun = buyerSignPara.createRun();
+            buyerSignRun.setText("Người mua hàng\n\n\n(Ký, ghi rõ họ tên)");
             signRow.getCell(0).setColor("FFFFFF");
-            // Tạo đoạn văn bản cho ô Người bán hàng
+            // Người bán hàng - căn giữa
             XWPFParagraph sellerPara = signRow.getCell(1).addParagraph();
             sellerPara.setAlignment(ParagraphAlignment.CENTER);
             XWPFRun sellerRun = sellerPara.createRun();
             sellerRun.setText("Người bán hàng\n\n\n(Ký, đóng dấu)");
             sellerRun.addBreak();
-            // Thêm hình ảnh chữ ký, tăng kích thước và căn giữa
-            try {
-                ClassPathResource signatureResource = new ClassPathResource("static/img/signature.png");
-                InputStream signatureStream = signatureResource.getInputStream();
-                // Tăng kích thước ảnh
-                sellerRun.addPicture(signatureStream, XWPFDocument.PICTURE_TYPE_PNG, "signature.png", Units.toEMU(220), Units.toEMU(90));
-                signatureStream.close();
-            } catch (Exception e) {
-                System.err.println("Failed to add signature to Word invoice: " + e.getMessage());
-            }
+            // // Thêm hình ảnh chữ ký, tăng kích thước và căn giữa
+            // try {
+            //     ClassPathResource signatureResource = new ClassPathResource("static/img/signature.png");
+            //     InputStream signatureStream = signatureResource.getInputStream();
+            //     // Tăng kích thước ảnh
+            //     sellerRun.addPicture(signatureStream, XWPFDocument.PICTURE_TYPE_PNG, "signature.png", Units.toEMU(220), Units.toEMU(90));
+            //     signatureStream.close();
+            // } catch (Exception e) {
+            //     System.err.println("Failed to add signature to Word invoice: " + e.getMessage());
+            // }
             signRow.getCell(1).setColor("FFFFFF");
             // Remove borders for signature table
             for (int c = 0; c < signRow.getTableCells().size(); c++) {

@@ -104,7 +104,7 @@ public class UserAdminController {
         model.addAttribute("orders", orders);
         model.addAttribute("orderCount", orderCount);
         model.addAttribute("totalSpent", totalSpent);
-
+                
         return "admin/user-detail";
     }
 

@@ -164,12 +164,6 @@ public class PublicController {
             Pageable pageable = PageRequest.of(page, size);
             Page<Watch> watchPage = watchService.findNewestProducts(pageable);
 
-            System.out.println("=== DEBUG NEWEST PRODUCTS ===");
-            System.out.println("Total elements: " + watchPage.getTotalElements());
-            System.out.println("Total pages: " + watchPage.getTotalPages());
-            System.out.println("Current page: " + page);
-            System.out.println("Content size: " + watchPage.getContent().size());
-            
             model.addAttribute("watches", watchPage.getContent());
             model.addAttribute("pageTitle", "Sản phẩm mới nhất");
             model.addAttribute("currentPage", page);
@@ -180,8 +174,6 @@ public class PublicController {
             return "public/products-newest";
 
         } catch (Exception e) {
-            System.err.println("ERROR in newestProducts: " + e.getMessage());
-            e.printStackTrace();
             model.addAttribute("error", "Lỗi khi tải sản phẩm mới nhất: " + e.getMessage());
             model.addAttribute("watches", List.of());
             model.addAttribute("pageTitle", "Sản phẩm mới nhất");
@@ -204,16 +196,6 @@ public class PublicController {
             Pageable pageable = PageRequest.of(page, size);
             Page<Watch> watchPage = watchService.findDiscountProducts(pageable);
 
-            System.out.println("=== DEBUG DISCOUNT PRODUCTS ===");
-            System.out.println("Total elements: " + watchPage.getTotalElements());
-            System.out.println("Total pages: " + watchPage.getTotalPages());
-            System.out.println("Current page: " + page);
-            System.out.println("Content size: " + watchPage.getContent().size());
-            if (!watchPage.getContent().isEmpty()) {
-                System.out.println("First product: " + watchPage.getContent().get(0).getWatchName() + 
-                    " - Discount: " + watchPage.getContent().get(0).getDiscountPercent());
-            }
-            
             model.addAttribute("watches", watchPage.getContent());
             model.addAttribute("pageTitle", "Sản phẩm giảm giá");
             model.addAttribute("currentPage", page);
@@ -224,8 +206,6 @@ public class PublicController {
             return "public/products-discount";
 
         } catch (Exception e) {
-            System.err.println("ERROR in discountProducts: " + e.getMessage());
-            e.printStackTrace();
             model.addAttribute("error", "Lỗi khi tải sản phẩm giảm giá: " + e.getMessage());
             model.addAttribute("watches", List.of());
             model.addAttribute("pageTitle", "Sản phẩm giảm giá");
