@@ -9,22 +9,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import boiz.shop._2BShop.service.DashboardService;
 
-/**
- * Admin Dashboard Controller
- * Handles admin dashboard statistics and charts
- * URL: /admin hoặc /admin/dashboard
- */
 @Controller
 @RequestMapping("/admin")
 public class DashboardController {
 
     @Autowired
     private DashboardService dashboardService;
-
-    /**
-     * Admin Dashboard Page
-     * URL: /admin hoặc /admin/dashboard
-     */
+    
     @GetMapping({"", "/", "/dashboard"})
     public String dashboard(
         @RequestParam(defaultValue = "month") String period,

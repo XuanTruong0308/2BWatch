@@ -27,24 +27,12 @@ public class CartController {
         java.math.BigDecimal subtotal = cartService.calculateSubtotal();
         model.addAttribute("subtotal", subtotal);
 
-        // Calculate total (subtotal + shipping) to match checkout logic
-        // Shipping rule: < 500k -> 30k, else 0
         java.math.BigDecimal shippingFee = subtotal.compareTo(new java.math.BigDecimal("500000")) >= 0
                 ? java.math.BigDecimal.ZERO
                 : new java.math.BigDecimal("30000");
         java.math.BigDecimal total = subtotal.add(shippingFee);
         model.addAttribute("total", total);
-
-        // Dummy summary for now to prevent NPE in view, or we can implement real
-        // summary logic later
-        // Just empty object or null check in view is enough, but view expects
-        // summary.discountAmount
-        // Let's passed a simple map or DTO if needed, but for now passing null is fine
-        // because we check summary != null
-        // However, user might expect the discount banner logic.
-        // Let's add a placeholder summary if needed, but for now just ensure total is
-        // there.
-        model.addAttribute("summary", null); // Explicitly null to satisfy th:if check safely
+        model.addAttribute("summary", null);
 
         return "public/cart";
     }
@@ -60,12 +48,10 @@ public class CartController {
                         .body(Map.of("success", false, "message", "Thiếu thông tin sản phẩm"));
             }
             cartService.addToCart(watchId, quantity);
-            // Return updated cart count
             int count = cartService.getCartItemCount();
             return ResponseEntity.ok()
                     .body(Map.of("success", true, "message", "Đã thêm vào giỏ hàng", "cartItemCount", count));
         } catch (RuntimeException e) {
-            // Kiểm tra nếu là lỗi yêu cầu đăng nhập
             if (e.getMessage() != null && e.getMessage().contains("đăng nhập")) {
                 return ResponseEntity.status(401)
                         .body(Map.of("success", false, "message", e.getMessage(), "needLogin", true));

@@ -21,7 +21,6 @@ public interface CartItemRepository extends JpaRepository<CartItem, Integer> {
 
     void deleteByCartCartId(Integer cartId);
 
-    // Thêm các methods cho CartService
     List<CartItem> findByCart(Cart cart);
 
     Optional<CartItem> findByCartAndWatch(Cart cart, Watch watch);

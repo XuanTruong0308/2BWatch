@@ -52,7 +52,7 @@ public class BankAccountService {
     }
 
     /**
-     * Generate QR Code from VietQR and save to disk
+     * sinh QR = VietQR và lưu ổ path /uploads/bshop
      */
     public void generateAndSaveQrCode(BankAccount bankAccount) {
         try {
@@ -91,7 +91,7 @@ public class BankAccountService {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            // Fallback: Do nothing, existing logic will use API URL
+                throw new RuntimeException("Failed to generate QR code: " + e.getMessage());
         }
     }
 }

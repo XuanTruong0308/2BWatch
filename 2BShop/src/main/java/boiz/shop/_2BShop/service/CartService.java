@@ -63,7 +63,6 @@ public class CartService {
                 });
     }
 
-    // Thêm sản phẩm vào giỏ
     @Transactional
     public void addToCart(Integer watchId, Integer quantity) {
         Cart cart = getCurrentUserCart();
@@ -71,17 +70,14 @@ public class CartService {
         Watch watch = watchRepository.findById(watchId)
                 .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
 
-        // Kiểm tra stock
         if (watch.getStockQuantity() < quantity) {
             throw new RuntimeException("Không đủ hàng trong kho!");
         }
 
-        // check xem có trong giỏ chưa
         Optional<CartItem> existingItem = cartItemRepository
                 .findByCartAndWatch(cart, watch);
 
         if (existingItem.isPresent()) {
-            // cập nhật số lượng
             CartItem item = existingItem.get();
             int newQuantity = item.getQuantity() + quantity;
 
@@ -92,7 +88,6 @@ public class CartService {
             item.setQuantity(newQuantity);
             cartItemRepository.save(item);
         } else {
-            // Thêm mới
             CartItem newItem = new CartItem();
             newItem.setCart(cart);
             newItem.setWatch(watch);
@@ -109,7 +104,6 @@ public class CartService {
         if (quantity <= 0) {
             cartItemRepository.delete(item);
         } else {
-            // check stock
             if (item.getWatch().getStockQuantity() < quantity) {
                 throw new RuntimeException("Không đủ hàng trong kho!");
             }
@@ -119,19 +113,16 @@ public class CartService {
         }
     }
 
-    // xóa item khỏi giỏ
     @Transactional
     public void removeCartItem(Integer cartItemId) {
         cartItemRepository.deleteById(cartItemId);
     }
 
-    // lấy danh sách cart items
     public List<CartItem> getCurrentUserCartItems() {
         Cart cart = getCurrentUserCart();
         return cartItemRepository.findByCart(cart);
     }
 
-    // Tính subtotal (chỉ tính các item được chọn)
     public BigDecimal calculateSubtotal() {
         List<CartItem> items = getSelectedCartItems();
 
