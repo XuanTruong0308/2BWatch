@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -48,9 +47,26 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf
                 .ignoringRequestMatchers("/cart/add", "/cart/update", "/cart/remove", "/cart/select", "/cart/select-all",
-                        "/checkout/place-order", "/logout")
+                        "/checkout/place-order", "/logout", "/api/**")
             )
             .authorizeHttpRequests(auth -> auth
+                // Swagger/OpenAPI - Public for API testing
+                .requestMatchers(
+                    "/v3/api-docs/**",
+                    "/swagger-ui/**",
+                    "/swagger-ui.html"
+                ).permitAll()
+
+                // Public API endpoints for React
+                .requestMatchers("/api/v1/products/**", "/api/v1/auth/**").permitAll()
+
+                // Admin API endpoints
+                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+
+                // User API endpoints
+                .requestMatchers("/api/v1/profile/**").hasRole("USER")
+                .requestMatchers("/api/v1/**").authenticated()
+
                 // Public pages - KHÔNG cần đăng nhập
                 .requestMatchers("/", "/login", "/register", "/account/login", "/account/register",
                     "/watches/**", "/products/**", "/verify", "/confirm-register", "/resend-verification",
@@ -63,14 +79,14 @@ public class SecurityConfig {
                 .requestMatchers("/cart", "/cart/update", "/cart/remove", "/cart/select", "/cart/select-all").authenticated()
                 
                 // Checkout and orders - Chỉ cần đăng nhập
-                .requestMatchers("/checkout/**", "/payment/**", "/orders/**", "/user/**").authenticated()
+                .requestMatchers("/checkout/**", "/payment/**", "/orders/**", "/my-orders/**", "/user/**").authenticated()
                 
                 // Invoice downloads - Chỉ cần đăng nhập
                 .requestMatchers("/invoice/**").authenticated()
                 
                 // User account pages - Cần đăng nhập (USER role)
                 .requestMatchers("/profile/**", "/account/**").hasRole("USER")
-                
+
                 // Admin pages - CẦN đăng nhập (ADMIN role)
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 

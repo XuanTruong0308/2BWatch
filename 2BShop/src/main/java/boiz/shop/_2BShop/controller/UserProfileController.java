@@ -167,32 +167,29 @@ public class UserProfileController {
         }
     }
 
-    /**
-     * Change password (AJAX endpoint)
-     */
-    @PostMapping("/change-password")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> changePassword(
-            @Valid @RequestBody ChangePasswordDTO changePasswordDTO,
-            Principal principal) {
+    // @PostMapping("/change-password")
+    // @ResponseBody
+    // public ResponseEntity<Map<String, Object>> changePassword(
+    //         @Valid @RequestBody ChangePasswordDTO changePasswordDTO,
+    //         Principal principal) {
 
-        Map<String, Object> response = new HashMap<>();
+    //     Map<String, Object> response = new HashMap<>();
 
-        try {
-            String email = getEmailFromPrincipal(principal);
-            User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+    //     try {
+    //         String email = getEmailFromPrincipal(principal);
+    //         User user = userRepository.findByEmail(email)
+    //                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
 
-            changePasswordDTO.setUserId(user.getUserId());
-            userProfileService.changePassword(changePasswordDTO);
+    //         changePasswordDTO.setUserId(user.getUserId());
+    //         userProfileService.changePassword(changePasswordDTO);
 
-            response.put("success", true);
-            response.put("message", "Đổi mật khẩu thành công");
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", e.getMessage());
-            return ResponseEntity.badRequest().body(response);
-        }
-    }
+    //         response.put("success", true);
+    //         response.put("message", "Đổi mật khẩu thành công");
+    //         return ResponseEntity.ok(response);
+    //     } catch (Exception e) {
+    //         response.put("success", false);
+    //         response.put("message", e.getMessage());
+    //         return ResponseEntity.badRequest().body(response);
+    //     }
+    // }
 }
