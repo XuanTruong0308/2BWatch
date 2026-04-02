@@ -12,6 +12,91 @@ Watch shop management system built with Spring Boot 3.
 
 ## 🚀 Quick Start
 
+## 🐳 Run with Docker (No SSMS Required)
+
+### 1. Prepare environment file
+
+Windows (PowerShell):
+```powershell
+Copy-Item .env.example .env
+```
+
+Linux/macOS:
+```bash
+cp .env.example .env
+```
+
+Then edit `.env` and set a strong `MSSQL_SA_PASSWORD`.
+
+### 2. Build and run app + SQL Server
+
+```bash
+docker compose up -d --build
+```
+
+App URL: `http://localhost:8080`
+
+Swagger URL:
+- `http://localhost:8080/swagger-ui.html`
+- `http://localhost:8080/swagger-ui/index.html`
+
+### 3. Stop services
+
+```bash
+docker compose down
+```
+
+### 4. Stop and remove volumes (reset all data)
+
+```bash
+docker compose down -v
+```
+
+## 📦 Deploy to another machine without source code
+
+Goal: build once, run anywhere with Docker only.
+
+### Step A - Build image once on your machine
+
+```bash
+docker compose build app
+```
+
+### Step B - Export web image to a single file
+
+```bash
+docker save -o 2bshop-web-1.0.0.tar 2bshop-web:1.0.0
+```
+
+### Step C - On another machine
+
+1) Copy these files to target machine:
+- `2bshop-web-1.0.0.tar`
+- `docker-compose.deploy.yml`
+- `.env` (or `.env.example` then rename, can edit `APP_IMAGE` if needed)
+
+2) Load image:
+
+```bash
+docker load -i 2bshop-web-1.0.0.tar
+```
+
+3) Start:
+
+```bash
+docker compose -f docker-compose.deploy.yml up -d
+```
+
+Note:
+- SQL Server image (`mcr.microsoft.com/mssql/server:2022-latest`) will be pulled automatically if internet is available.
+- If target machine is offline, export/import SQL Server image too:
+
+```bash
+docker pull mcr.microsoft.com/mssql/server:2022-latest
+docker save -o mssql-2022.tar mcr.microsoft.com/mssql/server:2022-latest
+docker load -i mssql-2022.tar
+```
+
 ### 1. Clone the repository
 ```bash
 git clone <repository-url>
