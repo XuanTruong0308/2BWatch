@@ -129,13 +129,13 @@ public class WatchService {
      * Sản phẩm mới nhất với pagination (tất cả sản phẩm active, sắp xếp mới nhất)
      */
     public Page<Watch> findNewestProducts(Pageable pageable) {
-        return watchRepository.findByIsActiveTrueOrderByCreatedDateDesc(pageable);
+        return watchRepository.findByIsActiveTrue(pageable);
     }
 
     /**
      * Sản phẩm giảm giá với pagination
      */
     public Page<Watch> findDiscountProducts(Pageable pageable) {
-        return watchRepository.findByIsActiveTrueAndDiscountPercentGreaterThanOrderByDiscountPercentDesc(0, pageable);
+        return watchRepository.findByIsActiveTrueAndDiscountPercentGreaterThan(0, pageable);
     }
 }

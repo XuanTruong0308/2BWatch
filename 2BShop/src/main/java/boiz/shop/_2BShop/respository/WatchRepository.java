@@ -103,11 +103,10 @@ public interface WatchRepository extends JpaRepository<Watch, Integer> {
     Page<Watch> findByIsActive(Boolean isActive, Pageable pageable);
 
     // Pagination for newest and discount products
-    Page<Watch> findByIsActiveTrueOrderByCreatedDateDesc(Pageable pageable);
+    Page<Watch> findByIsActiveTrue(Pageable pageable);
 
-    Page<Watch> findByIsActiveTrueAndCreatedDateAfterOrderByCreatedDateDesc(LocalDateTime date, Pageable pageable);
+    Page<Watch> findByIsActiveTrueAndCreatedDateAfter(LocalDateTime date, Pageable pageable);
 
-    Page<Watch> findByIsActiveTrueAndDiscountPercentGreaterThanOrderByDiscountPercentDesc(Integer minDiscount,
-            Pageable pageable);
+    Page<Watch> findByIsActiveTrueAndDiscountPercentGreaterThan(Integer minDiscount, Pageable pageable);
 
 }

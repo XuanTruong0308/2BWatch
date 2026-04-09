@@ -1,11 +1,10 @@
 package boiz.shop._2BShop.config;
 
-import boiz.shop._2BShop.service.CustomOAuth2UserService;
-import boiz.shop._2BShop.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -13,6 +12,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+
+import boiz.shop._2BShop.service.CustomOAuth2UserService;
+import boiz.shop._2BShop.service.CustomUserDetailsService;
 
 @Configuration
 @EnableWebSecurity
@@ -20,104 +26,141 @@ public class SecurityConfig {
 
     @Autowired
     private CustomUserDetailsService userDetailsService;
-    
-    @Autowired
-    private CustomLoginSuccessHandler loginSuccessHandler;
 
     @Autowired
     private CustomOAuth2UserService customOAuth2UserService;
-
-    @Autowired
-    @Qualifier("customOAuth2LoginSuccessHandler")
-    private AuthenticationSuccessHandler oAuth2LoginSuccessHandler;
 
     @Bean
     public static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-    
+
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth, PasswordEncoder passwordEncoder) throws Exception {
         auth.userDetailsService(userDetailsService)
-            .passwordEncoder(passwordEncoder);
+                .passwordEncoder(passwordEncoder);
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public CookieCsrfTokenRepository csrfTokenRepository() {
+        CookieCsrfTokenRepository repository = CookieCsrfTokenRepository.withHttpOnlyFalse();
+        repository.setCookiePath("/");
+        return repository;
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(
+            HttpSecurity http,
+            CookieCsrfTokenRepository csrfTokenRepository,
+            CustomLoginSuccessHandler loginSuccessHandler,
+            @Qualifier("customOAuth2LoginSuccessHandler") AuthenticationSuccessHandler oAuth2LoginSuccessHandler)
+            throws Exception {
         http
-            .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/cart/add", "/cart/update", "/cart/remove", "/cart/select", "/cart/select-all",
-                        "/checkout/place-order", "/logout", "/api/**")
-            )
-            .authorizeHttpRequests(auth -> auth
-                // Swagger/OpenAPI - Public for API testing
-                .requestMatchers(
-                    "/v3/api-docs/**",
-                    "/swagger-ui/**",
-                    "/swagger-ui.html"
-                ).permitAll()
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(csrfTokenRepository)
+                        .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler()))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html")
+                        .permitAll()
 
-                // Public API endpoints for React
-                .requestMatchers("/api/v1/products/**", "/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/auth/**", "/api/v1/public/**")
+                        .permitAll()
 
-                // Admin API endpoints
-                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/admin/**")
+                        .hasRole("ADMIN")
 
-                // User API endpoints
-                .requestMatchers("/api/v1/profile/**").hasRole("USER")
-                .requestMatchers("/api/v1/**").authenticated()
+                        .requestMatchers("/api/v1/profile/**")
+                        .hasRole("USER")
 
-                // Public pages - KHÔNG cần đăng nhập
-                .requestMatchers("/", "/login", "/register", "/account/login", "/account/register",
-                    "/watches/**", "/products/**", "/verify", "/confirm-register", "/resend-verification",
-                    "/static/**", "/css/**", "/js/**", "/images/**", "/uploads/**", "/error").permitAll()
-                
-                // Public cart endpoints - Cho phép truy cập công khai
-                .requestMatchers("/cart/count", "/cart/add").permitAll()
-                
-                // Cart page - Chỉ cần đăng nhập (không yêu cầu role cụ thể)
-                .requestMatchers("/cart", "/cart/update", "/cart/remove", "/cart/select", "/cart/select-all").authenticated()
-                
-                // Checkout and orders - Chỉ cần đăng nhập
-                .requestMatchers("/checkout/**", "/payment/**", "/orders/**", "/my-orders/**", "/user/**").authenticated()
-                
-                // Invoice downloads - Chỉ cần đăng nhập
-                .requestMatchers("/invoice/**").authenticated()
-                
-                // User account pages - Cần đăng nhập (USER role)
-                .requestMatchers("/profile/**", "/account/**").hasRole("USER")
+                        .requestMatchers("/api/v1/orders/**", "/api/v1/checkout/**")
+                        .authenticated()
 
-                // Admin pages - CẦN đăng nhập (ADMIN role)
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                
-                // Tất cả còn lại - Public (có thể 404 nếu không tồn tại)
-                .anyRequest().permitAll()
-            )
-            .formLogin(form -> form
-                .loginPage("/login")
-                .loginProcessingUrl("/perform-login")
-                .successHandler(loginSuccessHandler)
-                .failureUrl("/login?error=true")
-                .usernameParameter("email")
-                .passwordParameter("password")
-                .permitAll()
-            )
-            .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout=true")
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
-                .permitAll()
-            )
-            .oauth2Login(oauth2 -> oauth2
-                .loginPage("/login")
-                .userInfoEndpoint(userInfo -> userInfo
-                    .userService(customOAuth2UserService)
-                )
-                .successHandler(oAuth2LoginSuccessHandler)
-                .failureUrl("/login?error=oauth2")
-            );
-        
+                        .requestMatchers("/api/v1/cart/count")
+                        .permitAll()
+
+                        .requestMatchers("/api/v1/cart/**")
+                        .authenticated()
+
+                        .requestMatchers("/api/v1/**")
+                        .authenticated()
+
+                        .requestMatchers(
+                                "/",
+                                "/login",
+                                "/register",
+                                "/forgot-password",
+                                "/reset-password",
+                                "/confirm-register",
+                                "/about",
+                                "/contact",
+                                "/policy",
+                                "/terms",
+                                "/faq",
+                                "/payment-result",
+                                "/watches/**",
+                                "/products/**",
+                                "/oauth2/**",
+                                "/login/oauth2/**",
+                                "/perform-login",
+                                "/static/**",
+                                "/css/**",
+                                "/js/**",
+                                "/images/**",
+                                "/img/**",
+                                "/video/**",
+                                "/uploads/**",
+                                "/assets/**",
+                                "/favicon.ico",
+                                "/favicon.png",
+                                "/error")
+                        .permitAll()
+
+                        .requestMatchers("/payment/vnpay-return")
+                        .permitAll()
+
+                        .requestMatchers("/cart/**", "/checkout/**", "/my-orders/**", "/user/**", "/invoice/**")
+                        .authenticated()
+
+                        .requestMatchers("/profile/**", "/account/**")
+                        .hasRole("USER")
+
+                        .requestMatchers("/admin/**")
+                        .hasRole("ADMIN")
+
+                        .anyRequest()
+                        .permitAll())
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .loginProcessingUrl("/perform-login")
+                        .successHandler(loginSuccessHandler)
+                        .failureUrl("/login?error=true")
+                        .usernameParameter("email")
+                        .passwordParameter("password")
+                        .permitAll())
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout=true")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                        .permitAll())
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                        .successHandler(oAuth2LoginSuccessHandler)
+                        .failureUrl("/login?error=oauth2"))
+                .exceptionHandling(ex -> ex
+                        .defaultAuthenticationEntryPointFor(
+                                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
+                                new AntPathRequestMatcher("/api/**"))
+                        .defaultAccessDeniedHandlerFor(
+                                (request, response, accessDeniedException) -> response.sendError(HttpStatus.FORBIDDEN.value()),
+                                new AntPathRequestMatcher("/api/**")));
+
+        http.addFilterAfter(new CsrfCookieFilter(), CsrfFilter.class);
+
         return http.build();
     }
 }

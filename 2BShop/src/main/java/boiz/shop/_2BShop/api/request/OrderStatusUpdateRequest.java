@@ -1,0 +1,6 @@
+package boiz.shop._2BShop.api.request;
+
+public record OrderStatusUpdateRequest(
+        String newStatus,
+        String note) {
+}

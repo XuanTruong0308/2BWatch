@@ -1,0 +1,4 @@
+package boiz.shop._2BShop.api.request;
+
+public record PhoneUpdateRequest(String phone) {
+}

@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -22,9 +24,13 @@ public class CustomOAuth2LoginSuccessHandler implements AuthenticationSuccessHan
     @Autowired
     private CartRepository cartRepository;
 
+    @Autowired
+    private CsrfTokenRepository csrfTokenRepository;
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
+        refreshCsrfToken(request, response);
         
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
         User user = oAuth2User.getUser();
@@ -47,5 +53,12 @@ public class CustomOAuth2LoginSuccessHandler implements AuthenticationSuccessHan
         } else {
             response.sendRedirect("/");
         }
+    }
+
+    private void refreshCsrfToken(HttpServletRequest request, HttpServletResponse response) {
+        CsrfToken csrfToken = csrfTokenRepository.generateToken(request);
+        csrfTokenRepository.saveToken(csrfToken, request, response);
+        request.setAttribute(CsrfToken.class.getName(), csrfToken);
+        request.setAttribute(csrfToken.getParameterName(), csrfToken);
     }
 }
