@@ -126,7 +126,7 @@ export default function OrdersPage() {
                 <strong>{formatCurrency(order.totalAmount)}</strong>
               </div>
             </div>
-            <div className="header-actions" style={{ justifyContent: "space-between" }}>
+            <div className="header-actions" style={{ justifyContent: "space-between", marginTop: "1.25rem" }}>
               <Link className="button button-subtle" to={`/my-orders/${order.orderId}`}>
                 Xem chi tiết
               </Link>
