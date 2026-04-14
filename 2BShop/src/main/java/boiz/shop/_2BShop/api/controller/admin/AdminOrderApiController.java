@@ -58,7 +58,7 @@ public class AdminOrderApiController {
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fromDate,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate toDate,
             @RequestParam(defaultValue = "0") int page) {
-        Pageable pageable = PageRequest.of(page, 20, Sort.by("orderDate").descending());
+        Pageable pageable = PageRequest.of(page, 10, Sort.by("orderDate").descending());
         Page<Order> orders;
         if (keyword != null && !keyword.isBlank()) {
             orders = orderRepository.searchOrders(keyword, pageable);

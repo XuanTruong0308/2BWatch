@@ -1,14 +1,19 @@
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/Badge";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { LoadingScreen } from "@/components/ui/LoadingScreen";
+import { Pagination } from "@/components/ui/Pagination";
 import { deleteJson, getJson } from "@/lib/api/client";
 import type { ApiResponse, BankAccount } from "@/lib/api/types";
 import { getErrorMessage, toBooleanText } from "@/lib/utils/format";
 
 export default function BankAccountsPage() {
   const queryClient = useQueryClient();
+  const [currentPage, setCurrentPage] = useState(0);
+  const itemsPerPage = 10;
+
   const accountsQuery = useQuery({
     queryKey: ["admin", "bank-accounts"],
     queryFn: async () => {
@@ -31,6 +36,9 @@ export default function BankAccountsPage() {
   if (accountsQuery.isError || !accountsQuery.data) {
     return <ErrorState message="Không thể tải tài khoản ngân hàng." />;
   }
+
+  const totalPages = Math.ceil(accountsQuery.data.length / itemsPerPage);
+  const currentAccounts = accountsQuery.data.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage);
 
   return (
     <div className="panel">
@@ -57,7 +65,7 @@ export default function BankAccountsPage() {
             </tr>
           </thead>
           <tbody>
-            {accountsQuery.data.map((account) => (
+            {currentAccounts.map((account) => (
               <tr key={account.bankAccountId}>
                 <td>
                   <strong>{account.bankName}</strong>
@@ -84,6 +92,14 @@ export default function BankAccountsPage() {
           </tbody>
         </table>
       </div>
+
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
+          totalPages={totalPages}
+        />
+      )}
 
       {deleteMutation.isError ? <p className="inline-text-error">{getErrorMessage(deleteMutation.error)}</p> : null}
     </div>

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArcElement,
@@ -21,6 +22,9 @@ import { formatCurrency, formatDate, orderStatusLabel, statusTone } from "@/lib/
 ChartJS.register(ArcElement, BarElement, CategoryScale, Legend, LinearScale, LineElement, PointElement, Tooltip);
 
 export default function DashboardPage() {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
+
   const dashboardQuery = useQuery({
     queryKey: ["admin", "dashboard"],
     queryFn: async () => {
@@ -38,6 +42,8 @@ export default function DashboardPage() {
   }
 
   const data = dashboardQuery.data;
+  const totalPages = Math.ceil(data.recentOrders.length / itemsPerPage);
+  const currentOrders = data.recentOrders.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
     <div className="stack-section">
@@ -122,7 +128,7 @@ export default function DashboardPage() {
         <section className="panel">
           <h2>Đơn hàng gần đây</h2>
           <div className="summary-list">
-            {data.recentOrders.map((order) => (
+            {currentOrders.map((order) => (
               <div className="summary-product" key={order.orderId}>
                 <div>
                   <strong>{order.orderCode}</strong>
@@ -137,6 +143,27 @@ export default function DashboardPage() {
               </div>
             ))}
           </div>
+          {totalPages > 1 && (
+            <div style={{ display: "flex", gap: "8px", justifyContent: "center", marginTop: "1rem" }}>
+              <button 
+                type="button" 
+                className="button"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              >
+                Trước
+              </button>
+              <span style={{ padding: "8px" }}>{currentPage} / {totalPages}</span>
+              <button 
+                type="button" 
+                className="button"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              >
+                Tiếp
+              </button>
+            </div>
+          )}
         </section>
       </div>
     </div>

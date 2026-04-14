@@ -1,4 +1,4 @@
-import { Link, Outlet } from "react-router-dom";
+import { Link, NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useCsrf } from "@/hooks/useCsrf";
 
@@ -19,16 +19,20 @@ export function AdminLayout() {
 
   return (
     <div className="admin-shell">
-      <aside className="admin-sidebar">
+      <aside className="admin-sidebar" style={{ position: "sticky", top: 0, height: "100vh", overflowY: "auto", alignSelf: "start" }}>
         <div>
-          <span className="eyebrow">Admin</span>
-          <h2>2BShop Console</h2>
+          <span className="eyebrow" style={{ color: "var(--gold)" }}>Admin</span>
+          <h2 style={{ color: "white" }}>2BShop Console</h2>
         </div>
         <nav className="admin-nav">
           {adminLinks.map((link) => (
-            <Link key={link.to} to={link.to}>
+            <NavLink 
+              key={link.to} 
+              to={link.to}
+              className={({ isActive }) => isActive ? "active-link" : ""}
+            >
               {link.label}
-            </Link>
+            </NavLink>
           ))}
         </nav>
         <div className="admin-sidebar__footer">
@@ -37,7 +41,7 @@ export function AdminLayout() {
         </div>
       </aside>
 
-      <div className="admin-main">
+      <div className="admin-main" style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
         <header className="admin-topbar">
           <div>
             <span className="eyebrow">Backoffice</span>

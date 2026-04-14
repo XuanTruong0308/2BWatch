@@ -21,15 +21,15 @@ function HeroSection() {
           <h1 className="home-hero-title">WELCOME TO 2BSHOP</h1>
         </ScrollReveal>
         <ScrollReveal animation="fade-up" delay={500}>
-          <p className="home-hero-subtitle">Kham pha bo suu tap dong ho cao cap, sang trong va dang cap.</p>
+          <p className="home-hero-subtitle">Khám phá ngay bộ sưu tập đồng hồ cao cấp, sang trọng và đẳng cấp.</p>
         </ScrollReveal>
         <ScrollReveal animation="zoom-in" delay={800}>
           <div className="home-hero-actions">
             <a href="#bestsellers" className="home-btn home-btn-primary">
-              Kham pha ngay
+              Khám phá ngay
             </a>
             <Link to="/watches/newest" className="home-btn home-btn-outline">
-              San pham moi
+              Sản phẩm mới
             </Link>
           </div>
         </ScrollReveal>
@@ -94,10 +94,10 @@ function ProductSection({
                   type="button"
                 >
                   {isAddingToCart(product.watchId)
-                    ? "Dang xu ly..."
+                    ? "Đang xử lý..."
                     : (product.stockQuantity ?? 0) <= 0
-                      ? "Het hang"
-                      : "Them vao gio"}
+                      ? "Hết hàng"
+                      : "Thêm vào giỏ"}
                 </button>
               }
             />
@@ -149,9 +149,9 @@ export default function HomePage() {
 
       <ProductSection
         id="bestsellers"
-        eyebrow="Dang cap va sang trong"
-        title="BAN CHAY NHAT"
-        description="Bo suu tap nhung mau dong ho cao cap duoc san don nhieu nhat."
+        eyebrow="Đẳng cấp và sang trọng"
+        title="Bán Chạy Nhất"
+        description="Bộ sưu tập những mẫu đồng hồ cao cấp được săn đón nhiều nhất."
         products={bestSellers}
         onAddToCart={addToCart.addToCart}
         isAddingToCart={addToCart.isAdding}
@@ -159,26 +159,26 @@ export default function HomePage() {
       />
 
       <ProductSection
-        eyebrow="Tuyet tac moi"
-        title="SAN PHAM MOI NHAT"
-        description="Kham pha ngay nhung thiet ke vua ra mat."
+        eyebrow="Tuyệt tác mới"
+        title="SẢN PHẨM MỚI NHẤT"
+        description="Khám phá ngay những thiết kế vừa ra mắt."
         products={newestProducts}
         onAddToCart={addToCart.addToCart}
         isAddingToCart={addToCart.isAdding}
         actionLink="/watches/newest"
-        actionText="Xem toan bo san pham moi"
+        actionText="Xem toàn bộ sản phẩm mới"
         backgroundColor="gray"
       />
 
       <ProductSection
-        eyebrow="Dac quyen gioi han"
-        title="GIAM GIA SAU NHAT"
-        description="So huu tuyet tac dong ho voi muc gia uu dai chua tung co."
+        eyebrow="Đặc quyền giới hạn"
+        title="GIẢM GIÁ SÂU NHẤT"
+        description="Sở hữu tuyệt tác đồng hồ với mức giá ưu đãi chưa từng có."
         products={biggestDiscounts}
         onAddToCart={addToCart.addToCart}
         isAddingToCart={addToCart.isAdding}
         actionLink="/watches/discount"
-        actionText="Xem tat ca uu dai"
+        actionText="Xem tất cả ưu đãi"
         backgroundColor="white"
       />
     </main>

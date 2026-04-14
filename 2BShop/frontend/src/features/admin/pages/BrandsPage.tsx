@@ -1,14 +1,18 @@
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/Badge";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { LoadingScreen } from "@/components/ui/LoadingScreen";
+import { Pagination } from "@/components/ui/Pagination";
 import { deleteJson, getJson, postJson } from "@/lib/api/client";
 import type { ApiResponse, Brand } from "@/lib/api/types";
 import { getErrorMessage, toBooleanText } from "@/lib/utils/format";
 
 export default function BrandsPage() {
   const queryClient = useQueryClient();
+  const [currentPage, setCurrentPage] = useState(0);
+  const itemsPerPage = 10;
 
   const brandsQuery = useQuery({
     queryKey: ["admin", "brands"],
@@ -38,6 +42,9 @@ export default function BrandsPage() {
     return <ErrorState message="Không thể tải danh sách brand." />;
   }
 
+  const totalPages = Math.ceil(brandsQuery.data.length / itemsPerPage);
+  const currentBrands = brandsQuery.data.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage);
+
   return (
     <div className="panel">
       <div className="section-heading">
@@ -62,7 +69,7 @@ export default function BrandsPage() {
             </tr>
           </thead>
           <tbody>
-            {brandsQuery.data.map((brand) => (
+            {currentBrands.map((brand) => (
               <tr key={brand.brandId}>
                 <td>
                   <strong>{brand.brandName}</strong>
@@ -100,6 +107,14 @@ export default function BrandsPage() {
           </tbody>
         </table>
       </div>
+
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
+          totalPages={totalPages}
+        />
+      )}
 
       {actionMutation.isError ? <p className="inline-text-error">{getErrorMessage(actionMutation.error)}</p> : null}
     </div>

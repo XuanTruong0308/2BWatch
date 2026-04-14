@@ -48,7 +48,12 @@ public class BankAccountService {
      * Delete bank account
      */
     public void delete(Integer id) {
-        bankAccountRepository.deleteById(id);
+        try {
+            bankAccountRepository.deleteById(id);
+            bankAccountRepository.flush();
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            throw new RuntimeException("Tài khoản này đang được sử dụng trong đơn hàng, không thể xóa. Vui lòng chọn 'Tạm ngưng' (ẩn) thay vì xóa để tránh lỗi dữ liệu!");
+        }
     }
 
     /**

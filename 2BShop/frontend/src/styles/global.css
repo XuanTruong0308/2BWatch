@@ -442,6 +442,8 @@ img {
 
 .admin-sidebar {
   min-height: 100vh;
+  height: 100vh;
+  align-self: start;
   position: sticky;
   top: 0;
   background: linear-gradient(180deg, rgba(12, 31, 63, 0.97), rgba(17, 35, 71, 0.92));
@@ -449,13 +451,15 @@ img {
   padding: 28px 22px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  gap: 32px;
+  overflow-y: auto;
 }
 
 .admin-nav {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 10px;
-  margin-top: 24px;
+  flex: 1;
 }
 
 .admin-nav a {
@@ -467,6 +471,14 @@ img {
 .admin-nav a:hover {
   background: rgba(201, 161, 76, 0.16);
   color: white;
+}
+
+.admin-sidebar__footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .admin-topbar {
@@ -1463,3 +1475,16 @@ header, footer, section {
   transform: translateY(0) translateX(0) scale(1) !important;
   filter: blur(0);
 }
+""  
+".admin-nav a.active-link { background: var(--gold); color: var(--navy); font-weight: 500; border-radius: 4px; padding-left: 1rem; }"  
+".admin-nav a { color: var(--gray); transition: all 0.2s; }"  
+".admin-nav a:hover:not(.active-link) { color: white; background: rgba(255,255,255,0.05); padding-left: 0.5rem; }" 
+""  
+"/* Truncate long text in product cards to 1 line */"  
+".product-card h3, .product-card p.muted-copy {"  
+"  white-space: nowrap;"  
+"  overflow: hidden;"  
+"  text-overflow: ellipsis;"  
+"  max-width: 100%;"  
+"  display: block;"  
+"}" 

@@ -101,7 +101,7 @@ export function PublicLayout() {
             <h4>Kết nối</h4>
             <a href="tel:0399760075">0399 760 075</a>
             <a href="mailto:boiznews.fpoly@gmail.com">boiznews.fpoly@gmail.com</a>
-            <span>Ho Chi Minh City, Vietnam</span>
+            <span>Da Nang, Vietnam</span>
           </div>
         </div>
       </footer>

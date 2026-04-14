@@ -86,7 +86,7 @@ public class AdminPaymentApiController {
             @RequestParam(required = false) String status,
             @RequestParam(required = false) Integer methodId,
             @RequestParam(defaultValue = "0") int page) {
-        Pageable pageable = PageRequest.of(page, 50, Sort.by("transactionDate").descending());
+        Pageable pageable = PageRequest.of(page, 10, Sort.by("transactionDate").descending());
         org.springframework.data.domain.Page<PaymentTransaction> transactions;
         if (status != null && !status.isBlank()) {
             transactions = paymentTransactionRepository.findByStatus(status, pageable);

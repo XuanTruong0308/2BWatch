@@ -52,7 +52,7 @@ export default function ProductDetailPage() {
               onClick={() => setActiveImage(index)}
               type="button"
             >
-              Anh {index + 1}
+              Ảnh {index + 1}
             </button>
           ))}
         </div>
@@ -66,17 +66,17 @@ export default function ProductDetailPage() {
           {product.discountPercent ? <span className="price-old">{formatCurrency(product.price)}</span> : null}
         </div>
         <div className="header-actions" style={{ justifyContent: "flex-start", marginBottom: 16 }}>
-          <Badge label={isOutOfStock ? "Het hang" : "Con hang"} />
-          <Badge label={`Da ban ${product.soldCount ?? 0}`} tone="info" />
+          <Badge label={isOutOfStock ? "ết hàng" : "Còn hàng"} />
+          <Badge label={`Đã bán ${product.soldCount ?? 0}`} tone="info" />
         </div>
         <p className="muted-copy">{product.description}</p>
         <div className="info-grid" style={{ margin: "24px 0" }}>
           <div className="metric-card">
-            <span className="eyebrow">Thuong hieu</span>
+            <span className="eyebrow">Thương hiệu</span>
             <strong>{product.brandName}</strong>
           </div>
           <div className="metric-card">
-            <span className="eyebrow">Danh muc</span>
+            <span className="eyebrow">Danh mục</span>
             <strong>{product.categoryName}</strong>
           </div>
         </div>
@@ -95,7 +95,7 @@ export default function ProductDetailPage() {
           onClick={() => addToCart.addToCart(productId, quantity)}
           type="button"
         >
-          {addToCart.isAdding(productId) ? "Dang xu ly..." : isOutOfStock ? "Het hang" : "Them vao gio hang"}
+          {addToCart.isAdding(productId) ? "Dang xu ly..." : isOutOfStock ? "Hết hàng" : "Thêm vào giỏ hàng"}
         </button>
         {addToCart.feedback ? (
           <div className={`inline-alert inline-alert-${addToCart.feedback.tone}`} style={{ marginTop: 16 }}>
@@ -106,7 +106,7 @@ export default function ProductDetailPage() {
 
       <div className="panel" style={{ gridColumn: "1 / -1" }}>
         <ScrollReveal animation="fade-down">
-          <h2>San pham lien quan</h2>
+          <h2>Sản phẩm liên quan</h2>
         </ScrollReveal>
         <div className="product-grid">
           {product.relatedProducts.map((entry, idx) => (

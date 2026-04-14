@@ -64,7 +64,7 @@ public class AdminUserApiController {
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Boolean isActive,
             @RequestParam(defaultValue = "0") int page) {
-        Pageable pageable = PageRequest.of(page, 20, Sort.by("createdDate").descending());
+        Pageable pageable = PageRequest.of(page, 10, Sort.by("createdDate").descending());
         Page<User> users;
         if (keyword != null && !keyword.isBlank()) {
             users = userRepository.searchUsers(keyword, pageable);

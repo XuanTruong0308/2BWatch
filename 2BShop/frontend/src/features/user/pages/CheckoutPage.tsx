@@ -138,7 +138,7 @@ export default function CheckoutPage() {
     <div className="split-grid">
       <section className="panel">
         <span className="eyebrow">Checkout</span>
-        <h1>Hoan tat don hang cua ban</h1>
+        <h1>Hoàn tất đơn đặt hàng của bạn.</h1>
         <p className="muted-copy">
           Tong tien, dat coc va phi van chuyen deu duoc lay truc tiep tu logic hien tai cua backend.
         </p>
