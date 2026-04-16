@@ -39,6 +39,7 @@ const TransactionsPage = lazy(() => import("@/features/admin/pages/TransactionsP
 const TransactionDetailPage = lazy(() => import("@/features/admin/pages/TransactionDetailPage"));
 const BankAccountsPage = lazy(() => import("@/features/admin/pages/BankAccountsPage"));
 const BankAccountFormPage = lazy(() => import("@/features/admin/pages/BankAccountFormPage"));
+const AdminSupportChatPage = lazy(() => import("@/features/admin/pages/AdminSupportChatPage"));
 
 function ProductLegacyRedirect() {
   const { id } = useParams();
@@ -168,6 +169,7 @@ export function RouterView() {
         { path: "bank-accounts", element: <BankAccountsPage /> },
         { path: "bank-accounts/new", element: <BankAccountFormPage /> },
         { path: "bank-accounts/:id/edit", element: <BankAccountFormPage /> },
+        { path: "support-chat", element: <AdminSupportChatPage /> },
       ],
     },
     { path: "*", element: <Navigate replace to="/" /> },

@@ -3,8 +3,12 @@ package boiz.shop._2BShop.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @Controller
 public class SpaPageController {
+
+    private static final String DEV_FRONTEND_ORIGIN = "http://localhost:5173";
 
     @GetMapping({
             "/",
@@ -60,9 +64,25 @@ public class SpaPageController {
             "/admin/payments/transactions/{id}",
             "/admin/bank-accounts",
             "/admin/bank-accounts/new",
-            "/admin/bank-accounts/{id}/edit"
+            "/admin/bank-accounts/{id}/edit",
+            "/admin/support-chat"
     })
-    public String forwardSpa() {
+    public String forwardSpa(HttpServletRequest request) {
+        if (shouldRedirectToVite(request)) {
+            String queryString = request.getQueryString();
+            String target = DEV_FRONTEND_ORIGIN + request.getRequestURI();
+            if (queryString != null && !queryString.isBlank()) {
+                target += "?" + queryString;
+            }
+            return "redirect:" + target;
+        }
+
         return "forward:/index.html";
+    }
+
+    private boolean shouldRedirectToVite(HttpServletRequest request) {
+        String serverName = request.getServerName();
+        boolean isLocalRequest = "localhost".equalsIgnoreCase(serverName) || "127.0.0.1".equals(serverName);
+        return isLocalRequest && request.getServerPort() != 5173;
     }
 }

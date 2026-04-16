@@ -1,17 +1,19 @@
 import { Navigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useCsrf } from "@/hooks/useCsrf";
-
-const messageMap: Record<string, string> = {
-  error: "Email hoặc mật khẩu chưa chính xác. Vui lòng thử lại.",
-  logout: "Phiên đăng nhập đã được kết thúc an toàn.",
-  oauth2: "Đăng nhập mạng xã hội chưa thành công. Vui lòng thử lại.",
-};
+import { useI18n } from "@/lib/i18n";
 
 export default function LoginPage() {
   const [searchParams] = useSearchParams();
   const { data: user, isLoading } = useAuth();
   const { data: csrf } = useCsrf();
+  const { tx } = useI18n();
+
+  const messageMap = {
+    error: tx("Email hoặc mật khẩu chưa đúng. Vui lòng thử lại.", "Your email or password was incorrect. Please try again."),
+    logout: tx("Bạn đã đăng xuất an toàn.", "You have been signed out safely."),
+    oauth2: tx("Đăng nhập mạng xã hội chưa hoàn tất. Vui lòng thử lại.", "Social login was not completed. Please try again."),
+  };
 
   const continueTo = searchParams.get("continue");
   const redirectTo = continueTo || (user?.admin ? "/admin/dashboard" : "/");
@@ -21,17 +23,14 @@ export default function LoginPage() {
   }
 
   const messageKey = ["error", "logout", "oauth2"].find((key) => searchParams.has(key));
-  const hint = messageKey ? messageMap[messageKey] : null;
+  const hint = messageKey ? messageMap[messageKey as keyof typeof messageMap] : null;
 
   return (
     <section className="auth-shell">
       <div className="panel auth-card">
-        <span className="eyebrow">Welcome Back</span>
-        <h1>Đăng nhập vào trải nghiệm mua sắm mới của 2BShop.</h1>
-        <p className="muted-copy">
-          Giữ nguyên xác thực Spring Security hiện tại, nhưng giao diện đã được làm sáng, gọn và mượt hơn cho cả khách
-          hàng lẫn quản trị viên.
-        </p>
+        <span className="eyebrow">{tx("Chào mừng quay lại", "Welcome back")}</span>
+        <h1>{tx("Đăng nhập để tiếp tục trải nghiệm 2BShop.", "Sign in to continue your 2BShop experience.")}</h1>
+        <p className="muted-copy"></p>
 
         {hint ? <div className="inline-alert inline-alert-warning">{hint}</div> : null}
 
@@ -40,36 +39,36 @@ export default function LoginPage() {
           {continueTo ? <input name="continue" type="hidden" value={continueTo} /> : null}
 
           <div className="field-group" style={{ gridColumn: "1 / -1" }}>
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">{tx("Email", "Email")}</label>
             <input className="field" id="email" name="email" placeholder="you@example.com" required type="email" />
           </div>
 
           <div className="field-group" style={{ gridColumn: "1 / -1" }}>
-            <label htmlFor="password">Mật khẩu</label>
-            <input className="field" id="password" name="password" placeholder="Nhập mật khẩu" required type="password" />
+            <label htmlFor="password">{tx("Mật khẩu", "Password")}</label>
+            <input className="field" id="password" name="password" placeholder={tx("Nhập mật khẩu", "Enter password")} required type="password" />
           </div>
 
           <div className="header-actions" style={{ gridColumn: "1 / -1", justifyContent: "space-between" }}>
             <a className="muted-copy" href="/forgot-password">
-              Quên mật khẩu?
+              {tx("Quen mật khẩu?", "Forgot password?")}
             </a>
             <button className="button button-primary" type="submit">
-              Đăng nhập
+              {tx("Đăng nhập", "Sign in")}
             </button>
           </div>
         </form>
 
-        <div className="auth-divider">hoặc tiếp tục bằng</div>
+        <div className="auth-divider">{tx("hoặc tiếp tục bằng", "or continue with")}</div>
 
         <div className="header-actions" style={{ justifyContent: "stretch" }}>
           <a className="button button-subtle social-button" href="/oauth2/authorization/google">
             <i className="fa-brands fa-google" />
-            <span>Đăng nhập với Google</span>
+            <span>{tx("Đăng nhập với Google", "Sign in with Google")}</span>
           </a>
         </div>
 
         <p className="muted-copy" style={{ marginBottom: 0 }}>
-          Chưa có tài khoản? <a href="/register">Tạo tài khoản mới</a>
+          {tx("Chưa có tài khoản?", "Need an account?")} <a href="/register">{tx("Tạo tài khoản", "Create one now")}</a>
         </p>
       </div>
     </section>

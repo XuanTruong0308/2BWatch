@@ -1,3 +1,5 @@
+import { useI18n } from "@/lib/i18n";
+
 type PaginationProps = {
   currentPage: number;
   totalPages: number;
@@ -5,6 +7,8 @@ type PaginationProps = {
 };
 
 export function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
+  const { tx } = useI18n();
+
   if (totalPages <= 1) {
     return null;
   }
@@ -19,7 +23,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
         onClick={() => onPageChange(currentPage - 1)}
         type="button"
       >
-        Trước
+        {tx("Truoc", "Prev")}
       </button>
       {pages.map((page) => (
         <button
@@ -37,7 +41,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
         onClick={() => onPageChange(currentPage + 1)}
         type="button"
       >
-        Sau
+        {tx("Sau", "Next")}
       </button>
     </div>
   );

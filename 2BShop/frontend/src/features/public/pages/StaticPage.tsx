@@ -1,144 +1,185 @@
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { useI18n } from "@/lib/i18n";
+
+type StaticSection = {
+  headingVi?: string;
+  headingEn?: string;
+  blocksVi: string[];
+  blocksEn: string[];
+};
 
 type StaticContent = {
-  title: string;
-  description: string;
-  sections: {
-    heading?: string;
-    blocks: string[];
-  }[];
+  titleVi: string;
+  titleEn: string;
+  descriptionVi: string;
+  descriptionEn: string;
+  sections: StaticSection[];
 };
 
 const contentMap: Record<string, StaticContent> = {
   about: {
-    title: "Giới thiệu về 2BShop | Hệ thống bán lẻ đồng hồ chính hãng cao cấp",
-    description: "2BShop tự hào là đơn vị phân phối các thương hiệu đồng hồ nổi tiếng thế giới: Rolex, Omega, Seiko, Casio chính hãng 100%, bảo hành chuẩn quốc tế, uy tín hàng đầu.",
+    titleVi: "Về 2BShop | Cửa hàng đồng hồ cao cấp",
+    titleEn: "About 2BShop | Premium watch retail",
+    descriptionVi: "2BShop tập trung vào sản phẩm chính hãng và trải nghiệm mua sắm gọn gàng, hiện đại và dễ ra quyết định hơn.",
+    descriptionEn: "2BShop curates authentic watches across major global brands and presents them through a cleaner, product-first storefront experience.",
     sections: [
       {
-        heading: "Câu chuyện thương hiệu 2BShop",
-        blocks: [
-          "Được thành lập với niềm đam mê bất tận dành cho những cỗ máy thời gian, 2BShop đã không ngừng vươn lên thành một trong những điểm đến tin cậy nhất cho những tín đồ yêu thích đồng hồ cao cấp tại Việt Nam.",
-          "Chúng tôi hiểu rằng, một chiếc đồng hồ không chỉ là công cụ để xem giờ mà còn là biểu tượng của sự thành đạt, phong cách sống lịch lãm và dấu ấn cá nhân của mỗi người."
-        ]
+        headingVi: "Câu chuyện 2BShop",
+        headingEn: "The 2BShop story",
+        blocksVi: [
+          "2BShop được xây dựng từ đam mê với đồng hồ và mong muốn trình bày sản phẩm theo một cách rõ ràng, hiện đại và cao cấp hơn.",
+          "Một chiếc đồng hồ không chỉ để xem giờ. Đó còn là chất liệu, tỷ lệ, kỷ luật thiết kế và dấu ấn cá nhân của người đeo.",
+        ],
+        blocksEn: [
+          "Built from a long-standing passion for timepieces, 2BShop focuses on presenting premium watches with sharper product storytelling and a calmer digital buying experience.",
+          "A watch is more than a timekeeping tool. It is material, posture, precision and a personal signal of taste.",
+        ],
       },
       {
-        heading: "Tầm nhìn và Sứ mệnh",
-        blocks: [
-          "Tầm nhìn: Trở thành chuỗi bán lẻ đồng hồ chính hãng cao cấp số 1 Việt Nam, mang đến trải nghiệm mua sắm sang trọng, tiện lợi và chuẩn mực.",
-          "Sứ mệnh: Nói KHÔNG với hàng giả, hàng nhái. 2BShop cam kết 100% sản phẩm phân phối đều là đồng hồ chính hãng (Authentic), nguyên hộp, sổ thẻ cùng chính sách bảo hành chuẩn quốc tế."
-        ]
+        headingVi: "Tầm nhìn và sứ mệnh",
+        headingEn: "Vision and mission",
+        blocksVi: [
+          "Tầm nhìn: trở thành điểm đến đáng tin cậy cho người mua đồng hồ chính hãng với trải nghiệm giao diện rõ ràng và gọn gàng.",
+          "Sứ mệnh: giữ giao diện tối giản để sản phẩm được nổi bật, trong khi vẫn giữ quy trình mua hàng và hỗ trợ minh bạch.",
+        ],
+        blocksEn: [
+          "Vision: become a trusted premium watch storefront with a modern editorial retail identity.",
+          "Mission: keep the interface quiet, let authentic product quality lead, and make every transaction clear and dependable.",
+        ],
       },
-      {
-        heading: "Tại sao bạn nên chọn mua đồng hồ tại 2BShop?",
-        blocks: [
-          "1. Cam kết chính hãng: Hoàn tiền và bồi thường gấp 10 lần nếu phát hiện hàng giả, hàng kém chất lượng.",
-          "2. Đa dạng thương hiệu: Từ phân khúc phổ thông đến xa xỉ, hội tụ các thương hiệu đỉnh cao như Rolex, Omega, Orient, Seiko, Casio...",
-          "3. Chế độ hậu mãi và bảo hành: Hỗ trợ bảo hành lau dầu, thay pin, kiểm định từ 2 đến 5 năm với quy trình chuyên nghiệp.",
-          "4. Mua sắm dễ dàng - Giao hàng nhanh toàn quốc: Miễn phí vận chuyển cho tất cả các đơn hàng từ 500.000đ trở lên, cùng chính sách đổi trả minh bạch."
-        ]
-      }
     ],
   },
   policy: {
-    title: "Chính sách mua hàng & Bảo hành | 2BShop",
-    description: "Xem chi tiết chính sách mua hàng, giao nhận, đổi trả và bảo hành đồng hồ chính hãng tại 2BShop. Uy tín, minh bạch và bảo vệ quyền lợi khách hàng tuyệt đối.",
+    titleVi: "Chính sách | 2BShop",
+    titleEn: "Policy | 2BShop",
+    descriptionVi: "Tổng hợp chính sách giao hàng, bảo hành và mua sắm đang áp dụng tại 2BShop.",
+    descriptionEn: "Key purchase, delivery and warranty policies for ordering watches through 2BShop.",
     sections: [
       {
-        heading: "1. Chính sách giao hàng",
-        blocks: [
-          "Tất cả đơn hàng có giá trị từ 500.000đ trở lên sẽ được 2BShop miễn phí vận chuyển toàn quốc.",
-          "Đơn hàng được bàn giao qua các đơn vị chuyển phát uy tín, cho phép bạn được quyền kiểm tra hàng trước khi thanh toán (COD)."
-        ]
+        headingVi: "Chính sách giao hàng",
+        headingEn: "Shipping policy",
+        blocksVi: [
+          "Đơn hàng từ 500.000đ được miễn phí giao hàng toàn quốc.",
+          "Trạng thái giao nhận và theo dõi vận chuyển vẫn được lấy từ quy trình backend hiện tại.",
+        ],
+        blocksEn: [
+          "Orders from 500,000 VND receive free nationwide shipping.",
+          "Delivery states and fulfillment tracking still follow the existing backend workflow.",
+        ],
       },
       {
-        heading: "2. Chính sách bảo hành",
-        blocks: [
-          "Bảo hành đầy đủ theo chuẩn của hãng sản xuất và chính sách hậu mãi cộng thêm tại hệ thống 2BShop.",
-          "Lưu ý: Không bảo hành cho các trường hợp hao mòn tự nhiên (hư dây da, xước kính) hoặc hư hỏng do lỗi sử dụng sai cách (vào nước bất chính, rơi vỡ mạnh)."
-        ]
-      }
+        headingVi: "Chính sách bảo hành",
+        headingEn: "Warranty policy",
+        blocksVi: [
+          "Mỗi sản phẩm tiếp tục theo đúng chính sách bảo hành được cấu hình trong hệ thống hiện tại.",
+          "Những hao mòn tự nhiên hoặc lỗi sử dụng sai cách nằm ngoài phạm vi bảo hành chuẩn.",
+        ],
+        blocksEn: [
+          "Each product follows the active warranty terms supported by the current backend rules and sales flow.",
+          "Damage from improper use or natural wear remains outside standard warranty scope.",
+        ],
+      },
     ],
   },
   terms: {
-    title: "Điều khoản sử dụng dịch vụ | 2BShop",
-    description: "Các điều khoản và quy định rõ ràng khi sử dụng các dịch vụ đặt hàng và mua sắm đồng hồ trực tuyến trên website của 2BShop.",
+    titleVi: "Điều khoản sử dụng | 2BShop",
+    titleEn: "Terms of service | 2BShop",
+    descriptionVi: "Các điều kiện giao dịch và sử dụng cơ bản trên hệ thống 2BShop.",
+    descriptionEn: "Core usage terms and transaction conditions for the 2BShop storefront.",
     sections: [
       {
-        heading: "Điều kiện giao dịch chung",
-        blocks: [
-          "Website 2BShop cung cấp thông tin, giá cả, hình ảnh minh họa cho các sản phẩm đồng hồ hiện đang có sẵn trên hệ thống.",
-          "Chúng tôi có quyền từ chối hoặc hủy đơn hàng nếu phát hiện có gian lận, sai sót hệ thống về giá cả hoặc các sự cố bất khả kháng."
-        ]
+        headingVi: "Điều kiện chung",
+        headingEn: "General terms",
+        blocksVi: [
+          "2BShop hiển thị thông tin sản phẩm, giá bán và hình ảnh dựa trên dữ liệu đang có trong hệ thống.",
+          "Đơn hàng có thể bị từ chối hoặc hủy nếu xảy ra lỗi giá, gian lận hoặc sự cố bất khả kháng.",
+        ],
+        blocksEn: [
+          "2BShop provides product information, pricing and imagery for items currently active on the platform.",
+          "Orders may be rejected or canceled when fraud, pricing error or force majeure conditions are detected.",
+        ],
       },
       {
-        heading: "Bảo mật thông tin",
-        blocks: [
-          "Mọi thông tin thanh toán, mật khẩu và dữ liệu cá nhân của người dùng được mã hóa qua chuẩn Spring Security cao nhất ở phía máy chủ.",
-          "Chúng tôi cam kết tuyệt đối không mua bán, trao đổi dữ liệu cá nhân khách hàng cho bên thứ ba."
-        ]
-      }
+        headingVi: "Bảo mật dữ liệu",
+        headingEn: "Data protection",
+        blocksVi: [
+          "Dữ liệu cá nhân và thanh toán vẫn được bảo vệ bởi lớp bảo mật backend hiện tại.",
+          "Thông tin khách hàng không được mua bán hay trao đổi cho bên thứ ba.",
+        ],
+        blocksEn: [
+          "Personal and payment data continue to be protected by the existing backend security layer.",
+          "Customer information is not sold or exchanged to third parties.",
+        ],
+      },
     ],
   },
   faq: {
-    title: "Hỏi đáp (FAQ) - Các câu hỏi thường gặp | 2BShop",
-    description: "Giải đáp nhanh chóng thắc mắc thường gặp của khách hàng mua đồng hồ tại 2BShop: cách đặt hàng, bảo hành nhanh chóng, đổi trả dễ dàng, thanh toán an toàn.",
+    titleVi: "Câu hỏi thường gặp | 2BShop",
+    titleEn: "FAQ | 2BShop",
+    descriptionVi: "Những câu hỏi phổ biến về đặt hàng, tài khoản, bảo hành và xác thực sản phẩm.",
+    descriptionEn: "Quick answers for ordering, account usage, warranty and watch authenticity at 2BShop.",
     sections: [
       {
-        heading: "Tôi có cần tạo tài khoản để mua hàng không?",
-        blocks: [
-          "Có, hệ thống 2BShop hiện yêu cầu bạn nên tạo một tài khoản để tiện theo dõi tình trạng đơn hàng, bảo hành điện tử và tích lũy ưu đãi riêng."
-        ]
+        headingVi: "Có cần tài khoản để đặt hàng không?",
+        headingEn: "Do I need an account to order?",
+        blocksVi: [
+          "Có. Tài khoản giúp gắn checkout, theo dõi đơn hàng, cập nhật hồ sơ và lịch sử hỗ trợ vào đúng phiên đăng nhập của bạn.",
+        ],
+        blocksEn: [
+          "Yes. An account keeps checkout, order tracking, profile updates and support history tied to your active session and account state.",
+        ],
       },
       {
-        heading: "Làm thế nào để biết đồng hồ tôi mua là chính hãng?",
-        blocks: [
-          "Tất cả sản phẩm bán ra đều gửi kèm hộp, sổ thẻ bảo hành quốc tế từ nhà sản xuất và thẻ chứng nhận của 2BShop. Bạn có thể tự mình kiểm chứng tại bất kỳ trung tâm thẩm định uy tín nào."
-        ]
-      }
+        headingVi: "Làm sao biết sản phẩm là chính hãng?",
+        headingEn: "How do I know the watch is authentic?",
+        blocksVi: [
+          "Sản phẩm được quản lý qua hệ thống catalog, đơn hàng và quản trị hiện tại, giữ đúng quy trình duyệt và cập nhật sản phẩm đang vận hành.",
+        ],
+        blocksEn: [
+          "Products are presented through the existing catalog and order flow backed by the current admin management system and data rules.",
+        ],
+      },
     ],
   },
 };
 
 export default function StaticPage() {
   const { slug = "about" } = useParams();
+  const { tx } = useI18n();
   const content = contentMap[slug] ?? contentMap.about;
+  const title = tx(content.titleVi, content.titleEn);
+  const description = tx(content.descriptionVi, content.descriptionEn);
 
   useEffect(() => {
-    // Đẩy thông tin Title SEO động dựa theo Component (Tab trình duyệt)
-    document.title = content.title;
-    
-    // Khởi tạo và cập nhật thẻ Meta Description linh hoạt cho Bot Google đọc (SEO Onpage)
+    document.title = title;
+
     let metaDescription = document.querySelector('meta[name="description"]');
     if (!metaDescription) {
-      metaDescription = document.createElement('meta');
-      metaDescription.setAttribute('name', 'description');
+      metaDescription = document.createElement("meta");
+      metaDescription.setAttribute("name", "description");
       document.head.appendChild(metaDescription);
     }
-    metaDescription.setAttribute('content', content.description);
-  }, [content]);
+    metaDescription.setAttribute("content", description);
+  }, [description, title]);
 
   return (
-    <article className="panel" style={{ maxWidth: 960, margin: "2rem auto", padding: "2rem", border: "1px solid rgba(0,0,0,0.08)" }}>
-      <header style={{ marginBottom: "3rem", textAlign: "center", fontFamily: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" }}>
-        <span style={{ color: "var(--gold)", fontSize: "0.95rem", fontWeight: 600, letterSpacing: "1.5px", textTransform: "uppercase" }}>Cẩm Nang 2BShop</span>
-        <h1 style={{ fontSize: "2.2rem", marginTop: "0.8rem", color: "var(--navy)", fontWeight: 700 }}>{content.title.split("|")[0].trim()}</h1>
-        <p className="muted-copy" style={{ fontSize: "1.1rem", marginTop: "1rem", lineHeight: 1.6 }}>{content.description}</p>
+    <article className="panel editorial-page">
+      <header className="editorial-page__header">
+        <span className="eyebrow">{tx("Cẩm nang 2BShop", "2BShop guide")}</span>
+        <h1>{title.split("|")[0].trim()}</h1>
+        <p className="muted-copy">{description}</p>
       </header>
 
-      <main style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
+      <main style={{ display: "grid", gap: "24px" }}>
         {content.sections.map((section, index) => (
-          <section key={index} style={{ padding: "0" }}>
-            {section.heading && (
-              <h2 style={{ fontSize: "1.4rem", marginBottom: "1rem", color: "var(--navy)", paddingBottom: "0.5rem", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
-                {section.heading}
-              </h2>
-            )}
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem" }}>
-              {section.blocks.map((block, bIdx) => (
-                <p key={bIdx} style={{ lineHeight: 1.7, color: "var(--gray)", fontSize: "1.05rem" }}>{block}</p>
-              ))}
-            </div>
+          <section key={index} className="editorial-page__section">
+            {section.headingVi || section.headingEn ? <h2>{tx(section.headingVi || "", section.headingEn || "")}</h2> : null}
+            {(tx(section.blocksVi.join("\n"), section.blocksEn.join("\n")).split("\n")).map((block, blockIndex) => (
+              <p key={blockIndex} className="muted-copy" style={{ lineHeight: 1.8 }}>
+                {block}
+              </p>
+            ))}
           </section>
         ))}
       </main>

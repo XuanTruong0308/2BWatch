@@ -8,6 +8,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -26,6 +27,9 @@ public class CustomOAuth2LoginSuccessHandler implements AuthenticationSuccessHan
 
     @Autowired
     private CsrfTokenRepository csrfTokenRepository;
+
+    @Value("${app.frontend.origin:http://localhost:5173}")
+    private String frontendOrigin;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -49,9 +53,9 @@ public class CustomOAuth2LoginSuccessHandler implements AuthenticationSuccessHan
             .anyMatch(role -> role.equals("ROLE_ADMIN"));
         
         if (isAdmin) {
-            response.sendRedirect("/admin/dashboard");
+            response.sendRedirect(frontendOrigin + "/admin/dashboard");
         } else {
-            response.sendRedirect("/");
+            response.sendRedirect(frontendOrigin + "/");
         }
     }
 

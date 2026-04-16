@@ -54,13 +54,13 @@ export function useAddToCart() {
 
       setFeedback({
         tone: "success",
-        message: response.message ?? "Da them san pham vao gio hang.",
+        message: response.message ?? "Đã thêm sản phẩm vào giỏ hàng.",
       });
     },
     onError: (error) => {
       setFeedback({
         tone: "danger",
-        message: getErrorMessage(error, "Khong the them san pham vao gio hang."),
+        message: getErrorMessage(error, "Không thể thêm sản phẩm vào giỏ hàng."),
       });
     },
     onSettled: () => {
@@ -74,7 +74,7 @@ export function useAddToCart() {
     if (authLoading) {
       setFeedback({
         tone: "warning",
-        message: "Dang kiem tra phien dang nhap. Vui long thu lai sau vai giay.",
+        message: "Đang kiểm tra phiên đăng nhập. Vui lòng thử lại sau vài giây.",
       });
       return;
     }

@@ -7,6 +7,7 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import { getJson, postJson } from "@/lib/api/client";
 import type { ApiResponse, CheckoutContext, Order } from "@/lib/api/types";
+import { useI18n } from "@/lib/i18n";
 import { formatCurrency, getErrorMessage } from "@/lib/utils/format";
 
 type CheckoutFormValues = {
@@ -19,6 +20,7 @@ type CheckoutFormValues = {
 };
 
 export default function CheckoutPage() {
+  const { tx } = useI18n();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -96,16 +98,17 @@ export default function CheckoutPage() {
   );
 
   if (checkoutQuery.isLoading) {
-    return <LoadingScreen label="Dang chuan bi trang thanh toan..." />;
+    return <LoadingScreen label={tx("Đang chuẩn bị trang thanh toán...", "Preparing checkout...")} />;
   }
 
   if (checkoutQuery.isError || !checkoutQuery.data) {
-    const message = getErrorMessage(checkoutQuery.error, "Khong the tai du lieu checkout. Vui long thu lai.");
-    const needsProfileUpdate = message.toLowerCase().includes("so dien thoai");
+    const message = getErrorMessage(checkoutQuery.error, tx("Không thể tải trang thanh toán lúc này.", "We could not load checkout right now."));
+    const normalizedMessage = message.toLowerCase();
+    const needsProfileUpdate = normalizedMessage.includes("số điện thoại") || normalizedMessage.includes("phone");
 
     return (
       <ErrorState
-        actionLabel={needsProfileUpdate ? "Cap nhat ho so" : "Quay lai gio hang"}
+        actionLabel={needsProfileUpdate ? tx("Cập nhật hồ sơ", "Update profile") : tx("Quay lại giỏ hàng", "Back to cart")}
         message={message}
         onAction={() => navigate(needsProfileUpdate ? "/profile" : "/cart")}
       />
@@ -117,8 +120,8 @@ export default function CheckoutPage() {
   if (data.cart.items.length === 0) {
     return (
       <ErrorState
-        actionLabel="Quay lai gio hang"
-        message="Chua co san pham nao duoc chon de thanh toan."
+        actionLabel={tx("Quay lại giỏ hàng", "Back to cart")}
+        message={tx("Không có sản phẩm nào được chọn để thanh toán.", "No selected products are available for checkout.")}
         onAction={() => navigate("/cart")}
       />
     );
@@ -137,63 +140,71 @@ export default function CheckoutPage() {
   return (
     <div className="split-grid">
       <section className="panel">
-        <span className="eyebrow">Checkout</span>
-        <h1>Hoàn tất đơn đặt hàng của bạn.</h1>
+        <span className="eyebrow">{tx("Thanh toán", "Checkout")}</span>
+        <h1>{tx("Hoàn tất đơn hàng của bạn.", "Complete your order.")}</h1>
         <p className="muted-copy">
-          Tong tien, dat coc va phi van chuyen deu duoc lay truc tiep tu logic hien tai cua backend.
+          {tx(
+            "Tổng tiền, tiền cọc và phí vận chuyển vẫn được tính theo logic backend hiện tại.",
+            "Totals, deposits and shipping remain calculated by the current backend checkout logic.",
+          )}
         </p>
 
         {data.user.provider === "GOOGLE" && !data.user.phoneVerified ? (
           <div className="inline-alert inline-alert-warning">
-            Tai khoan Google cua ban can cap nhat so dien thoai truoc khi xac nhan giao hang.
+            {tx(
+              "Tài khoản Google của bạn vẫn cần xác minh số điện thoại trước khi xác nhận đơn hàng.",
+              "Your Google account still needs a verified phone number before order confirmation.",
+            )}
             <Link style={{ marginLeft: 8 }} to="/profile">
-              Cap nhat ngay
+              {tx("Cập nhật hồ sơ", "Update profile")}
             </Link>
           </div>
         ) : null}
 
         <form className="form-grid" onSubmit={form.handleSubmit((values) => placeOrder.mutate(values))}>
           <div className="field-group">
-            <label htmlFor="receiverName">Nguoi nhan</label>
+            <label htmlFor="receiverName">{tx("Người nhận", "Receiver")}</label>
             <input className="field" id="receiverName" {...form.register("receiverName", { required: true })} />
           </div>
           <div className="field-group">
-            <label htmlFor="phone">So dien thoai</label>
+            <label htmlFor="phone">{tx("Số điện thoại", "Phone")}</label>
             <input className="field" id="phone" {...form.register("phone", { required: true })} />
           </div>
           <div className="field-group" style={{ gridColumn: "1 / -1" }}>
-            <label htmlFor="address">Dia chi giao hang</label>
+            <label htmlFor="address">{tx("Địa chỉ giao hàng", "Shipping address")}</label>
             <textarea className="textarea" id="address" rows={4} {...form.register("address", { required: true })} />
           </div>
           <div className="field-group" style={{ gridColumn: "1 / -1" }}>
-            <label htmlFor="notes">Ghi chu</label>
+            <label htmlFor="notes">{tx("Ghi chú", "Notes")}</label>
             <textarea className="textarea" id="notes" rows={3} {...form.register("notes")} />
           </div>
 
           <div className="field-group" style={{ gridColumn: "1 / -1" }}>
-            <label>Ma uu dai</label>
+            <label>{tx("Ma giảm giá", "Coupon code")}</label>
             <div className="coupon-row">
               <input
                 className="field"
                 onChange={(event) => setCouponDraft(event.target.value)}
-                placeholder="Nhap coupon neu co"
+                placeholder={tx("Nhập mã giảm giá nếu bạn có", "Enter coupon if you have one")}
                 value={couponDraft}
               />
               <button className="button button-subtle" onClick={applyCoupon} type="button">
-                Ap dung
+                {tx("Áp dụng", "Apply")}
               </button>
             </div>
           </div>
 
           <div className="field-group" style={{ gridColumn: "1 / -1" }}>
-            <label>Phuong thuc thanh toan</label>
+            <label>{tx("Phương thức thanh toán", "Payment method")}</label>
             <div className="choice-grid">
               {data.paymentMethods.map((method) => (
                 <label className="choice-card" key={method.paymentMethodId}>
                   <input type="radio" value={method.methodName} {...form.register("paymentMethod", { required: true })} />
                   <div>
                     <strong>{method.methodName}</strong>
-                    <p className="muted-copy">{method.description || "Thanh toan voi phuong thuc hien co cua he thong."}</p>
+                    <p className="muted-copy">
+                      {method.description || tx("Sử dụng một trong các luồng thanh toán đang hoạt động.", "Use one of the currently active payment flows.")}
+                    </p>
                   </div>
                 </label>
               ))}
@@ -202,7 +213,7 @@ export default function CheckoutPage() {
 
           {bankTransferSelected ? (
             <div className="field-group" style={{ gridColumn: "1 / -1" }}>
-              <label>Chon tai khoan ngan hang nhan tien</label>
+              <label>{tx("Chọn tài khoản ngân hàng nhận tiền", "Select destination bank account")}</label>
               <div className="choice-grid">
                 {data.bankAccounts.map((account) => (
                   <label className="choice-card" key={account.bankAccountId}>
@@ -224,24 +235,24 @@ export default function CheckoutPage() {
 
           {placeOrder.isError ? (
             <div className="inline-alert inline-alert-danger" style={{ gridColumn: "1 / -1" }}>
-              {getErrorMessage(placeOrder.error, "Khong the dat hang luc nay.")}
+              {getErrorMessage(placeOrder.error, tx("Không thể đặt hàng lúc này.", "We could not place the order right now."))}
             </div>
           ) : null}
 
           <div className="header-actions" style={{ gridColumn: "1 / -1", justifyContent: "space-between" }}>
             <Link className="button button-subtle" to="/cart">
-              Quay lai gio hang
+              {tx("Quay lại giỏ hàng", "Back to cart")}
             </Link>
             <button className="button button-primary" disabled={placeOrder.isPending || data.cart.selectedItemCount === 0} type="submit">
-              {placeOrder.isPending ? "Dang tao don..." : "Dat hang"}
+              {placeOrder.isPending ? tx("Đang đặt hàng...", "Placing order...") : tx("Đặt hàng", "Place order")}
             </button>
           </div>
         </form>
       </section>
 
       <aside className="panel">
-        <span className="eyebrow">Order Summary</span>
-        <h2>Don da chon</h2>
+        <span className="eyebrow">{tx("Tóm tắt đơn hàng", "Order summary")}</span>
+        <h2>{tx("Sản phẩm đã chọn", "Selected products")}</h2>
         <div className="summary-list">
           {data.cart.items.map((item) => (
             <div className="summary-product" key={item.cartItemId}>
@@ -255,35 +266,38 @@ export default function CheckoutPage() {
             </div>
           ))}
           <div className="summary-row">
-            <span>Tam tinh</span>
+            <span>{tx("Tạm tính", "Subtotal")}</span>
             <strong>{formatCurrency(data.summary.subtotal)}</strong>
           </div>
           <div className="summary-row">
-            <span>Giam gia</span>
+            <span>{tx("Giảm giá", "Discount")}</span>
             <strong>{formatCurrency(data.summary.discountAmount)}</strong>
           </div>
           <div className="summary-row">
-            <span>Phi van chuyen</span>
-            <strong>{data.summary.shippingFee === 0 ? "Mien phi" : formatCurrency(data.summary.shippingFee)}</strong>
+            <span>{tx("Vận chuyển", "Shipping")}</span>
+            <strong>{data.summary.shippingFee === 0 ? tx("Miễn phí", "Free") : formatCurrency(data.summary.shippingFee)}</strong>
           </div>
           <div className="summary-row summary-row-total">
-            <span>Tong cong</span>
+            <span>{tx("Tổng cộng", "Total")}</span>
             <strong>{formatCurrency(data.summary.totalAmount)}</strong>
           </div>
         </div>
 
         {data.summary.couponCode ? (
           <div className="inline-alert inline-alert-success" style={{ marginTop: 18 }}>
-            Dang ap dung coupon: <strong>{data.summary.couponCode}</strong>
+            {tx("Đã áp dụng mã:", "Applied coupon:")} <strong>{data.summary.couponCode}</strong>
           </div>
         ) : null}
 
         {data.summary.depositRequired ? (
           <div className="inline-alert inline-alert-warning" style={{ marginTop: 18 }}>
-            Don hang nay yeu cau dat coc {formatCurrency(data.summary.depositAmount)} theo rule hien tai cua he thong.
+            {tx(
+              `Đơn hàng này cần đặt cọc ${formatCurrency(data.summary.depositAmount)} theo quy tắc thanh toán hiện tại.`,
+              `This order requires a deposit of ${formatCurrency(data.summary.depositAmount)} under the current checkout rules.`,
+            )}
           </div>
         ) : (
-          <Badge label="Khong yeu cau dat coc" tone="success" />
+          <Badge label={tx("Không cần đặt cọc", "No deposit required")} tone="success" />
         )}
       </aside>
     </div>

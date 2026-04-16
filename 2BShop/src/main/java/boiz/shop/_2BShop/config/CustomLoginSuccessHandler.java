@@ -1,7 +1,9 @@
 package boiz.shop._2BShop.config;
 
 import java.io.IOException;
+import java.net.URI;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
@@ -19,9 +21,13 @@ import jakarta.servlet.http.HttpSession;
 public class CustomLoginSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 
     private final CsrfTokenRepository csrfTokenRepository;
+    private final String frontendOrigin;
 
-    public CustomLoginSuccessHandler(CsrfTokenRepository csrfTokenRepository) {
+    public CustomLoginSuccessHandler(
+            CsrfTokenRepository csrfTokenRepository,
+            @Value("${app.frontend.origin:http://localhost:5173}") String frontendOrigin) {
         this.csrfTokenRepository = csrfTokenRepository;
+        this.frontendOrigin = frontendOrigin;
     }
 
     @Override
@@ -32,7 +38,7 @@ public class CustomLoginSuccessHandler extends SavedRequestAwareAuthenticationSu
 
         String continueUrl = request.getParameter("continue");
         if (continueUrl != null && !continueUrl.isBlank() && continueUrl.startsWith("/")) {
-            getRedirectStrategy().sendRedirect(request, response, continueUrl);
+            getRedirectStrategy().sendRedirect(request, response, toFrontendUrl(continueUrl));
             return;
         }
 
@@ -43,7 +49,14 @@ public class CustomLoginSuccessHandler extends SavedRequestAwareAuthenticationSu
         }
 
         if (savedRequest != null) {
-            super.onAuthenticationSuccess(request, response, authentication);
+            String savedRequestUrl = savedRequest.getRedirectUrl();
+            URI savedRequestUri = URI.create(savedRequestUrl);
+            String targetPath = savedRequestUri.getRawPath();
+            String query = savedRequestUri.getRawQuery();
+            if (query != null && !query.isBlank()) {
+                targetPath += "?" + query;
+            }
+            getRedirectStrategy().sendRedirect(request, response, toFrontendUrl(targetPath));
             return;
         }
 
@@ -54,7 +67,7 @@ public class CustomLoginSuccessHandler extends SavedRequestAwareAuthenticationSu
             targetUrl = "/";
         }
 
-        getRedirectStrategy().sendRedirect(request, response, targetUrl);
+        getRedirectStrategy().sendRedirect(request, response, toFrontendUrl(targetUrl));
     }
 
     private void refreshCsrfToken(HttpServletRequest request, HttpServletResponse response) {
@@ -62,5 +75,9 @@ public class CustomLoginSuccessHandler extends SavedRequestAwareAuthenticationSu
         csrfTokenRepository.saveToken(csrfToken, request, response);
         request.setAttribute(CsrfToken.class.getName(), csrfToken);
         request.setAttribute(csrfToken.getParameterName(), csrfToken);
+    }
+
+    private String toFrontendUrl(String path) {
+        return frontendOrigin + path;
     }
 }

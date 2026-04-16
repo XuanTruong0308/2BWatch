@@ -6,28 +6,28 @@ import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import { Pagination } from "@/components/ui/Pagination";
 import { getJson } from "@/lib/api/client";
 import type { ApiResponse, PaymentTransactionsPayload } from "@/lib/api/types";
+import { useI18n } from "@/lib/i18n";
 import { formatCurrency, formatDate, orderStatusLabel, statusTone } from "@/lib/utils/format";
 
 export default function TransactionsPage() {
+  const { tx } = useI18n();
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get("page") || 0);
 
   const transactionsQuery = useQuery({
     queryKey: ["admin", "transactions", searchParams.toString()],
     queryFn: async () => {
-      const response = await getJson<ApiResponse<PaymentTransactionsPayload>>(
-        `/api/v1/admin/payments/transactions?${searchParams.toString()}`,
-      );
+      const response = await getJson<ApiResponse<PaymentTransactionsPayload>>(`/api/v1/admin/payments/transactions?${searchParams.toString()}`);
       return response.data;
     },
   });
 
   if (transactionsQuery.isLoading) {
-    return <LoadingScreen label="Đang tải giao dịch..." />;
+    return <LoadingScreen label={tx("Đang tải giao dịch...", "Loading transactions...")} />;
   }
 
   if (transactionsQuery.isError || !transactionsQuery.data) {
-    return <ErrorState message="Không thể tải giao dịch thanh toán." />;
+    return <ErrorState message={tx("Không thể tải giao dịch thanh toán.", "Could not load transactions.")} />;
   }
 
   const payload = transactionsQuery.data;
@@ -48,25 +48,25 @@ export default function TransactionsPage() {
       <div className="panel">
         <div className="section-heading">
           <div>
-            <span className="eyebrow">Transactions</span>
-            <h2>Giao dịch thanh toán</h2>
+            <span className="eyebrow">{tx("Giao dịch", "Transactions")}</span>
+            <h2>{tx("Giao dịch thanh toán", "Payment transactions")}</h2>
           </div>
         </div>
 
         <div className="form-grid">
           <div className="field-group">
-            <label htmlFor="status">Trạng thái</label>
+            <label htmlFor="status">{tx("Trạng thái", "Status")}</label>
             <select className="select" id="status" onChange={(event) => updateSearch("status", event.target.value)} value={searchParams.get("status") || ""}>
-              <option value="">Tất cả</option>
-              <option value="PENDING">Pending</option>
-              <option value="SUCCESS">Success</option>
-              <option value="FAILED">Failed</option>
+              <option value="">{tx("Tất cả", "All")}</option>
+              <option value="PENDING">{orderStatusLabel("PENDING")}</option>
+              <option value="SUCCESS">{orderStatusLabel("SUCCESS")}</option>
+              <option value="FAILED">{orderStatusLabel("FAILED")}</option>
             </select>
           </div>
           <div className="field-group">
-            <label htmlFor="methodId">Phương thức</label>
+            <label htmlFor="methodId">{tx("Phương thức", "Method")}</label>
             <select className="select" id="methodId" onChange={(event) => updateSearch("methodId", event.target.value)} value={searchParams.get("methodId") || ""}>
-              <option value="">Tất cả</option>
+              <option value="">{tx("Tất cả", "All")}</option>
               {payload.paymentMethods.map((method) => (
                 <option key={method.paymentMethodId} value={method.paymentMethodId}>
                   {method.methodName}
@@ -81,21 +81,21 @@ export default function TransactionsPage() {
         <table className="data-table">
           <thead>
             <tr>
-              <th>Mã giao dịch</th>
-              <th>Khách hàng</th>
-              <th>Phương thức</th>
-              <th>Số tiền</th>
-              <th>Thời gian</th>
-              <th>Trạng thái</th>
-              <th>Hành động</th>
+              <th>{tx("Mã giao dịch", "Transaction code")}</th>
+              <th>{tx("Khách hàng", "Customer")}</th>
+              <th>{tx("Phương thức", "Method")}</th>
+              <th>{tx("Số tiền", "Amount")}</th>
+              <th>{tx("Thời gian", "Time")}</th>
+              <th>{tx("Trạng thái", "Status")}</th>
+              <th>{tx("Hành động", "Actions")}</th>
             </tr>
           </thead>
           <tbody>
             {payload.transactions.items.map((transaction) => (
               <tr key={transaction.transactionId}>
                 <td>{transaction.transactionCode || `TX-${transaction.transactionId}`}</td>
-                <td>{transaction.customerName || "N/A"}</td>
-                <td>{transaction.paymentMethod?.methodName || "N/A"}</td>
+                <td>{transaction.customerName || tx("Không có", "N/A")}</td>
+                <td>{transaction.paymentMethod?.methodName || tx("Không có", "N/A")}</td>
                 <td>{formatCurrency(transaction.amount)}</td>
                 <td>{formatDate(transaction.transactionDate)}</td>
                 <td>
@@ -103,7 +103,7 @@ export default function TransactionsPage() {
                 </td>
                 <td>
                   <Link className="button button-subtle" to={`/admin/payments/transactions/${transaction.transactionId}`}>
-                    Chi tiết
+                    {tx("Chi tiết", "Details")}
                   </Link>
                 </td>
               </tr>

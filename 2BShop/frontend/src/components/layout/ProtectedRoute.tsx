@@ -1,6 +1,7 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import { useAuth } from "@/hooks/useAuth";
+import { useI18n } from "@/lib/i18n";
 
 type ProtectedRouteProps = {
   children: React.ReactNode;
@@ -10,9 +11,10 @@ type ProtectedRouteProps = {
 export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
   const location = useLocation();
   const { data: user, isLoading } = useAuth();
+  const { tx } = useI18n();
 
   if (isLoading) {
-    return <LoadingScreen label="Đang xác thực phiên đăng nhập..." />;
+    return <LoadingScreen label={tx("Đang xác thực phiên đăng nhập...", "Verifying your sign-in session...")} />;
   }
 
   if (!user?.authenticated) {

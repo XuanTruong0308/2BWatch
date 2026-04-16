@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import { getJson, postJson } from "@/lib/api/client";
+import { useI18n } from "@/lib/i18n";
 import type { ApiResponse } from "@/lib/api/types";
 import { getErrorMessage } from "@/lib/utils/format";
 
@@ -15,6 +16,7 @@ export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token") || "";
   const form = useForm<ResetValues>();
+  const { tx } = useI18n();
 
   const validateQuery = useQuery({
     queryKey: ["auth", "reset-token", token],
@@ -40,9 +42,9 @@ export default function ResetPasswordPage() {
     return (
       <section className="auth-shell">
         <div className="panel auth-card">
-          <div className="inline-alert inline-alert-danger">Liên kết đặt lại mật khẩu không hợp lệ hoặc bị thiếu token.</div>
+          <div className="inline-alert inline-alert-danger">{tx("Liên kết đặt lại mật khẩu không hợp lệ.", "The reset link is missing a valid token.")}</div>
           <a className="button button-primary" href="/forgot-password">
-            Yêu cầu liên kết mới
+            {tx("Yeu cau lien ket moi", "Request a new link")}
           </a>
         </div>
       </section>
@@ -50,16 +52,16 @@ export default function ResetPasswordPage() {
   }
 
   if (validateQuery.isLoading) {
-    return <LoadingScreen label="Đang xác minh liên kết đặt lại mật khẩu..." />;
+    return <LoadingScreen label={tx("Đang xác minh liên kết đặt lại mật khẩu...", "Validating reset link...")} />;
   }
 
   if (validateQuery.isError || validateQuery.data === false) {
     return (
       <section className="auth-shell">
         <div className="panel auth-card">
-          <div className="inline-alert inline-alert-danger">Token đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.</div>
+          <div className="inline-alert inline-alert-danger">{tx("Token đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.", "This reset token is invalid or has expired.")}</div>
           <a className="button button-primary" href="/forgot-password">
-            Gửi lại yêu cầu
+            {tx("Gửi lại yêu cầu", "Send another request")}
           </a>
         </div>
       </section>
@@ -69,24 +71,24 @@ export default function ResetPasswordPage() {
   return (
     <section className="auth-shell">
       <div className="panel auth-card">
-        <span className="eyebrow">Reset Password</span>
-        <h1>Tạo mật khẩu mới cho tài khoản của bạn.</h1>
-        <p className="muted-copy">Mật khẩu nên có chữ hoa, chữ thường và số để đáp ứng đúng rule đang áp dụng ở backend.</p>
+        <span className="eyebrow">{tx("Dat lai mật khẩu", "Reset password")}</span>
+        <h1>{tx("Tạo mật khẩu mới cho tài khoản của bạn.", "Create a new password for your account.")}</h1>
+        <p className="muted-copy">{tx("Chọn mật khẩu mới và lưu lại theo đúng rule đang có của backend.", "Choose a stronger password that still follows the backend validation rules already in place.")}</p>
 
         {mutation.isSuccess ? (
           <div className="inline-alert inline-alert-success">
-            Đổi mật khẩu thành công. Bạn có thể đăng nhập bằng mật khẩu mới.
+            {tx("Mật khẩu đã được cập nhật. Bạn có thể đăng nhập bằng mật khẩu mới.", "Your password has been updated. You can now sign in with the new password.")}
           </div>
         ) : null}
         {mutation.isError ? <div className="inline-alert inline-alert-danger">{getErrorMessage(mutation.error)}</div> : null}
 
         <form className="form-grid" onSubmit={form.handleSubmit((values) => mutation.mutate(values))}>
           <div className="field-group" style={{ gridColumn: "1 / -1" }}>
-            <label htmlFor="newPassword">Mật khẩu mới</label>
+            <label htmlFor="newPassword">{tx("Mật khẩu moi", "New password")}</label>
             <input className="field" id="newPassword" type="password" {...form.register("newPassword", { required: true })} />
           </div>
           <div className="field-group" style={{ gridColumn: "1 / -1" }}>
-            <label htmlFor="confirmPassword">Xác nhận mật khẩu</label>
+            <label htmlFor="confirmPassword">{tx("Xác nhận mật khẩu", "Confirm password")}</label>
             <input
               className="field"
               id="confirmPassword"
@@ -96,10 +98,10 @@ export default function ResetPasswordPage() {
           </div>
           <div className="header-actions" style={{ gridColumn: "1 / -1", justifyContent: "space-between" }}>
             <a className="muted-copy" href="/login">
-              Quay lại đăng nhập
+              {tx("Quay lại đăng nhập", "Back to sign in")}
             </a>
             <button className="button button-primary" disabled={mutation.isPending} type="submit">
-              {mutation.isPending ? "Đang cập nhật..." : "Lưu mật khẩu mới"}
+              {mutation.isPending ? tx("Đang cập nhật...", "Saving...") : tx("Luu mật khẩu moi", "Save new password")}
             </button>
           </div>
         </form>

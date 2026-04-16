@@ -6,6 +6,7 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import { getJson, postJson, putJson } from "@/lib/api/client";
 import type { ApiResponse, User, UserOptionsPayload } from "@/lib/api/types";
+import { useI18n } from "@/lib/i18n";
 import { getErrorMessage } from "@/lib/utils/format";
 
 type UserValues = {
@@ -20,7 +21,19 @@ type UserValues = {
   roleNames: string[];
 };
 
+const roleLabel = (role: string, tx: (vi: string, en: string) => string) => {
+  switch (role) {
+    case "ADMIN":
+      return tx("Quản trị vien", "Administrator");
+    case "USER":
+      return tx("Người dùng", "User");
+    default:
+      return role;
+  }
+};
+
 export default function UserFormPage() {
+  const { tx } = useI18n();
   const { id } = useParams();
   const editing = Boolean(id);
   const navigate = useNavigate();
@@ -87,11 +100,11 @@ export default function UserFormPage() {
   });
 
   if (optionsQuery.isLoading || detailQuery.isLoading) {
-    return <LoadingScreen label="Đang tải form người dùng..." />;
+    return <LoadingScreen label={tx("Đang tải form người dùng...", "Loading user form...")} />;
   }
 
   if (optionsQuery.isError || !optionsQuery.data || detailQuery.isError) {
-    return <ErrorState message="Không thể tải dữ liệu người dùng." />;
+    return <ErrorState message={tx("Không thể tải dữ liệu người dùng.", "Could not load user data.")} />;
   }
 
   const selectedRoles = form.watch("roleNames") || [];
@@ -100,11 +113,11 @@ export default function UserFormPage() {
     <div className="panel">
       <div className="section-heading">
         <div>
-          <span className="eyebrow">User Form</span>
-          <h2>{editing ? "Chỉnh sửa người dùng" : "Tạo người dùng mới"}</h2>
+          <span className="eyebrow">{tx("Form người dùng", "User form")}</span>
+          <h2>{editing ? tx("Chỉnh sửa người dùng", "Edit user") : tx("Tạo người dùng mới", "Create new user")}</h2>
         </div>
         <Link className="button button-subtle" to="/admin/users">
-          Quay lại danh sách
+          {tx("Quay lại danh sách", "Back to list")}
         </Link>
       </div>
 
@@ -118,28 +131,28 @@ export default function UserFormPage() {
           <input className="field" id="email" type="email" {...form.register("email", { required: true })} />
         </div>
         <div className="field-group">
-          <label htmlFor="fullName">Họ tên</label>
+          <label htmlFor="fullName">{tx("Ho va ten", "Full name")}</label>
           <input className="field" id="fullName" {...form.register("fullName")} />
         </div>
         <div className="field-group">
-          <label htmlFor="phone">Số điện thoại</label>
+          <label htmlFor="phone">{tx("Số điện thoại", "Phone")}</label>
           <input className="field" id="phone" {...form.register("phone")} />
         </div>
         <div className="field-group" style={{ gridColumn: "1 / -1" }}>
-          <label htmlFor="address">Địa chỉ</label>
+          <label htmlFor="address">{tx("Địa chỉ", "Address")}</label>
           <textarea className="textarea" id="address" rows={3} {...form.register("address")} />
         </div>
         <div className="field-group">
-          <label htmlFor="avatarUrl">Avatar URL</label>
+          <label htmlFor="avatarUrl">{tx("Duong dan avatar", "Avatar URL")}</label>
           <input className="field" id="avatarUrl" {...form.register("avatarUrl")} />
         </div>
         <div className="field-group">
-          <label htmlFor="newPassword">{editing ? "Mật khẩu mới (nếu đổi)" : "Mật khẩu"}</label>
+          <label htmlFor="newPassword">{editing ? tx("Mật khẩu moi (neu doi)", "New password (optional)") : tx("Mật khẩu", "Password")}</label>
           <input className="field" id="newPassword" type="password" {...form.register("newPassword")} />
         </div>
 
         <div className="field-group" style={{ gridColumn: "1 / -1" }}>
-          <label>Vai trò</label>
+          <label>{tx("Vai tro", "Roles")}</label>
           <div className="choice-grid">
             {optionsQuery.data.roles.map((role) => (
               <label className="choice-card" key={role.value}>
@@ -154,7 +167,7 @@ export default function UserFormPage() {
                   type="checkbox"
                 />
                 <div>
-                  <strong>{role.label}</strong>
+                  <strong>{roleLabel(role.value, tx)}</strong>
                 </div>
               </label>
             ))}
@@ -164,7 +177,7 @@ export default function UserFormPage() {
         <div className="field-group" style={{ gridColumn: "1 / -1" }}>
           <label className="checkbox-row">
             <input type="checkbox" {...form.register("enabled")} />
-            <span>Tài khoản đang hoạt động</span>
+            <span>{tx("Tài khoản đang hoạt động", "Account is active")}</span>
           </label>
         </div>
 
@@ -172,7 +185,11 @@ export default function UserFormPage() {
 
         <div className="header-actions" style={{ gridColumn: "1 / -1", justifyContent: "flex-end" }}>
           <button className="button button-primary" disabled={mutation.isPending} type="submit">
-            {mutation.isPending ? "Đang lưu..." : editing ? "Lưu thay đổi" : "Tạo người dùng"}
+            {mutation.isPending
+              ? tx("Đang lưu...", "Saving...")
+              : editing
+                ? tx("Luu thay doi", "Save changes")
+                : tx("Tạo người dùng", "Create user")}
           </button>
         </div>
       </form>

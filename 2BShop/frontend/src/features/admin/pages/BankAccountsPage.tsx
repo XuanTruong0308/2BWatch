@@ -7,9 +7,11 @@ import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import { Pagination } from "@/components/ui/Pagination";
 import { deleteJson, getJson } from "@/lib/api/client";
 import type { ApiResponse, BankAccount } from "@/lib/api/types";
+import { useI18n } from "@/lib/i18n";
 import { getErrorMessage, toBooleanText } from "@/lib/utils/format";
 
 export default function BankAccountsPage() {
+  const { tx } = useI18n();
   const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 10;
@@ -30,11 +32,11 @@ export default function BankAccountsPage() {
   });
 
   if (accountsQuery.isLoading) {
-    return <LoadingScreen label="Đang tải tài khoản ngân hàng..." />;
+    return <LoadingScreen label={tx("Đang tải tài khoản ngan hang...", "Loading bank accounts...")} />;
   }
 
   if (accountsQuery.isError || !accountsQuery.data) {
-    return <ErrorState message="Không thể tải tài khoản ngân hàng." />;
+    return <ErrorState message={tx("Không thể tải tài khoản ngan hang.", "Could not load bank accounts.")} />;
   }
 
   const totalPages = Math.ceil(accountsQuery.data.length / itemsPerPage);
@@ -44,11 +46,11 @@ export default function BankAccountsPage() {
     <div className="panel">
       <div className="section-heading">
         <div>
-          <span className="eyebrow">Bank Accounts</span>
-          <h2>Tài khoản nhận chuyển khoản</h2>
+          <span className="eyebrow">{tx("Tài khoản ngan hang", "Bank accounts")}</span>
+          <h2>{tx("Tài khoản nhận chuyển khoản", "Transfer destination accounts")}</h2>
         </div>
         <Link className="button button-primary" to="/admin/bank-accounts/new">
-          Thêm tài khoản
+          {tx("Thêm tài khoản", "Add account")}
         </Link>
       </div>
 
@@ -56,12 +58,12 @@ export default function BankAccountsPage() {
         <table className="data-table">
           <thead>
             <tr>
-              <th>Ngân hàng</th>
-              <th>Số tài khoản</th>
-              <th>Chủ tài khoản</th>
+              <th>{tx("Ngân hàng", "Bank")}</th>
+              <th>{tx("Số tài khoản", "Account number")}</th>
+              <th>{tx("Chủ tài khoản", "Account holder")}</th>
               <th>QR</th>
-              <th>Trạng thái</th>
-              <th>Hành động</th>
+              <th>{tx("Trạng thái", "Status")}</th>
+              <th>{tx("Hành động", "Actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -73,17 +75,17 @@ export default function BankAccountsPage() {
                 </td>
                 <td>{account.accountNumber}</td>
                 <td>{account.accountHolder}</td>
-                <td>{account.qrImageUrl ? <img alt={account.bankName} className="bank-qr bank-qr--thumb" src={account.qrImageUrl} /> : "N/A"}</td>
+                <td>{account.qrImageUrl ? <img alt={account.bankName} className="bank-qr bank-qr--thumb" src={account.qrImageUrl} /> : tx("Không có", "N/A")}</td>
                 <td>
                   <Badge label={toBooleanText(account.active)} tone={account.active ? "success" : "danger"} />
                 </td>
                 <td>
                   <div className="header-actions" style={{ justifyContent: "flex-start" }}>
                     <Link className="button button-subtle" to={`/admin/bank-accounts/${account.bankAccountId}/edit`}>
-                      Sửa
+                      {tx("Sửa", "Edit")}
                     </Link>
                     <button className="button button-danger" onClick={() => deleteMutation.mutate(account.bankAccountId)} type="button">
-                      Xóa
+                      {tx("Xóa", "Delete")}
                     </button>
                   </div>
                 </td>
@@ -93,13 +95,7 @@ export default function BankAccountsPage() {
         </table>
       </div>
 
-      {totalPages > 1 && (
-        <Pagination
-          currentPage={currentPage}
-          onPageChange={setCurrentPage}
-          totalPages={totalPages}
-        />
-      )}
+      {totalPages > 1 ? <Pagination currentPage={currentPage} onPageChange={setCurrentPage} totalPages={totalPages} /> : null}
 
       {deleteMutation.isError ? <p className="inline-text-error">{getErrorMessage(deleteMutation.error)}</p> : null}
     </div>

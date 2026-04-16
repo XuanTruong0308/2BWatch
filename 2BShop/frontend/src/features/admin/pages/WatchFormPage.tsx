@@ -6,6 +6,7 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import { getJson, postFormData } from "@/lib/api/client";
 import type { ApiResponse, ProductDetail, WatchOptionsPayload } from "@/lib/api/types";
+import { useI18n } from "@/lib/i18n";
 import { getErrorMessage } from "@/lib/utils/format";
 
 type WatchValues = {
@@ -22,6 +23,7 @@ type WatchValues = {
 };
 
 export default function WatchFormPage() {
+  const { tx } = useI18n();
   const { id } = useParams();
   const editing = Boolean(id);
   const navigate = useNavigate();
@@ -98,46 +100,46 @@ export default function WatchFormPage() {
   });
 
   if (optionsQuery.isLoading || detailQuery.isLoading) {
-    return <LoadingScreen label="Đang tải form sản phẩm..." />;
+    return <LoadingScreen label={tx("Đang tải form sản phẩm...", "Loading product form...")} />;
   }
 
   if (optionsQuery.isError || !optionsQuery.data || detailQuery.isError) {
-    return <ErrorState message="Không thể tải dữ liệu form sản phẩm." />;
+    return <ErrorState message={tx("Không thể tải dữ liệu form sản phẩm.", "Could not load product form data.")} />;
   }
 
   return (
     <div className="panel">
       <div className="section-heading">
         <div>
-          <span className="eyebrow">Watch Form</span>
-          <h2>{editing ? "Cập nhật sản phẩm" : "Tạo sản phẩm mới"}</h2>
+          <span className="eyebrow">{tx("Form sản phẩm", "Watch form")}</span>
+          <h2>{editing ? tx("Cập nhật sản phẩm", "Update product") : tx("Tạo sản phẩm mới", "Create new product")}</h2>
         </div>
         <Link className="button button-subtle" to="/admin/watches">
-          Quay lại danh sách
+          {tx("Quay lại danh sách", "Back to list")}
         </Link>
       </div>
 
       <form className="form-grid" onSubmit={form.handleSubmit((values) => mutation.mutate(values))}>
         <div className="field-group">
-          <label htmlFor="watchName">Tên sản phẩm</label>
+          <label htmlFor="watchName">{tx("Tên sản phẩm", "Product name")}</label>
           <input className="field" id="watchName" {...form.register("watchName", { required: true })} />
         </div>
         <div className="field-group">
-          <label htmlFor="price">Giá gốc</label>
+          <label htmlFor="price">{tx("Giá gốc", "Base price")}</label>
           <input className="field" id="price" type="number" {...form.register("price", { required: true })} />
         </div>
         <div className="field-group">
-          <label htmlFor="discountPercent">Giảm giá %</label>
+          <label htmlFor="discountPercent">{tx("Giảm giá %", "Discount %")}</label>
           <input className="field" id="discountPercent" type="number" {...form.register("discountPercent")} />
         </div>
         <div className="field-group">
-          <label htmlFor="stockQuantity">Tồn kho</label>
+          <label htmlFor="stockQuantity">{tx("Tồn kho", "Stock quantity")}</label>
           <input className="field" id="stockQuantity" type="number" {...form.register("stockQuantity", { required: true })} />
         </div>
         <div className="field-group">
-          <label htmlFor="brandId">Brand</label>
+          <label htmlFor="brandId">{tx("Thương hiệu", "Brand")}</label>
           <select className="select" id="brandId" {...form.register("brandId", { required: true })}>
-            <option value="">Chọn brand</option>
+            <option value="">{tx("Chọn thương hiệu", "Select brand")}</option>
             {optionsQuery.data.brands.map((brand) => (
               <option key={brand.brandId} value={brand.brandId}>
                 {brand.brandName}
@@ -146,9 +148,9 @@ export default function WatchFormPage() {
           </select>
         </div>
         <div className="field-group">
-          <label htmlFor="categoryId">Danh mục</label>
+          <label htmlFor="categoryId">{tx("Danh mục", "Category")}</label>
           <select className="select" id="categoryId" {...form.register("categoryId", { required: true })}>
-            <option value="">Chọn danh mục</option>
+            <option value="">{tx("Chọn danh mục", "Select category")}</option>
             {optionsQuery.data.categories.map((category) => (
               <option key={category.categoryId} value={category.categoryId}>
                 {category.categoryName}
@@ -157,27 +159,27 @@ export default function WatchFormPage() {
           </select>
         </div>
         <div className="field-group" style={{ gridColumn: "1 / -1" }}>
-          <label htmlFor="description">Mô tả</label>
+          <label htmlFor="description">{tx("Mô tả", "Description")}</label>
           <textarea className="textarea" id="description" rows={5} {...form.register("description")} />
         </div>
         <div className="field-group">
-          <label htmlFor="mainImage">Ảnh chính</label>
+          <label htmlFor="mainImage">{tx("Ảnh chính", "Main image")}</label>
           <input className="field" id="mainImage" type="file" {...form.register("mainImage")} />
         </div>
         <div className="field-group">
-          <label htmlFor="galleryImages">Gallery ảnh</label>
+          <label htmlFor="galleryImages">{tx("Bộ sưu tập ảnh", "Gallery images")}</label>
           <input className="field" id="galleryImages" multiple type="file" {...form.register("galleryImages")} />
         </div>
         <div className="field-group" style={{ gridColumn: "1 / -1" }}>
           <label className="checkbox-row">
             <input type="checkbox" {...form.register("isActive")} />
-            <span>Sản phẩm đang hoạt động</span>
+            <span>{tx("Sản phẩm đang hoạt động", "Product is active")}</span>
           </label>
         </div>
 
         {detailQuery.data?.images?.length ? (
           <div className="field-group" style={{ gridColumn: "1 / -1" }}>
-            <label>Ảnh hiện tại</label>
+            <label>{tx("Ảnh hiện tại", "Current images")}</label>
             <div className="mini-gallery">
               {detailQuery.data.images.map((image) => (
                 <img alt={detailQuery.data.watchName} key={image.id} src={image.url} />
@@ -190,7 +192,11 @@ export default function WatchFormPage() {
 
         <div className="header-actions" style={{ gridColumn: "1 / -1", justifyContent: "flex-end" }}>
           <button className="button button-primary" disabled={mutation.isPending} type="submit">
-            {mutation.isPending ? "Đang lưu..." : editing ? "Cập nhật sản phẩm" : "Tạo sản phẩm"}
+            {mutation.isPending
+              ? tx("Đang lưu...", "Saving...")
+              : editing
+                ? tx("Cập nhật sản phẩm", "Update product")
+                : tx("Tạo sản phẩm", "Create product")}
           </button>
         </div>
       </form>

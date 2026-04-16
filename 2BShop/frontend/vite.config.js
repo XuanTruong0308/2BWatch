@@ -19,31 +19,40 @@ export default defineConfig({
         proxy: {
             "/api": {
                 target: "http://localhost:8080",
-                changeOrigin: true,
+                changeOrigin: false,
+            },
+            "/ws": {
+                target: "http://localhost:8080",
+                changeOrigin: false,
+                ws: true,
             },
             "/perform-login": {
                 target: "http://localhost:8080",
-                changeOrigin: true,
+                changeOrigin: false,
             },
             "/logout": {
                 target: "http://localhost:8080",
-                changeOrigin: true,
+                changeOrigin: false,
             },
             "/oauth2": {
                 target: "http://localhost:8080",
-                changeOrigin: true,
+                changeOrigin: false,
             },
             "/login": {
                 target: "http://localhost:8080",
-                changeOrigin: true,
+                changeOrigin: false,
+            },
+            "/payment": {
+                target: "http://localhost:8080",
+                changeOrigin: false,
             },
             "/uploads": {
                 target: "http://localhost:8080",
-                changeOrigin: true,
+                changeOrigin: false,
             },
             "/assets": {
                 target: "http://localhost:8080",
-                changeOrigin: true,
+                changeOrigin: false,
             },
         },
     },

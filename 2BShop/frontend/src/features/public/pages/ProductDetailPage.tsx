@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { getJson } from "@/lib/api/client";
+import { useI18n } from "@/lib/i18n";
 import type { ApiResponse, ProductDetail } from "@/lib/api/types";
 import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import { ErrorState } from "@/components/ui/ErrorState";
@@ -16,6 +17,7 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
   const addToCart = useAddToCart();
+  const { tx } = useI18n();
 
   const query = useQuery({
     queryKey: ["product", id],
@@ -26,11 +28,11 @@ export default function ProductDetailPage() {
   });
 
   if (query.isLoading) {
-    return <LoadingScreen label="Dang tai chi tiet san pham..." />;
+    return <LoadingScreen label={tx("Đang tải chi tiết sản phẩm...", "Loading product details...")} />;
   }
 
   if (query.isError || !query.data) {
-    return <ErrorState message="Khong the tai thong tin san pham." />;
+    return <ErrorState message={tx("Không thể tải sản phẩm nay.", "We could not load this product.")} />;
   }
 
   const product = query.data;
@@ -41,62 +43,79 @@ export default function ProductDetailPage() {
   return (
     <div className="split-grid">
       <ScrollReveal animation="slide-right" className="panel">
-        <div className="product-cover" style={{ marginBottom: 18 }}>
+        <div className="product-cover" style={{ aspectRatio: "4 / 5", marginBottom: 18 }}>
           <img alt={product.watchName} src={image} />
         </div>
-        <div className="product-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))" }}>
+
+        <div className="product-detail-gallery" role="list" aria-label={tx("Bộ sưu tập ảnh sản phẩm", "Product image gallery")}>
           {product.images.map((entry, index) => (
             <button
               key={entry.id}
-              className={`button ${activeImage === index ? "button-primary" : "button-subtle"}`}
-              onClick={() => setActiveImage(index)}
               type="button"
+              className={`product-detail-gallery__thumb ${activeImage === index ? "is-active" : ""}`}
+              onClick={() => setActiveImage(index)}
+              aria-pressed={activeImage === index}
+              aria-label={tx("Xem ảnh", "View image") + ` ${index + 1}`}
             >
-              Ảnh {index + 1}
+              <img alt={`${product.watchName} ${index + 1}`} src={entry.url} />
             </button>
           ))}
         </div>
       </ScrollReveal>
 
-      <ScrollReveal animation="slide-left" delay={200} className="panel">
-        <div className="eyebrow">{product.brandName}</div>
-        <h1>{product.watchName}</h1>
-        <div className="price-stack">
+      <ScrollReveal animation="slide-left" delay={140} className="panel">
+        <span className="eyebrow">{product.brandName}</span>
+        <h1 style={{ marginTop: 10 }}>{product.watchName}</h1>
+
+        <div className="price-stack" style={{ marginTop: 16 }}>
           <span className="price-main">{formatCurrency(product.priceAfterDiscount)}</span>
           {product.discountPercent ? <span className="price-old">{formatCurrency(product.price)}</span> : null}
         </div>
-        <div className="header-actions" style={{ justifyContent: "flex-start", marginBottom: 16 }}>
-          <Badge label={isOutOfStock ? "ết hàng" : "Còn hàng"} />
-          <Badge label={`Đã bán ${product.soldCount ?? 0}`} tone="info" />
+
+        <div className="header-actions" style={{ justifyContent: "flex-start", flexWrap: "wrap", marginTop: 18 }}>
+          <Badge label={isOutOfStock ? tx("Hết hàng", "Sold out") : tx("Còn hàng", "In stock")} />
+          <Badge label={`${tx("Da ban", "Sold")} ${product.soldCount ?? 0}`} tone="info" />
+          {product.discountPercent ? <Badge label={`${product.discountPercent}% ${tx("giam", "off")}`} tone="warning" /> : null}
         </div>
-        <p className="muted-copy">{product.description}</p>
+
+        <p className="muted-copy" style={{ marginTop: 18, lineHeight: 1.8 }}>
+          {product.description}
+        </p>
+
         <div className="info-grid" style={{ margin: "24px 0" }}>
           <div className="metric-card">
-            <span className="eyebrow">Thương hiệu</span>
+            <span className="eyebrow">{tx("Thương hiệu", "Brand")}</span>
             <strong>{product.brandName}</strong>
           </div>
           <div className="metric-card">
-            <span className="eyebrow">Danh mục</span>
+            <span className="eyebrow">{tx("Danh muc", "Category")}</span>
             <strong>{product.categoryName}</strong>
           </div>
         </div>
-        <div className="header-actions" style={{ justifyContent: "flex-start", marginBottom: 18 }}>
+
+        <div className="quantity-stepper" style={{ justifyContent: "flex-start", marginBottom: 20 }}>
           <button className="button button-subtle" onClick={() => setQuantity((value) => Math.max(1, value - 1))} type="button">
             -
           </button>
-          <span>{quantity}</span>
+          <span style={{ minWidth: 20, textAlign: "center", fontWeight: 700 }}>{quantity}</span>
           <button className="button button-subtle" onClick={() => setQuantity((value) => value + 1)} type="button">
             +
           </button>
         </div>
+
         <button
           className="button button-primary"
           disabled={addToCart.isAdding(productId) || isOutOfStock}
           onClick={() => addToCart.addToCart(productId, quantity)}
           type="button"
         >
-          {addToCart.isAdding(productId) ? "Dang xu ly..." : isOutOfStock ? "Hết hàng" : "Thêm vào giỏ hàng"}
+          {addToCart.isAdding(productId)
+            ? tx("Đang xử lý...", "Processing...")
+            : isOutOfStock
+              ? tx("Hết hàng", "Sold out")
+              : tx("Thêm vào giỏ", "Add to cart")}
         </button>
+
         {addToCart.feedback ? (
           <div className={`inline-alert inline-alert-${addToCart.feedback.tone}`} style={{ marginTop: 16 }}>
             {addToCart.feedback.message}
@@ -106,11 +125,17 @@ export default function ProductDetailPage() {
 
       <div className="panel" style={{ gridColumn: "1 / -1" }}>
         <ScrollReveal animation="fade-down">
-          <h2>Sản phẩm liên quan</h2>
+          <div className="section-heading" style={{ marginBottom: 20 }}>
+            <div>
+              <span className="eyebrow">{tx("Sản phẩm lien quan", "Related edit")}</span>
+              <h2>{tx("Sản phẩm lien quan", "Related products")}</h2>
+            </div>
+          </div>
         </ScrollReveal>
+
         <div className="product-grid">
           {product.relatedProducts.map((entry, idx) => (
-            <ScrollReveal key={entry.watchId} animation="fade-up" delay={50 * (idx % 6)}>
+            <ScrollReveal key={entry.watchId} animation="fade-up" delay={40 * (idx % 6)}>
               <ProductTile product={entry} />
             </ScrollReveal>
           ))}

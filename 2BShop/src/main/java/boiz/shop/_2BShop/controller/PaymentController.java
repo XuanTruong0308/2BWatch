@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +22,9 @@ import jakarta.servlet.http.HttpServletRequest;
 @Controller
 @RequestMapping("/payment")
 public class PaymentController {
+
+    @Value("${app.frontend.origin:http://localhost:5173}")
+    private String frontendOrigin;
 
     @Autowired
     private VNPayService vnPayService;
@@ -116,7 +120,7 @@ public class PaymentController {
             String transactionCode,
             String bankCode,
             String payDate) {
-        String targetUrl = UriComponentsBuilder.fromPath("/payment-result")
+        String targetUrl = UriComponentsBuilder.fromUriString(frontendOrigin + "/payment-result")
                 .queryParam("success", success)
                 .queryParam("message", message)
                 .queryParamIfPresent("orderId", Optional.ofNullable(orderId))

@@ -7,9 +7,11 @@ import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import { Pagination } from "@/components/ui/Pagination";
 import { deleteJson, getJson, postJson } from "@/lib/api/client";
 import type { ApiResponse, Brand } from "@/lib/api/types";
+import { useI18n } from "@/lib/i18n";
 import { getErrorMessage, toBooleanText } from "@/lib/utils/format";
 
 export default function BrandsPage() {
+  const { tx } = useI18n();
   const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 10;
@@ -35,11 +37,11 @@ export default function BrandsPage() {
   });
 
   if (brandsQuery.isLoading) {
-    return <LoadingScreen label="Đang tải brand..." />;
+    return <LoadingScreen label={tx("Đang tải thương hiệu...", "Loading brands...")} />;
   }
 
   if (brandsQuery.isError || !brandsQuery.data) {
-    return <ErrorState message="Không thể tải danh sách brand." />;
+    return <ErrorState message={tx("Không thể tải danh sách thương hiệu.", "Could not load brand list.")} />;
   }
 
   const totalPages = Math.ceil(brandsQuery.data.length / itemsPerPage);
@@ -49,11 +51,11 @@ export default function BrandsPage() {
     <div className="panel">
       <div className="section-heading">
         <div>
-          <span className="eyebrow">Brands</span>
-          <h2>Quản lý thương hiệu</h2>
+          <span className="eyebrow">{tx("Thương hiệu", "Brands")}</span>
+          <h2>{tx("Quản lý thương hiệu", "Manage brands")}</h2>
         </div>
         <Link className="button button-primary" to="/admin/brands/new">
-          Thêm brand
+          {tx("Them thương hiệu", "Add brand")}
         </Link>
       </div>
 
@@ -61,11 +63,11 @@ export default function BrandsPage() {
         <table className="data-table">
           <thead>
             <tr>
-              <th>Tên brand</th>
-              <th>Mô tả</th>
-              <th>Sản phẩm</th>
-              <th>Trạng thái</th>
-              <th>Hành động</th>
+              <th>{tx("Tên thương hiệu", "Brand name")}</th>
+              <th>{tx("Mô tả", "Description")}</th>
+              <th>{tx("Sản phẩm", "Products")}</th>
+              <th>{tx("Trạng thái", "Status")}</th>
+              <th>{tx("Hành động", "Actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -74,7 +76,7 @@ export default function BrandsPage() {
                 <td>
                   <strong>{brand.brandName}</strong>
                 </td>
-                <td>{brand.description || "Chưa có mô tả"}</td>
+                <td>{brand.description || tx("Chưa có mô tả", "No description yet")}</td>
                 <td>{brand.watchCount}</td>
                 <td>
                   <Badge label={toBooleanText(brand.active)} tone={brand.active ? "success" : "danger"} />
@@ -82,7 +84,7 @@ export default function BrandsPage() {
                 <td>
                   <div className="header-actions" style={{ justifyContent: "flex-start" }}>
                     <Link className="button button-subtle" to={`/admin/brands/${brand.brandId}/edit`}>
-                      Sửa
+                      {tx("Sửa", "Edit")}
                     </Link>
                     {!brand.active ? (
                       <button
@@ -90,7 +92,7 @@ export default function BrandsPage() {
                         onClick={() => actionMutation.mutate({ endpoint: `/api/v1/admin/brands/${brand.brandId}/activate`, method: "POST" })}
                         type="button"
                       >
-                        Kích hoạt
+                        {tx("Kích hoạt", "Activate")}
                       </button>
                     ) : null}
                     <button
@@ -98,7 +100,7 @@ export default function BrandsPage() {
                       onClick={() => actionMutation.mutate({ endpoint: `/api/v1/admin/brands/${brand.brandId}`, method: "DELETE" })}
                       type="button"
                     >
-                      Xóa
+                      {tx("Xóa", "Delete")}
                     </button>
                   </div>
                 </td>
@@ -108,13 +110,7 @@ export default function BrandsPage() {
         </table>
       </div>
 
-      {totalPages > 1 && (
-        <Pagination
-          currentPage={currentPage}
-          onPageChange={setCurrentPage}
-          totalPages={totalPages}
-        />
-      )}
+      {totalPages > 1 ? <Pagination currentPage={currentPage} onPageChange={setCurrentPage} totalPages={totalPages} /> : null}
 
       {actionMutation.isError ? <p className="inline-text-error">{getErrorMessage(actionMutation.error)}</p> : null}
     </div>

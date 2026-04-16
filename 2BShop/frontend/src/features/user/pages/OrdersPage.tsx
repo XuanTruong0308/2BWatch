@@ -7,23 +7,25 @@ import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import { Pagination } from "@/components/ui/Pagination";
 import { getJson, postJson } from "@/lib/api/client";
 import type { ApiResponse, Order, PaginatedResponse } from "@/lib/api/types";
+import { useI18n } from "@/lib/i18n";
 import { formatCurrency, formatDate, getErrorMessage, orderStatusLabel, statusTone } from "@/lib/utils/format";
 
-const statusFilters = [
-  { value: "", label: "Tất cả" },
-  { value: "PENDING", label: "Chờ xử lý" },
-  { value: "CONFIRMED", label: "Đã xác nhận" },
-  { value: "SHIPPING", label: "Đang giao" },
-  { value: "DELIVERED", label: "Đã giao" },
-  { value: "COMPLETED", label: "Hoàn thành" },
-  { value: "CANCELLED", label: "Đã hủy" },
-];
-
 export default function OrdersPage() {
+  const { tx } = useI18n();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get("page") || 0);
   const status = searchParams.get("status") || "";
+
+  const statusFilters = [
+    { value: "", label: tx("Tất cả", "All") },
+    { value: "PENDING", label: orderStatusLabel("PENDING") },
+    { value: "CONFIRMED", label: orderStatusLabel("CONFIRMED") },
+    { value: "SHIPPING", label: orderStatusLabel("SHIPPING") },
+    { value: "DELIVERED", label: orderStatusLabel("DELIVERED") },
+    { value: "COMPLETED", label: orderStatusLabel("COMPLETED") },
+    { value: "CANCELLED", label: orderStatusLabel("CANCELLED") },
+  ];
 
   const ordersQuery = useQuery({
     queryKey: ["orders", page, status],
@@ -47,11 +49,11 @@ export default function OrdersPage() {
   });
 
   if (ordersQuery.isLoading) {
-    return <LoadingScreen label="Đang tải đơn hàng..." />;
+    return <LoadingScreen label={tx("Đang tải đơn hàng...", "Loading orders...")} />;
   }
 
   if (ordersQuery.isError || !ordersQuery.data) {
-    return <ErrorState message="Không thể tải danh sách đơn hàng." />;
+    return <ErrorState message={tx("Không thể tải đơn hàng của bạn.", "We could not load your orders.")} />;
   }
 
   const orders = ordersQuery.data;
@@ -59,11 +61,14 @@ export default function OrdersPage() {
   if (orders.items.length === 0) {
     return (
       <EmptyState
-        title="Chưa có đơn hàng phù hợp"
-        description="Khi bạn hoàn tất checkout, đơn hàng sẽ xuất hiện tại đây để tiện theo dõi."
+        title={tx("Chưa có đơn hàng phù hợp", "No matching orders yet")}
+        description={tx(
+          "Hoàn tất một lần thanh toán và lịch sử đơn hàng sẽ xuất hiện tại đây để bạn theo dõi.",
+          "Complete a checkout and your order timeline will appear here for tracking.",
+        )}
         action={
           <Link className="button button-primary" to="/watches">
-            Khám phá sản phẩm
+            {tx("Khám phá bộ sưu tập", "Explore the collection")}
           </Link>
         }
       />
@@ -74,9 +79,14 @@ export default function OrdersPage() {
     <div className="panel">
       <div className="section-heading">
         <div>
-          <span className="eyebrow">My Orders</span>
-          <h2>Lịch sử mua sắm của bạn</h2>
-          <p>Trạng thái đơn được đồng bộ trực tiếp với hệ quản trị và luồng xử lý đơn hiện tại.</p>
+          <span className="eyebrow">{tx("Đơn hàng của tôi", "My orders")}</span>
+          <h2>{tx("Lịch sử mua sắm", "Your purchase history")}</h2>
+          <p className="muted-copy">
+            {tx(
+              "Trạng thái đơn hàng luôn được đồng bộ với quy trình xử lý backend và cập nhật từ admin.",
+              "Order states stay synchronized with the existing backend processing flow and admin updates.",
+            )}
+          </p>
         </div>
       </div>
 
@@ -112,40 +122,50 @@ export default function OrdersPage() {
               </div>
               <Badge label={orderStatusLabel(order.orderStatus)} tone={statusTone(order.orderStatus)} />
             </div>
+
             <div className="info-grid">
               <div className="metric-card">
-                <span className="eyebrow">Ngày đặt</span>
+                <span className="eyebrow">{tx("Ngày đặt", "Order date")}</span>
                 <strong>{formatDate(order.orderDate)}</strong>
               </div>
               <div className="metric-card">
-                <span className="eyebrow">Thanh toán</span>
-                <strong>{order.paymentMethod?.methodName || "N/A"}</strong>
+                <span className="eyebrow">{tx("Thanh toán", "Payment")}</span>
+                <strong>{order.paymentMethod?.methodName || tx("Không có", "N/A")}</strong>
               </div>
               <div className="metric-card">
-                <span className="eyebrow">Tổng tiền</span>
+                <span className="eyebrow">{tx("Tổng tiền", "Total")}</span>
                 <strong>{formatCurrency(order.totalAmount)}</strong>
               </div>
             </div>
-            <div className="header-actions" style={{ justifyContent: "space-between", marginTop: "1.25rem" }}>
-              <Link className="button button-subtle" to={`/my-orders/${order.orderId}`}>
-                Xem chi tiết
-              </Link>
+
+            <div className="header-actions" style={{ justifyContent: "flex-end", marginTop: 24, paddingTop: 24, borderTop: "1px solid var(--line)" }}>
               {["PENDING", "CONFIRMED"].includes(order.orderStatus) ? (
                 <button
                   className="button button-danger"
                   disabled={cancelMutation.isPending}
-                  onClick={() => cancelMutation.mutate({ orderId: order.orderId, reason: "Khách hàng yêu cầu hủy từ giao diện React" })}
+                  onClick={() =>
+                    cancelMutation.mutate({
+                      orderId: order.orderId,
+                      reason: tx("Khách hàng hủy từ lịch sử đơn hàng", "Customer cancelled from order history"),
+                    })
+                  }
                   type="button"
                 >
-                  Hủy đơn
+                  {tx("Hủy đơn", "Cancel order")}
                 </button>
               ) : null}
+
+              <Link className="button button-subtle" to={`/my-orders/${order.orderId}`}>
+                {tx("Xem chi tiết", "View details")}
+              </Link>
             </div>
           </article>
         ))}
       </div>
 
-      {cancelMutation.isError ? <p className="inline-text-error">{getErrorMessage(cancelMutation.error)}</p> : null}
+      {cancelMutation.isError ? (
+        <p className="inline-text-error">{getErrorMessage(cancelMutation.error, tx("Không thể hủy đơn hàng.", "We could not cancel the order."))}</p>
+      ) : null}
 
       <Pagination
         currentPage={page}

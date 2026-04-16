@@ -6,6 +6,7 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import { getJson, postJson, putJson } from "@/lib/api/client";
 import type { ApiResponse, Brand } from "@/lib/api/types";
+import { useI18n } from "@/lib/i18n";
 import { getErrorMessage } from "@/lib/utils/format";
 
 type BrandValues = {
@@ -16,6 +17,7 @@ type BrandValues = {
 };
 
 export default function BrandFormPage() {
+  const { tx } = useI18n();
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -64,42 +66,42 @@ export default function BrandFormPage() {
   });
 
   if (detailQuery.isLoading) {
-    return <LoadingScreen label="Đang tải thông tin brand..." />;
+    return <LoadingScreen label={tx("Đang tải thong tin thương hiệu...", "Loading brand details...")} />;
   }
 
   if (detailQuery.isError) {
-    return <ErrorState message="Không thể tải dữ liệu brand để chỉnh sửa." />;
+    return <ErrorState message={tx("Không thể tải dữ liệu thương hiệu de chinh sua.", "Could not load brand data for editing.")} />;
   }
 
   return (
     <div className="panel">
       <div className="section-heading">
         <div>
-          <span className="eyebrow">Brand Form</span>
-          <h2>{editing ? "Chỉnh sửa thương hiệu" : "Tạo thương hiệu mới"}</h2>
+          <span className="eyebrow">{tx("Form thương hiệu", "Brand form")}</span>
+          <h2>{editing ? tx("Chỉnh sửa thương hiệu", "Edit brand") : tx("Tạo thương hiệu mới", "Create new brand")}</h2>
         </div>
         <Link className="button button-subtle" to="/admin/brands">
-          Quay lại danh sách
+          {tx("Quay lại danh sách", "Back to list")}
         </Link>
       </div>
 
       <form className="form-grid" onSubmit={form.handleSubmit((values) => mutation.mutate(values))}>
         <div className="field-group">
-          <label htmlFor="brandName">Tên brand</label>
+          <label htmlFor="brandName">{tx("Tên thương hiệu", "Brand name")}</label>
           <input className="field" id="brandName" {...form.register("brandName", { required: true })} />
         </div>
         <div className="field-group">
-          <label htmlFor="logoUrl">Logo URL</label>
+          <label htmlFor="logoUrl">{tx("Duong dan logo", "Logo URL")}</label>
           <input className="field" id="logoUrl" {...form.register("logoUrl")} />
         </div>
         <div className="field-group" style={{ gridColumn: "1 / -1" }}>
-          <label htmlFor="description">Mô tả</label>
+          <label htmlFor="description">{tx("Mô tả", "Description")}</label>
           <textarea className="textarea" id="description" rows={5} {...form.register("description")} />
         </div>
         <div className="field-group" style={{ gridColumn: "1 / -1" }}>
           <label className="checkbox-row">
             <input type="checkbox" {...form.register("active")} />
-            <span>Brand đang hoạt động</span>
+            <span>{tx("Thương hiệu đang hoạt động", "Brand is active")}</span>
           </label>
         </div>
 
@@ -107,7 +109,11 @@ export default function BrandFormPage() {
 
         <div className="header-actions" style={{ gridColumn: "1 / -1", justifyContent: "flex-end" }}>
           <button className="button button-primary" disabled={mutation.isPending} type="submit">
-            {mutation.isPending ? "Đang lưu..." : editing ? "Lưu thay đổi" : "Tạo brand"}
+            {mutation.isPending
+              ? tx("Đang lưu...", "Saving...")
+              : editing
+                ? tx("Luu thay doi", "Save changes")
+                : tx("Tạo thương hiệu", "Create brand")}
           </button>
         </div>
       </form>

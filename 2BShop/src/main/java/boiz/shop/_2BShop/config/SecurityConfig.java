@@ -1,6 +1,7 @@
 package boiz.shop._2BShop.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +24,9 @@ import boiz.shop._2BShop.service.CustomUserDetailsService;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Value("${app.frontend.origin:http://localhost:5173}")
+    private String frontendOrigin;
 
     @Autowired
     private CustomUserDetailsService userDetailsService;
@@ -136,13 +140,13 @@ public class SecurityConfig {
                         .loginPage("/login")
                         .loginProcessingUrl("/perform-login")
                         .successHandler(loginSuccessHandler)
-                        .failureUrl("/login?error=true")
+                        .failureUrl(frontendOrigin + "/login?error=true")
                         .usernameParameter("email")
                         .passwordParameter("password")
                         .permitAll())
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout=true")
+                        .logoutSuccessUrl(frontendOrigin + "/login?logout=true")
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                         .permitAll())
@@ -150,7 +154,7 @@ public class SecurityConfig {
                         .loginPage("/login")
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .successHandler(oAuth2LoginSuccessHandler)
-                        .failureUrl("/login?error=oauth2"))
+                        .failureUrl(frontendOrigin + "/login?error=oauth2"))
                 .exceptionHandling(ex -> ex
                         .defaultAuthenticationEntryPointFor(
                                 new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),

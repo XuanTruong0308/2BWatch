@@ -1,5 +1,8 @@
+import { getCurrentLanguage } from "@/lib/i18n";
+
 export function formatCurrency(value?: number | null) {
-  return new Intl.NumberFormat("vi-VN", {
+  const language = getCurrentLanguage();
+  return new Intl.NumberFormat(language === "vi" ? "vi-VN" : "en-US", {
     style: "currency",
     currency: "VND",
     maximumFractionDigits: 0,
@@ -7,10 +10,11 @@ export function formatCurrency(value?: number | null) {
 }
 
 export function formatDate(value?: string | null) {
+  const language = getCurrentLanguage();
   if (!value) {
-    return "N/A";
+    return language === "vi" ? "Không có" : "N/A";
   }
-  return new Intl.DateTimeFormat("vi-VN", {
+  return new Intl.DateTimeFormat(language === "vi" ? "vi-VN" : "en-US", {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(value));
@@ -40,38 +44,41 @@ export function statusTone(status?: string | null) {
 }
 
 export function orderStatusLabel(status?: string | null) {
+  const language = getCurrentLanguage();
   switch (status) {
     case "PENDING":
-      return "Chờ xử lý";
+      return language === "vi" ? "Chờ xử lý" : "Pending";
     case "CONFIRMED":
-      return "Đã xác nhận";
+      return language === "vi" ? "Đã xác nhận" : "Confirmed";
     case "SHIPPING":
-      return "Đang giao";
+      return language === "vi" ? "Đang giao" : "Shipping";
     case "DELIVERED":
-      return "Đã giao";
+      return language === "vi" ? "Đã giao" : "Delivered";
     case "COMPLETED":
-      return "Hoàn thành";
+      return language === "vi" ? "Hoàn thành" : "Completed";
     case "CANCELLED":
-      return "Đã hủy";
+      return language === "vi" ? "Đã hủy" : "Cancelled";
     case "SUCCESS":
-      return "Thành công";
+      return language === "vi" ? "Thành công" : "Success";
     case "FAILED":
-      return "Thất bại";
+      return language === "vi" ? "Thất bại" : "Failed";
     default:
-      return status ?? "Chưa xác định";
+      return status ?? (language === "vi" ? "Chưa xác định" : "Unknown");
   }
 }
 
-export function getErrorMessage(error: unknown, fallback = "Yêu cầu thất bại") {
+export function getErrorMessage(error: unknown, fallback?: string) {
+  const language = getCurrentLanguage();
   if (error instanceof Error && error.message) {
     return error.message;
   }
-  return fallback;
+  return fallback ?? (language === "vi" ? "Yêu cầu thất bại" : "Request failed");
 }
 
 export function toBooleanText(value?: boolean | null) {
+  const language = getCurrentLanguage();
   if (value === null || value === undefined) {
-    return "N/A";
+    return language === "vi" ? "Không có" : "N/A";
   }
-  return value ? "Có" : "Không";
+  return value ? (language === "vi" ? "Có" : "Yes") : language === "vi" ? "Không" : "No";
 }

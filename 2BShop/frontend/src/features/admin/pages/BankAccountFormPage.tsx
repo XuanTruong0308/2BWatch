@@ -6,6 +6,7 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import { getJson, postJson, putJson } from "@/lib/api/client";
 import type { ApiResponse, BankAccount } from "@/lib/api/types";
+import { useI18n } from "@/lib/i18n";
 import { getErrorMessage } from "@/lib/utils/format";
 
 type BankAccountValues = {
@@ -18,6 +19,7 @@ type BankAccountValues = {
 };
 
 export default function BankAccountFormPage() {
+  const { tx } = useI18n();
   const { id } = useParams();
   const editing = Boolean(id);
   const navigate = useNavigate();
@@ -70,56 +72,56 @@ export default function BankAccountFormPage() {
   });
 
   if (detailQuery.isLoading) {
-    return <LoadingScreen label="Đang tải tài khoản ngân hàng..." />;
+    return <LoadingScreen label={tx("Đang tải tài khoản ngân hàng...", "Loading bank account...")} />;
   }
 
   if (detailQuery.isError) {
-    return <ErrorState message="Không thể tải dữ liệu tài khoản ngân hàng." />;
+    return <ErrorState message={tx("Không thể tải dữ liệu tài khoản ngân hàng.", "Could not load bank account data.")} />;
   }
 
   return (
     <div className="panel">
       <div className="section-heading">
         <div>
-          <span className="eyebrow">Bank Account Form</span>
-          <h2>{editing ? "Chỉnh sửa tài khoản ngân hàng" : "Tạo tài khoản ngân hàng mới"}</h2>
+          <span className="eyebrow">{tx("Form tài khoản ngân hàng", "Bank account form")}</span>
+          <h2>{editing ? tx("Chỉnh sửa tài khoản ngân hàng", "Edit bank account") : tx("Tạo tài khoản ngân hàng mới", "Create new bank account")}</h2>
         </div>
         <Link className="button button-subtle" to="/admin/bank-accounts">
-          Quay lại danh sách
+          {tx("Quay lại danh sách", "Back to list")}
         </Link>
       </div>
 
       <form className="form-grid" onSubmit={form.handleSubmit((values) => mutation.mutate(values))}>
         <div className="field-group">
-          <label htmlFor="bankName">Tên ngân hàng</label>
+          <label htmlFor="bankName">{tx("Tên ngân hàng", "Bank name")}</label>
           <input className="field" id="bankName" {...form.register("bankName", { required: true })} />
         </div>
         <div className="field-group">
-          <label htmlFor="bankCode">Mã ngân hàng</label>
+          <label htmlFor="bankCode">{tx("Mã ngân hàng", "Bank code")}</label>
           <input className="field" id="bankCode" {...form.register("bankCode", { required: true })} />
         </div>
         <div className="field-group">
-          <label htmlFor="accountNumber">Số tài khoản</label>
+          <label htmlFor="accountNumber">{tx("Số tài khoản", "Account number")}</label>
           <input className="field" id="accountNumber" {...form.register("accountNumber", { required: true })} />
         </div>
         <div className="field-group">
-          <label htmlFor="accountHolder">Chủ tài khoản</label>
+          <label htmlFor="accountHolder">{tx("Chủ tài khoản", "Account holder")}</label>
           <input className="field" id="accountHolder" {...form.register("accountHolder", { required: true })} />
         </div>
         <div className="field-group">
-          <label htmlFor="displayOrder">Thứ tự hiển thị</label>
+          <label htmlFor="displayOrder">{tx("Thứ tự hiển thị", "Display order")}</label>
           <input className="field" id="displayOrder" type="number" {...form.register("displayOrder", { valueAsNumber: true })} />
         </div>
         <div className="field-group">
           <label className="checkbox-row">
             <input type="checkbox" {...form.register("active")} />
-            <span>Tài khoản đang hoạt động</span>
+            <span>{tx("Tài khoản đang hoạt động", "Account is active")}</span>
           </label>
         </div>
 
         {detailQuery.data?.qrImageUrl ? (
           <div className="field-group" style={{ gridColumn: "1 / -1" }}>
-            <label>QR hiện tại</label>
+            <label>{tx("QR hiện tại", "Current QR")}</label>
             <img alt={detailQuery.data.bankName} className="bank-qr" src={detailQuery.data.qrImageUrl} />
           </div>
         ) : null}
@@ -128,7 +130,11 @@ export default function BankAccountFormPage() {
 
         <div className="header-actions" style={{ gridColumn: "1 / -1", justifyContent: "flex-end" }}>
           <button className="button button-primary" disabled={mutation.isPending} type="submit">
-            {mutation.isPending ? "Đang lưu..." : editing ? "Lưu thay đổi" : "Tạo tài khoản"}
+            {mutation.isPending
+              ? tx("Đang lưu...", "Saving...")
+              : editing
+                ? tx("Lưu thay đổi", "Save changes")
+                : tx("Tạo tài khoản", "Create account")}
           </button>
         </div>
       </form>

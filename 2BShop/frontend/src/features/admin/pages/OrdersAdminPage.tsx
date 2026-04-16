@@ -6,9 +6,11 @@ import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import { Pagination } from "@/components/ui/Pagination";
 import { getJson } from "@/lib/api/client";
 import type { AdminOrderListPayload, ApiResponse } from "@/lib/api/types";
+import { useI18n } from "@/lib/i18n";
 import { formatCurrency, formatDate, orderStatusLabel, statusTone } from "@/lib/utils/format";
 
 export default function OrdersAdminPage() {
+  const { tx } = useI18n();
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get("page") || 0);
 
@@ -21,11 +23,11 @@ export default function OrdersAdminPage() {
   });
 
   if (ordersQuery.isLoading) {
-    return <LoadingScreen label="Đang tải đơn hàng quản trị..." />;
+    return <LoadingScreen label={tx("Đang tải đơn hàng quản trị...", "Loading admin orders...")} />;
   }
 
   if (ordersQuery.isError || !ordersQuery.data) {
-    return <ErrorState message="Không thể tải danh sách đơn hàng quản trị." />;
+    return <ErrorState message={tx("Không thể tải danh sách đơn hàng quản trị.", "Could not load admin orders.")} />;
   }
 
   const payload = ordersQuery.data;
@@ -45,19 +47,19 @@ export default function OrdersAdminPage() {
     <div className="stack-section">
       <div className="metrics-grid">
         <div className="metric-card">
-          <span className="eyebrow">Total</span>
+          <span className="eyebrow">{tx("Tổng số", "Total")}</span>
           <strong>{payload.stats.totalOrders}</strong>
         </div>
         <div className="metric-card">
-          <span className="eyebrow">Pending</span>
+          <span className="eyebrow">{orderStatusLabel("PENDING")}</span>
           <strong>{payload.stats.pendingCount}</strong>
         </div>
         <div className="metric-card">
-          <span className="eyebrow">Shipping</span>
+          <span className="eyebrow">{orderStatusLabel("SHIPPING")}</span>
           <strong>{payload.stats.shippingCount}</strong>
         </div>
         <div className="metric-card">
-          <span className="eyebrow">Delivered</span>
+          <span className="eyebrow">{orderStatusLabel("DELIVERED")}</span>
           <strong>{payload.stats.deliveredCount}</strong>
         </div>
       </div>
@@ -65,14 +67,14 @@ export default function OrdersAdminPage() {
       <div className="panel">
         <div className="section-heading">
           <div>
-            <span className="eyebrow">Orders</span>
-            <h2>Điều phối đơn hàng</h2>
+            <span className="eyebrow">{tx("Đơn hàng", "Orders")}</span>
+            <h2>{tx("Điều phối đơn hàng", "Order operations")}</h2>
           </div>
         </div>
 
         <div className="form-grid">
           <div className="field-group">
-            <label htmlFor="keyword">Tìm kiếm</label>
+            <label htmlFor="keyword">{tx("Tìm kiếm", "Search")}</label>
             <input
               className="field"
               defaultValue={searchParams.get("keyword") || ""}
@@ -82,13 +84,13 @@ export default function OrdersAdminPage() {
                   updateSearch("keyword", (event.target as HTMLInputElement).value);
                 }
               }}
-              placeholder="Tên, SĐT, mã đơn..."
+              placeholder={tx("Ten, SDT, ma don...", "Name, phone, order code...")}
             />
           </div>
           <div className="field-group">
-            <label htmlFor="status">Trạng thái</label>
+            <label htmlFor="status">{tx("Trạng thái", "Status")}</label>
             <select className="select" id="status" onChange={(event) => updateSearch("status", event.target.value)} value={searchParams.get("status") || ""}>
-              <option value="">Tất cả</option>
+              <option value="">{tx("Tất cả", "All")}</option>
               {["PENDING", "CONFIRMED", "SHIPPING", "DELIVERED", "CANCELLED"].map((status) => (
                 <option key={status} value={status}>
                   {orderStatusLabel(status)}
@@ -97,11 +99,11 @@ export default function OrdersAdminPage() {
             </select>
           </div>
           <div className="field-group">
-            <label htmlFor="fromDate">Từ ngày</label>
+            <label htmlFor="fromDate">{tx("Từ ngày", "From date")}</label>
             <input className="field" id="fromDate" onChange={(event) => updateSearch("fromDate", event.target.value)} type="date" value={searchParams.get("fromDate") || ""} />
           </div>
           <div className="field-group">
-            <label htmlFor="toDate">Đến ngày</label>
+            <label htmlFor="toDate">{tx("Đến ngày", "To date")}</label>
             <input className="field" id="toDate" onChange={(event) => updateSearch("toDate", event.target.value)} type="date" value={searchParams.get("toDate") || ""} />
           </div>
         </div>
@@ -111,13 +113,13 @@ export default function OrdersAdminPage() {
         <table className="data-table">
           <thead>
             <tr>
-              <th>Mã đơn</th>
-              <th>Khách hàng</th>
-              <th>Ngày đặt</th>
-              <th>Thanh toán</th>
-              <th>Tổng tiền</th>
-              <th>Trạng thái</th>
-              <th>Hành động</th>
+              <th>{tx("Mã đơn", "Order code")}</th>
+              <th>{tx("Khách hàng", "Customer")}</th>
+              <th>{tx("Ngày đặt", "Order date")}</th>
+              <th>{tx("Thanh toán", "Payment")}</th>
+              <th>{tx("Tổng tiền", "Total")}</th>
+              <th>{tx("Trạng thái", "Status")}</th>
+              <th>{tx("Hành động", "Actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -131,14 +133,14 @@ export default function OrdersAdminPage() {
                   <div className="muted-copy">{order.shippingPhone}</div>
                 </td>
                 <td>{formatDate(order.orderDate)}</td>
-                <td>{order.paymentMethod?.methodName || "N/A"}</td>
+                <td>{order.paymentMethod?.methodName || tx("Không có", "N/A")}</td>
                 <td>{formatCurrency(order.totalAmount)}</td>
                 <td>
                   <Badge label={orderStatusLabel(order.orderStatus)} tone={statusTone(order.orderStatus)} />
                 </td>
                 <td>
                   <Link className="button button-subtle" to={`/admin/orders/${order.orderId}`}>
-                    Chi tiết
+                    {tx("Chi tiết", "Details")}
                   </Link>
                 </td>
               </tr>

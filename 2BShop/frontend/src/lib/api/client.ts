@@ -24,15 +24,15 @@ async function parseResponse<T>(response: Response): Promise<T> {
     const message =
       payload?.message ??
       (response.status === 401
-        ? "Vui long dang nhap de tiep tuc."
+        ? "Vui lòng đăng nhập để tiếp tục."
         : response.status === 403
-          ? "Phien lam viec da het han hoac ban khong co quyen thuc hien thao tac nay."
-          : "Yeu cau that bai");
+          ? "Phiên làm việc đã hết hạn hoặc bạn không có quyền thực hiện thao tác này."
+          : "Yêu cầu thất bại");
     throw new Error(message);
   }
 
   if (payload && typeof payload.success === "boolean" && payload.success === false) {
-    throw new Error(payload.message ?? "Yeu cau that bai");
+    throw new Error(payload.message ?? "Yêu cầu thất bại");
   }
 
   return payload as T;
@@ -61,7 +61,7 @@ async function refreshCsrfCookie(force = false) {
     })
       .then(async (response) => {
         if (!response.ok) {
-          throw new Error("Khong the lam moi CSRF token.");
+          throw new Error("Không thể làm mới CSRF token.");
         }
 
         if (response.headers.get("content-type")?.includes("application/json")) {

@@ -7,6 +7,7 @@ import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { getJson } from "@/lib/api/client";
+import { useI18n } from "@/lib/i18n";
 import type { ApiResponse, HomePageData, PaginatedResponse, ProductCard } from "@/lib/api/types";
 import { useAddToCart } from "@/hooks/useAddToCart";
 
@@ -19,6 +20,7 @@ export default function CatalogPage({ variant = "all" }: CatalogPageProps) {
   const navigate = useNavigate();
   const page = Number(searchParams.get("page") || 0);
   const addToCart = useAddToCart();
+  const { tx } = useI18n();
 
   const optionsQuery = useQuery({
     queryKey: ["public", "options"],
@@ -45,39 +47,60 @@ export default function CatalogPage({ variant = "all" }: CatalogPageProps) {
   const overview = useMemo(() => {
     if (variant === "newest") {
       return {
-        title: "Tuyet Tac Moi",
-        desc: "Kham pha ngay nhung thiet ke vua ra mat mang hoi tho thoi dai.",
+        eyebrow: tx("Hàng mới", "New arrivals"),
+        title: tx("Sản phẩm mới nhất", "Latest watch drops"),
+        desc: tx(
+          "Những mẫu vừa lên kệ, được sắp xếp gọn gàng để người dùng quét nhanh và so sánh dễ hơn.",
+          "New pieces surfaced through a sharp editorial grid with product imagery as the only source of color.",
+        ),
       };
     }
+
     if (variant === "discount") {
       return {
-        title: "Dac Quyen Gioi Han",
-        desc: "So huu tuyet tac dong ho voi muc gia uu dai chua tung co.",
+        eyebrow: tx("Bộ sưu tập giảm giá", "Sale edit"),
+        title: tx("Những sản phẩm đang ưu đãi", "Discount collection"),
+        desc: tx(
+          "Các mẫu đang có ưu đãi nhưng vẫn giữ trải nghiệm mua sắm sạch, rõ và dễ ra quyết định.",
+          "High-impact offers presented through a flatter, cleaner buying experience.",
+        ),
       };
     }
+
     return {
-      title: "Bo Suu Tap Dong Ho",
-      desc: "Tinh hoa cua thoi gian hoi tu trong tung thiet ke sang trong va dang cap.",
+      eyebrow: tx("Tất cả bộ sưu tập", "Full collection"),
+      title: tx("Khám phá tất cả đồng hồ", "Explore every watch"),
+      desc: tx(
+        "Danh mục được trình bày theo mật độ gọn hơn, dễ lọc nhanh theo thương hiệu, giá và tình trạng sản phẩm.",
+        "A dense, product-first catalog with restrained UI and faster scanning across brand, category and price.",
+      ),
     };
-  }, [variant]);
+  }, [tx, variant]);
+
+  const updateParams = (updater: (next: URLSearchParams) => void) => {
+    const next = new URLSearchParams(searchParams);
+    updater(next);
+    setSearchParams(next);
+  };
 
   const changePage = (nextPage: number) => {
-    searchParams.set("page", String(nextPage));
-    setSearchParams(searchParams);
+    updateParams((next) => {
+      next.set("page", String(nextPage));
+    });
   };
 
   if (productsQuery.isLoading) {
-    return <LoadingScreen label="Dang tai danh muc..." />;
+    return <LoadingScreen label={tx("Đang tải danh muc...", "Loading catalog...")} />;
   }
 
   if (productsQuery.isError || !productsQuery.data) {
-    return <ErrorState message="Khong the tai danh sach san pham." />;
+    return <ErrorState message={tx("Không thể tải danh muc lúc này.", "We could not load the collection right now.")} />;
   }
 
   return (
     <main className="catalog-page-container">
       <ScrollReveal animation="fade-down" className="catalog-header">
-        <span className="catalog-eyebrow">2BSHOP COLLECTION</span>
+        <span className="catalog-eyebrow">{overview.eyebrow}</span>
         <h1 className="catalog-title">{overview.title}</h1>
         <p className="catalog-description">{overview.desc}</p>
       </ScrollReveal>
@@ -89,41 +112,47 @@ export default function CatalogPage({ variant = "all" }: CatalogPageProps) {
       ) : null}
 
       {variant === "all" ? (
-        <ScrollReveal animation="fade-in" delay={200} className="catalog-filters">
+        <ScrollReveal animation="fade-in" delay={180} className="catalog-filters">
           <div className="catalog-filter-group">
-            <label className="catalog-filter-label" htmlFor="search">Tim kiem</label>
+            <label className="catalog-filter-label" htmlFor="search">
+              {tx("Tìm kiếm", "Search")}
+            </label>
             <input
               className="catalog-input"
               defaultValue={searchParams.get("search") || ""}
               id="search"
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
-                  searchParams.set("search", (event.target as HTMLInputElement).value);
-                  searchParams.set("page", "0");
-                  setSearchParams(searchParams);
+                  updateParams((next) => {
+                    next.set("search", (event.target as HTMLInputElement).value);
+                    next.set("page", "0");
+                  });
                 }
               }}
-              placeholder="Ten hoac dong san pham..."
+              placeholder={tx("Tên đồng hồ hoặc bộ sưu tập...", "Watch name or collection...")}
             />
           </div>
 
           <div className="catalog-filter-group">
-            <label className="catalog-filter-label" htmlFor="brand">Thuong hieu</label>
+            <label className="catalog-filter-label" htmlFor="brand">
+              {tx("Thương hiệu", "Brand")}
+            </label>
             <select
               className="catalog-select"
               id="brand"
               value={searchParams.get("brand") || ""}
               onChange={(event) => {
-                if (event.target.value) {
-                  searchParams.set("brand", event.target.value);
-                } else {
-                  searchParams.delete("brand");
-                }
-                searchParams.set("page", "0");
-                setSearchParams(searchParams);
+                updateParams((next) => {
+                  if (event.target.value) {
+                    next.set("brand", event.target.value);
+                  } else {
+                    next.delete("brand");
+                  }
+                  next.set("page", "0");
+                });
               }}
             >
-              <option value="">Tat ca thuong hieu</option>
+              <option value="">{tx("Tất cả thương hiệu", "All brands")}</option>
               {optionsQuery.data?.brands?.map((brand) => (
                 <option key={brand.id} value={brand.value}>
                   {brand.label}
@@ -133,42 +162,57 @@ export default function CatalogPage({ variant = "all" }: CatalogPageProps) {
           </div>
 
           <div className="catalog-filter-group">
-            <label className="catalog-filter-label" htmlFor="sortBy">Sap xep theo</label>
+            <label className="catalog-filter-label" htmlFor="sortBy">
+              {tx("Sắp xếp", "Sort")}
+            </label>
             <select
               className="catalog-select"
               id="sortBy"
               value={searchParams.get("sortBy") || ""}
               onChange={(event) => {
-                if (event.target.value) {
-                  searchParams.set("sortBy", event.target.value);
-                } else {
-                  searchParams.delete("sortBy");
-                }
-                setSearchParams(searchParams);
+                updateParams((next) => {
+                  if (event.target.value) {
+                    next.set("sortBy", event.target.value);
+                  } else {
+                    next.delete("sortBy");
+                  }
+                });
               }}
             >
-              <option value="">Goi y</option>
-              <option value="price-asc">Gia: thap den cao</option>
-              <option value="price-desc">Gia: cao xuong thap</option>
-              <option value="newest">Moi nhat</option>
+              <option value="">{tx("Đề xuất", "Recommended")}</option>
+              <option value="price-asc">{tx("Giá tăng dần", "Price low to high")}</option>
+              <option value="price-desc">{tx("Giá giảm dần", "Price high to low")}</option>
+              <option value="newest">{tx("Mới nhất", "Newest")}</option>
             </select>
+          </div>
+
+          <div className="catalog-filter-group">
+            <label className="catalog-filter-label" htmlFor="pageState">
+              {tx("Trang", "Page")}
+            </label>
+            <input
+              className="catalog-input"
+              id="pageState"
+              readOnly
+              value={`${tx("Trang", "Page")} ${page + 1} / ${Math.max(productsQuery.data.totalPages, 1)}`}
+            />
           </div>
         </ScrollReveal>
       ) : null}
 
       {productsQuery.data.items.length === 0 ? (
         <ScrollReveal animation="zoom-in" className="catalog-empty">
-          <h2 className="catalog-empty-title">Khong Tim Thay San Pham</h2>
-          <p className="catalog-empty-text">Hien tai khong co san pham nao phu hop voi tieu chi cua ban.</p>
+          <h2 className="catalog-empty-title">{tx("Không có sản phẩm phù hợp", "No matching products")}</h2>
+          <p className="catalog-empty-text">{tx("Thử điều chỉnh bộ lọc hoặc quay về trang chủ để tiếp tục xem sản phẩm.", "Try a broader filter or return to the storefront to continue browsing.")}</p>
           <button className="catalog-btn-primary" onClick={() => navigate("/")} type="button">
-            Quay ve trang chu
+            {tx("Quay về trang chủ", "Return home")}
           </button>
         </ScrollReveal>
       ) : (
         <>
           <div className="catalog-product-grid">
             {productsQuery.data.items.map((product, idx) => (
-              <ScrollReveal key={product.watchId} animation="fade-up" delay={50 * (idx % 8)} threshold={0}>
+              <ScrollReveal key={product.watchId} animation="fade-up" delay={40 * (idx % 8)} threshold={0}>
                 <ProductTile
                   product={product}
                   action={
@@ -179,10 +223,10 @@ export default function CatalogPage({ variant = "all" }: CatalogPageProps) {
                       type="button"
                     >
                       {addToCart.isAdding(product.watchId)
-                        ? "Dang xu ly..."
+                        ? tx("Đang xử lý...", "Processing...")
                         : (product.stockQuantity ?? 0) <= 0
-                          ? "Het hang"
-                          : "Them vao gio"}
+                          ? tx("Hết hàng", "Sold out")
+                          : tx("Thêm vào giỏ", "Add to cart")}
                     </button>
                   }
                 />
@@ -192,11 +236,7 @@ export default function CatalogPage({ variant = "all" }: CatalogPageProps) {
 
           {productsQuery.data.totalPages > 1 ? (
             <ScrollReveal animation="fade-up" className="catalog-pagination">
-              <Pagination
-                currentPage={page}
-                onPageChange={changePage}
-                totalPages={productsQuery.data.totalPages}
-              />
+              <Pagination currentPage={page} onPageChange={changePage} totalPages={productsQuery.data.totalPages} />
             </ScrollReveal>
           ) : null}
         </>

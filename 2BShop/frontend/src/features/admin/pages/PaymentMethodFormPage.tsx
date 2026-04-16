@@ -6,6 +6,7 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import { getJson, postJson, putJson } from "@/lib/api/client";
 import type { ApiResponse, PaymentMethod } from "@/lib/api/types";
+import { useI18n } from "@/lib/i18n";
 import { getErrorMessage } from "@/lib/utils/format";
 
 type PaymentMethodValues = {
@@ -15,6 +16,7 @@ type PaymentMethodValues = {
 };
 
 export default function PaymentMethodFormPage() {
+  const { tx } = useI18n();
   const { id } = useParams();
   const editing = Boolean(id);
   const navigate = useNavigate();
@@ -61,38 +63,38 @@ export default function PaymentMethodFormPage() {
   });
 
   if (detailQuery.isLoading) {
-    return <LoadingScreen label="Đang tải phương thức thanh toán..." />;
+    return <LoadingScreen label={tx("Đang tải phương thức thanh toán...", "Loading payment method...")} />;
   }
 
   if (detailQuery.isError) {
-    return <ErrorState message="Không thể tải dữ liệu phương thức thanh toán." />;
+    return <ErrorState message={tx("Không thể tải dữ liệu phương thức thanh toán.", "Could not load payment method data.")} />;
   }
 
   return (
     <div className="panel">
       <div className="section-heading">
         <div>
-          <span className="eyebrow">Payment Method Form</span>
-          <h2>{editing ? "Chỉnh sửa phương thức" : "Tạo phương thức mới"}</h2>
+          <span className="eyebrow">{tx("Form phuong thuc", "Payment method form")}</span>
+          <h2>{editing ? tx("Chỉnh sửa phương thức", "Edit method") : tx("Tạo phương thức mới", "Create new method")}</h2>
         </div>
         <Link className="button button-subtle" to="/admin/payments/methods">
-          Quay lại danh sách
+          {tx("Quay lại danh sách", "Back to list")}
         </Link>
       </div>
 
       <form className="form-grid" onSubmit={form.handleSubmit((values) => mutation.mutate(values))}>
         <div className="field-group">
-          <label htmlFor="methodName">Tên phương thức</label>
+          <label htmlFor="methodName">{tx("Ten phuong thuc", "Method name")}</label>
           <input className="field" id="methodName" {...form.register("methodName", { required: true })} />
         </div>
         <div className="field-group" style={{ gridColumn: "1 / -1" }}>
-          <label htmlFor="description">Mô tả</label>
+          <label htmlFor="description">{tx("Mô tả", "Description")}</label>
           <textarea className="textarea" id="description" rows={4} {...form.register("description")} />
         </div>
         <div className="field-group" style={{ gridColumn: "1 / -1" }}>
           <label className="checkbox-row">
             <input type="checkbox" {...form.register("active")} />
-            <span>Phương thức đang hoạt động</span>
+            <span>{tx("Phuong thuc đang hoạt động", "Method is active")}</span>
           </label>
         </div>
 
@@ -100,7 +102,11 @@ export default function PaymentMethodFormPage() {
 
         <div className="header-actions" style={{ gridColumn: "1 / -1", justifyContent: "flex-end" }}>
           <button className="button button-primary" disabled={mutation.isPending} type="submit">
-            {mutation.isPending ? "Đang lưu..." : editing ? "Lưu thay đổi" : "Tạo phương thức"}
+            {mutation.isPending
+              ? tx("Đang lưu...", "Saving...")
+              : editing
+                ? tx("Luu thay doi", "Save changes")
+                : tx("Tạo phương thức", "Create method")}
           </button>
         </div>
       </form>
